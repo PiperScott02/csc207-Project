@@ -58,8 +58,9 @@
             Stock stock = new Stock();
             stock.setTickerSymbol(tickerSymbol);
             stock.setHistoricalTimeline(timeline);
-            stock.setCurrentPrice(timeline.get(99).getOpen());
-            stock.setPreviousClose(timeline.get(98).getClose());
+            int size = timeline.size();
+            stock.setCurrentPrice(timeline.get(size - 1).getOpen());
+            stock.setPreviousClose(timeline.get(size - 2).getClose());
             stock.setDailyChange(stock.getCurrentPrice().subtract(stock.getPreviousClose()));
             return stock;
 
