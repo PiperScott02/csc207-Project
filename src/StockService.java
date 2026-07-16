@@ -4,6 +4,7 @@
     import java.net.http.HttpClient;
     import java.net.http.HttpRequest;
     import java.net.http.HttpResponse;
+    import java.time.LocalDate;
     import java.util.ArrayList;
     import java.util.Collections;
     import java.util.Comparator;
@@ -25,6 +26,7 @@
             this.apiKey = apiKey;
             this.httpClient = HttpClient.newHttpClient();
             this.objectMapper = new ObjectMapper();
+            this.objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         }
         public Stock createStockAndHistory(String tickerSymbol) throws IOException, InterruptedException {
             String url =
@@ -41,7 +43,7 @@
                     client.send(request, HttpResponse.BodyHandlers.ofString());
             String jsonBody = response.body();
             AlphaVantageResponse apiResponse = objectMapper.readValue(response.body(), AlphaVantageResponse.class);
-            Map<String, DailyPriceData> historicalData = apiResponse.getTimeSeries();
+            Map<LocalDate, DailyPriceData> historicalData = apiResponse.getTimeSeries();
 
             /*System.out.println(jsonBody);
 
@@ -56,7 +58,9 @@
             Stock stock = new Stock();
             stock.setTickerSymbol(tickerSymbol);
             stock.setHistoricalTimeline(timeline);
-
+            stock.setCurrentPrice(timeline.get(99).getOpen());
+            stock.setPreviousClose(timeline.get(98).getClose());
+            stock.setDailyChange(stock.getCurrentPrice().subtract(stock.getPreviousClose()));
             return stock;
 
 

@@ -48,10 +48,10 @@
             Stock google = stockService.createStockAndHistory(tickerSymbol);
             System.out.println(google.getTickerSymbol());
             System.out.println(google.getHistoricalTimeline().get(99).getDate());
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(1);
             Stock market = stockService.createStockAndHistory(marketTickerSymbol);
             financialService.calculateAndAssignMetrics(google, market);
-            System.out.println(google.getBeta());
+            System.out.println(google.getAlpha());
         }}
 
 

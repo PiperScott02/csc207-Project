@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
 
 import java.math.BigDecimal;
 
@@ -22,12 +23,12 @@ public class DailyPriceData {
 
     @JsonProperty("5. volume")
     private long volume;
-    private String date;
+    private LocalDate date;
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

@@ -96,5 +96,17 @@ public class Stock {
         this.sharpeRatio = sharpeRatio;
     }
 
+    public void setCurrentPrice(BigDecimal currentPrice) {
+        this.currentPrice = currentPrice;
+    }
+
+    public void setPreviousClose(BigDecimal previousClose) {
+        this.previousClose = previousClose;
+    }
+
+    public void setDailyChange(BigDecimal dailyChange) {
+        this.dailyChange = dailyChange;
+    }
+
 
 }
