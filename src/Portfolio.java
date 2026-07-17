@@ -52,6 +52,10 @@ public class Portfolio {
         this.alpha = alpha;
     }
 
+    public void setSharpeRatio(double sharpeRatio) {
+        this.sharpeRatio = sharpeRatio;
+    }
+
 
     public List<LocalDate> getMasterTimeline() {
 
@@ -78,18 +82,18 @@ public class Portfolio {
         return value;
     }
 
-    public List<Stock> getStocksInvestedIn() {
-        List<Stock> stocksInvestedIn = new ArrayList<>();
-        for (StockHolding stockHolding: this.holdings) {
-            Stock stock = stockHolding.getStock();
-            stocksInvestedIn.add(stock);
+    public List<Stock> getStocks() {
+        List<Stock> stockList = new ArrayList<Stock>();
+        List<StockHolding> stockHoldings = this.getHoldings();
+        for (int i = 0; i < stockHoldings.size(); i++) {
+            stockList.add(stockHoldings.get(i).getStock());
         }
-        return stocksInvestedIn;
+        return stockList;
     }
 
     public Map<Stock, List<DailyPriceData>> getStocksAndTimelines() {
         Map<Stock, List<DailyPriceData>> stocksAndTimelines = new HashMap<>();
-        for (Stock stock : getStocksInvestedIn()) {
+        for (Stock stock : getStocks()) {
             stocksAndTimelines.put(stock, stock.getHistoricalTimeline());
         }
         return stocksAndTimelines;
@@ -105,17 +109,17 @@ public class Portfolio {
     }
 
 
-    public BigDecimal getHoldingShare(StockHolding holding) {
+    public double getHoldingShare(StockHolding holding) {
         BigDecimal holdingPrice = holding.calculateTotalValue();
         BigDecimal portfolioValue = this.calculateTotalPortfolioValue();
         if (portfolioValue.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO;
+            return 0.0;
         }
-        return holdingPrice.divide(portfolioValue, 12, java.math.RoundingMode.HALF_UP);
+        return holdingPrice.divide(portfolioValue, 12, java.math.RoundingMode.HALF_UP).doubleValue();
 
     }
 
-    public Double calculateHoldingShareOnDay(StockHolding holding, LocalDate date) {
+    public double calculateHoldingShareOnDay(StockHolding holding, LocalDate date) {
         BigDecimal holdingPriceOnDate = holding.calculateTotalValueOnDate(date);
         BigDecimal portfolioValueOnDate = this.calculateTotalPortfolioValueOnDate(date);
         if (portfolioValueOnDate.compareTo(BigDecimal.ZERO) == 0) {

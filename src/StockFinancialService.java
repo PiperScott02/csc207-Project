@@ -3,6 +3,8 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 
 public class StockFinancialService {
 
@@ -90,5 +92,22 @@ public class StockFinancialService {
         stock.setAlpha(alpha);
 
         stock.setSharpeRatio(sharpeRatio);
+    }
+
+    public static RealMatrix buildCovarianceMatrix(double[][] covariancesArray) {
+        return new Array2DRowRealMatrix(covariancesArray);
+    }
+
+    public static double[][] buildCovariancesArray(List<Stock> stockList) {
+        int numberOfStocks = stockList.size();
+        double [][] covariancesArray = new double[numberOfStocks][numberOfStocks];
+        for (int i = 0; i < numberOfStocks; i++) {
+            for (int j = i; j < numberOfStocks; j++) {
+                double covariance = StatisticsService.calculateCovariance(returnRatios(stockList.get(i)),
+                        returnRatios(stockList.get(j)));
+                covariancesArray[i][j] = covariance;
+            }
+        }
+        return covariancesArray;
     }
 }
