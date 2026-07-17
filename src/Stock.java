@@ -1,9 +1,3 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +13,7 @@ public class Stock {
 
     private String companyName;
 
-    private BigDecimal currentPrice;
+    private BigDecimal close;
 
     private BigDecimal previousClose;
 
@@ -61,8 +55,8 @@ public class Stock {
         return companyName;
     }
 
-    public BigDecimal getCurrentPrice() {
-        return currentPrice;
+    public BigDecimal getClose() {
+        return close;
     }
 
     public BigDecimal getOpenOnDate(LocalDate date) {
@@ -151,8 +145,8 @@ public class Stock {
         this.sharpeRatio = sharpeRatio;
     }
 
-    public void setCurrentPrice(BigDecimal currentPrice) {
-        this.currentPrice = currentPrice;
+    public void setClose(BigDecimal close) {
+        this.close = close;
     }
 
     public void setPreviousClose(BigDecimal previousClose) {

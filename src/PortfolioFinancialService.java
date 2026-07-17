@@ -6,11 +6,11 @@ import java.util.List;
 import static java.lang.Math.pow;
 
 public class PortfolioFinancialService {
-    private double threemonthusbillreturn = 0.0379;
+    private static double threemonthusbillreturn = 0.0379;
 
-    private final double riskFreeRate = Math.pow(1+threemonthusbillreturn, 1.0/252.0) - 1.0;
+    private static final double riskFreeRate = Math.pow(1+threemonthusbillreturn, 1.0/252.0) - 1.0;
 
-    private double calculatePortfolioWeightedBeta(Portfolio portfolio) {
+    private static double calculatePortfolioWeightedBeta(Portfolio portfolio) {
         BigDecimal totalBeta = BigDecimal.ZERO;
         for (StockHolding holding : portfolio.getHoldings()) {
             BigDecimal holdingShare = portfolio.getHoldingShare(holding);
@@ -21,7 +21,7 @@ public class PortfolioFinancialService {
         return totalBeta.doubleValue();
     }
 
-    private double calculatePortfolioTrueBeta(Portfolio portfolio, Stock market) {
+    private static double calculatePortfolioTrueBeta(Portfolio portfolio, Stock market) {
         List<Double> portfolioReturns = calculatePortfolioReturns(portfolio);
         List<Double> marketReturns = StockFinancialService.returnRatios(market);
         Double portfolioCovariance = StatisticsService.calculateCovariance(portfolioReturns, marketReturns);
@@ -29,7 +29,7 @@ public class PortfolioFinancialService {
         return portfolioCovariance/marketVariance;
     }
 
-    public List<Double> calculatePortfolioReturns(Portfolio portfolio) {
+    public static List<Double> calculatePortfolioReturns(Portfolio portfolio) {
         List<Double> returns = new ArrayList<>();
         List<LocalDate> timeline = portfolio.getMasterTimeline();
         for (int i = 1; i < timeline.size(); i++) {
@@ -40,14 +40,34 @@ public class PortfolioFinancialService {
 
     }
 
-    public double calculatePortfolioAlpha(Portfolio portfolio, Stock market) {
+    public static double calculatePortfolioAlpha(Portfolio portfolio, Stock market) {
         List<Double> returns = calculatePortfolioReturns(portfolio);
         double portfolioReturnsMean = StatisticsService.calculateMean(returns);
         List<Double> marketRatios = StockFinancialService.returnRatios(market);
         double portfolioCovariance = StatisticsService.calculateCovariance(returns, marketRatios);
         double marketMean = StatisticsService.calculateMean(marketRatios);
         return StatisticsService.calculateAlpha(portfolioReturnsMean, marketMean,
-                calculatePortfolioTrueBeta(portfolio, market), this.riskFreeRate);
+                calculatePortfolioTrueBeta(portfolio, market), riskFreeRate);
+    }
+
+    public static void calculateAndAssignMetrics(Portfolio portfolio, Stock market) {
+        double weightedBeta = calculatePortfolioWeightedBeta(portfolio);
+
+        double alpha = calculatePortfolioAlpha(portfolio, market);
+
+        double trueBeta = calculatePortfolioTrueBeta(portfolio, market);
+
+        /*double sharpeRatio = calculateSharpeRatio(stock);*/
+
+        portfolio.setWeightedBeta(weightedBeta);
+
+        portfolio.setAlpha(alpha);
+
+        portfolio.setTrueBeta(trueBeta);
+
+        /*stock.setSharpeRatio(sharpeRatio)*/;
+
+
     }
 }
 

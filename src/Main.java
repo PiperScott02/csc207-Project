@@ -34,10 +34,10 @@ import java.util.concurrent.TimeUnit;
 
     public class Main {
         public static void main(String[] args) throws IOException, InterruptedException {
-            StockService stockService = new StockService("1BPENK5QMO8ULOU1");
+                StockService stockService = new StockService("1BPENK5QMO8ULOU1");
             StockFinancialService financialService = new StockFinancialService();
             String tickerSymbol = "GOOG";
-            String marketTickerSymbol  = "IBM";
+            String marketTickerSymbol  = "SPY";
             Stock google = stockService.createStockAndHistory(tickerSymbol);
             System.out.println(google.getTickerSymbol());
             System.out.println(google.getHistoricalTimeline().get(99).getDate());

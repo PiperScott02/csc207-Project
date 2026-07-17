@@ -27,12 +27,35 @@ public class Portfolio {
 
     private double portfolioHealth;
 
+    private double weightedBeta;
+
+    private double trueBeta;
+
+    private double alpha;
+
+    private double sharpeRatio;
+
+
     public void setMasterTimeline(List<LocalDate> timeline) {
         this.masterTimeline = timeline;
     }
 
+    public void setTrueBeta(double trueBeta) {
+        this.trueBeta = trueBeta;
+    }
+
+    public void setWeightedBeta(double weightedBeta) {
+        this.weightedBeta = weightedBeta;
+    }
+
+    public void setAlpha(double alpha) {
+        this.alpha = alpha;
+    }
+
+
     public List<LocalDate> getMasterTimeline() {
-        return this.getMasterTimeline();
+
+        return this.masterTimeline;
     }
 
     public List<StockHolding> getHoldings() {
@@ -72,6 +95,7 @@ public class Portfolio {
         return stocksAndTimelines;
     }
 
+
     private Map<StockHolding, List<DailyPriceData>> getHoldingAndTimelines() {
         Map<StockHolding, List<DailyPriceData>> stocksAndTimelines = new HashMap<>();
         for (StockHolding holding : this.holdings) {
@@ -91,13 +115,13 @@ public class Portfolio {
 
     }
 
-    public BigDecimal calculateHoldingShareOnDay(StockHolding holding, LocalDate date) {
+    public Double calculateHoldingShareOnDay(StockHolding holding, LocalDate date) {
         BigDecimal holdingPriceOnDate = holding.calculateTotalValueOnDate(date);
         BigDecimal portfolioValueOnDate = this.calculateTotalPortfolioValueOnDate(date);
         if (portfolioValueOnDate.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO;
+            return 0.0;
         }
-        return holdingPriceOnDate.divide(portfolioValueOnDate, 12, java.math.RoundingMode.HALF_UP);
+        return holdingPriceOnDate.divide(portfolioValueOnDate, 12, java.math.RoundingMode.HALF_UP).doubleValue();
     }
 
     public double calculatePortfolioDailyReturn (LocalDate date) {
@@ -111,6 +135,16 @@ public class Portfolio {
         BigDecimal dailyChange = portfolioValueToday.subtract(portfolioValueYesterday);
         return dailyChange.divide(portfolioValueYesterday, 12, RoundingMode.HALF_UP).doubleValue();
     }
+
+    public StockHolding getHoldingByTicker(String ticker) {
+        for (StockHolding holding: this.holdings) {
+            if (holding.getStock().getTickerSymbol().equals(ticker)) {
+                return holding;
+            }
+        }
+        return null;
+    }
+
 
     }
 

@@ -1,8 +1,6 @@
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class StockHolding {
     private Stock stock;
@@ -16,7 +14,7 @@ public class StockHolding {
 
 
     public BigDecimal calculateTotalValue() {
-        BigDecimal price = stock.getCurrentPrice();
+        BigDecimal price = stock.getClose();
         BigDecimal shares = BigDecimal.valueOf(getNumberOfShares());
         return price.multiply(shares);
     }

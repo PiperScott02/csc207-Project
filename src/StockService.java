@@ -1,13 +1,11 @@
     import com.fasterxml.jackson.databind.ObjectMapper;
     import java.io.IOException;
-    import java.math.BigDecimal;
     import java.net.URI;
     import java.net.http.HttpClient;
     import java.net.http.HttpRequest;
     import java.net.http.HttpResponse;
     import java.time.LocalDate;
     import java.util.ArrayList;
-    import java.util.Collections;
     import java.util.Comparator;
     import java.util.List;
     import java.util.Map;
@@ -61,9 +59,9 @@
             stock.setHistoricalTimeline(timeline);
             stock.setTimeSeries(timeSeries);
             int size = timeline.size();
-            stock.setCurrentPrice(timeline.get(size - 1).getClose());
+            stock.setClose(timeline.get(size - 1).getClose());
             stock.setPreviousClose(timeline.get(size - 2).getClose());
-            stock.setDailyChange(stock.getCurrentPrice().subtract(stock.getPreviousClose()));
+            stock.setDailyChange(stock.getClose().subtract(stock.getPreviousClose()));
             return stock;
 
 

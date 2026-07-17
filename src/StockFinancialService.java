@@ -8,9 +8,11 @@ public class StockFinancialService {
 
     /* For alpha and the Sharpe Ratio, we used the yield of a U.S Treasury Bill, converted to a daily rate, using the
  approximate number of trading days. */
-    private double threemonthusbillreturn = 0.0379;
+    private static double threemonthusbillreturn = 0.0379;
 
-    private final double riskFreeRate = Math.pow(1+threemonthusbillreturn, 1.0/252.0) - 1.0;
+    private static final double riskFreeRate = Math.pow(1+threemonthusbillreturn, 1.0/252.0) - 1.0;
+
+    private static final String defaultMarket = "SPY";
 
     /*A class which calculates the Alpha, Beta and Sharpe Ratio of the stock corresponding to the given Stock Object*/
     private static double returnRatioOnDate(Stock stock, LocalDate today) {
@@ -28,13 +30,12 @@ public class StockFinancialService {
         List<LocalDate> dates = stock.getDatesSorted();
         for (int i = 1; i < dates.size(); i += 1) {
             LocalDate today = dates.get(i);
-            LocalDate yesterday = dates.get(i-1);
             ratiosList.add(returnRatioOnDate(stock, today));
         }
         return ratiosList;
     }
 
-    public double calculateBeta(Stock stock, Stock market) {
+    public static double calculateBeta(Stock stock, Stock market) {
         double covariance = StatisticsService.calculateCovariance(returnRatios(stock), returnRatios(market));
         double marketVariance = StatisticsService.calculateVariance(returnRatios(market));
         if (marketVariance == 0) {
@@ -45,7 +46,7 @@ public class StockFinancialService {
     }
 
 
-    public double calculateAlpha(Stock stock, Stock market) {
+    public static double calculateAlpha(Stock stock, Stock market) {
 
         List<Double> stockRatios = returnRatios(stock);
         List<Double> marketRatios = returnRatios(market);
@@ -55,10 +56,10 @@ public class StockFinancialService {
 
         double beta = calculateBeta(stock, market);
 
-        return StatisticsService.calculateAlpha(stockMean, marketMean, beta, this.riskFreeRate);
+        return StatisticsService.calculateAlpha(stockMean, marketMean, beta, riskFreeRate);
     }
 
-    public double calculateSharpeRatio(Stock stock) {
+    public static double calculateSharpeRatio(Stock stock) {
         List<Double> stockRatios = returnRatios(stock);
 
         Double stockMean = StatisticsService.calculateMean(stockRatios);
@@ -77,7 +78,7 @@ public class StockFinancialService {
         return sharpeRatio;
     }
 
-    public void calculateAndAssignMetrics(Stock stock, Stock market) {
+    public static void calculateAndAssignMetrics(Stock stock, Stock market) {
         double beta = calculateBeta(stock, market);
 
         double alpha = calculateAlpha(stock, market);
