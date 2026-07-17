@@ -1,9 +1,15 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.awt.*;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.math.BigDecimal;
@@ -11,13 +17,29 @@ import java.math.BigDecimal;
 public class Portfolio {
     private String portfolioName;
 
+    private String userId;
+
     private List<StockHolding> holdings;
 
     private List<StockHolding> watchlisted;
 
+    private List<LocalDate> masterTimeline;
+
     private double portfolioHealth;
 
-    private BigDecimal calculateTotalPortfolioValue() {
+    public void setMasterTimeline(List<LocalDate> timeline) {
+        this.masterTimeline = timeline;
+    }
+
+    public List<LocalDate> getMasterTimeline() {
+        return this.getMasterTimeline();
+    }
+
+    public List<StockHolding> getHoldings() {
+        return this.holdings;
+    }
+
+    public BigDecimal calculateTotalPortfolioValue() {
         BigDecimal value = BigDecimal.ZERO;
         for (StockHolding holding: holdings) {
             value = value.add(holding.calculateTotalValue());
@@ -25,24 +47,71 @@ public class Portfolio {
         return value;
     }
 
-    private BigDecimal calculateholdingShare(StockHolding holding) {
+    public BigDecimal calculateTotalPortfolioValueOnDate(LocalDate date) {
+        BigDecimal value = BigDecimal.ZERO;
+        for (StockHolding holding: holdings) {
+            value = value.add(holding.calculateTotalValueOnDate(date));
+        }
+        return value;
+    }
+
+    public List<Stock> getStocksInvestedIn() {
+        List<Stock> stocksInvestedIn = new ArrayList<>();
+        for (StockHolding stockHolding: this.holdings) {
+            Stock stock = stockHolding.getStock();
+            stocksInvestedIn.add(stock);
+        }
+        return stocksInvestedIn;
+    }
+
+    public Map<Stock, List<DailyPriceData>> getStocksAndTimelines() {
+        Map<Stock, List<DailyPriceData>> stocksAndTimelines = new HashMap<>();
+        for (Stock stock : getStocksInvestedIn()) {
+            stocksAndTimelines.put(stock, stock.getHistoricalTimeline());
+        }
+        return stocksAndTimelines;
+    }
+
+    private Map<StockHolding, List<DailyPriceData>> getHoldingAndTimelines() {
+        Map<StockHolding, List<DailyPriceData>> stocksAndTimelines = new HashMap<>();
+        for (StockHolding holding : this.holdings) {
+            stocksAndTimelines.put(holding, holding.getStock().getHistoricalTimeline());
+        }
+        return stocksAndTimelines;
+    }
+
+
+    public BigDecimal getHoldingShare(StockHolding holding) {
         BigDecimal holdingPrice = holding.calculateTotalValue();
         BigDecimal portfolioValue = this.calculateTotalPortfolioValue();
         if (portfolioValue.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
-        return holdingPrice.divide(portfolioValue, 4, java.math.RoundingMode.HALF_UP);
+        return holdingPrice.divide(portfolioValue, 12, java.math.RoundingMode.HALF_UP);
+
     }
 
-    private double calculatePortfolioBeta() {
-        BigDecimal totalBeta = BigDecimal.ZERO;
-        for (StockHolding holding: holdings) {
-            BigDecimal holdingShare = this.calculateholdingShare(holding);
-            BigDecimal holdingStockBeta = BigDecimal.valueOf(holding.getStock().getBeta());
-            BigDecimal betaContribution = holdingShare.multiply(holdingStockBeta);
-            totalBeta = totalBeta.add(betaContribution);
+    public BigDecimal calculateHoldingShareOnDay(StockHolding holding, LocalDate date) {
+        BigDecimal holdingPriceOnDate = holding.calculateTotalValueOnDate(date);
+        BigDecimal portfolioValueOnDate = this.calculateTotalPortfolioValueOnDate(date);
+        if (portfolioValueOnDate.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
         }
-        return totalBeta.doubleValue();
+        return holdingPriceOnDate.divide(portfolioValueOnDate, 12, java.math.RoundingMode.HALF_UP);
     }
 
-}
+    public double calculatePortfolioDailyReturn (LocalDate date) {
+        BigDecimal portfolioValueToday = calculateTotalPortfolioValueOnDate(date);
+        int dateIndex = this.masterTimeline.indexOf(date);
+        if (dateIndex <= 0) {
+            return 0.0;
+        }
+        LocalDate dateBefore = this.masterTimeline.get(dateIndex - 1);
+        BigDecimal portfolioValueYesterday = calculateTotalPortfolioValueOnDate(dateBefore);
+        BigDecimal dailyChange = portfolioValueToday.subtract(portfolioValueYesterday);
+        return dailyChange.divide(portfolioValueYesterday, 12, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    }
+
+

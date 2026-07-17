@@ -1,5 +1,6 @@
     import com.fasterxml.jackson.databind.ObjectMapper;
     import java.io.IOException;
+    import java.math.BigDecimal;
     import java.net.URI;
     import java.net.http.HttpClient;
     import java.net.http.HttpRequest;
@@ -43,7 +44,7 @@
                     client.send(request, HttpResponse.BodyHandlers.ofString());
             String jsonBody = response.body();
             AlphaVantageResponse apiResponse = objectMapper.readValue(response.body(), AlphaVantageResponse.class);
-            Map<LocalDate, DailyPriceData> historicalData = apiResponse.getTimeSeries();
+            Map<LocalDate, DailyPriceData> timeSeries = apiResponse.getTimeSeries();
 
             /*System.out.println(jsonBody);
 
@@ -52,14 +53,15 @@
                 return null; //
             }*/
 
-            List<DailyPriceData> timeline = new ArrayList<>(historicalData.values());
+            List<DailyPriceData> timeline = new ArrayList<>(timeSeries.values());
             timeline.sort(Comparator.comparing(DailyPriceData::getDate));
 
             Stock stock = new Stock();
             stock.setTickerSymbol(tickerSymbol);
             stock.setHistoricalTimeline(timeline);
+            stock.setTimeSeries(timeSeries);
             int size = timeline.size();
-            stock.setCurrentPrice(timeline.get(size - 1).getOpen());
+            stock.setCurrentPrice(timeline.get(size - 1).getClose());
             stock.setPreviousClose(timeline.get(size - 2).getClose());
             stock.setDailyChange(stock.getCurrentPrice().subtract(stock.getPreviousClose()));
             return stock;

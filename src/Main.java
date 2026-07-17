@@ -1,13 +1,6 @@
-    import com.fasterxml.jackson.databind.ObjectMapper;
-    import java.io.IOException;
-    import java.net.URI;
-    import java.net.http.HttpClient;
-    import java.net.http.HttpRequest;
-    import java.net.http.HttpResponse;
-    import java.util.Map;
-    import java.util.*;
-    import java.math.BigDecimal;
-    import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.concurrent.TimeUnit;
 
     /* Access data now
      */
@@ -42,7 +35,7 @@
     public class Main {
         public static void main(String[] args) throws IOException, InterruptedException {
             StockService stockService = new StockService("1BPENK5QMO8ULOU1");
-            FinancialService financialService = new FinancialService();
+            StockFinancialService financialService = new StockFinancialService();
             String tickerSymbol = "GOOG";
             String marketTickerSymbol  = "IBM";
             Stock google = stockService.createStockAndHistory(tickerSymbol);
@@ -52,6 +45,11 @@
             Stock market = stockService.createStockAndHistory(marketTickerSymbol);
             financialService.calculateAndAssignMetrics(google, market);
             System.out.println(google.getAlpha());
+            System.out.println(google.getDailyChange());
+            System.out.println(google.getCloseOnDate(LocalDate.now()));
+            System.out.println(google.getOpenOnDate(LocalDate.now()));
+            System.out.println(google.getCloseOnDate(LocalDate.now().minusDays(1)));
+            System.out.println(google.getHistoricalTimeline().size());
         }}
 
 
