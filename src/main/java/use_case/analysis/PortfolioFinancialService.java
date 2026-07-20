@@ -1,3 +1,8 @@
+package use_case.analysis;
+
+import entity.Portfolio;
+import entity.Stock;
+import entity.StockHolding;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 
 import java.time.LocalDate;

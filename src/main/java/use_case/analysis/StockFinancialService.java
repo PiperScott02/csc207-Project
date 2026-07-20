@@ -1,8 +1,12 @@
+package use_case.analysis;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import entity.Stock;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -16,7 +20,7 @@ public class StockFinancialService {
 
     private static final String defaultMarket = "SPY";
 
-    /*A class which calculates the Alpha, Beta and Sharpe Ratio of the stock corresponding to the given Stock Object*/
+    /*A class which calculates the Alpha, Beta and Sharpe Ratio of the stock corresponding to the given entity.Stock Object*/
     private static double returnRatioOnDate(Stock stock, LocalDate today) {
         BigDecimal diff = stock.getDailyChangeOnDate(today);
         LocalDate yesterday = stock.getPreviousTradingDay(today);

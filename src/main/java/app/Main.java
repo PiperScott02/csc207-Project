@@ -1,3 +1,9 @@
+package app;
+
+import data_access.stock_daily.StockService;
+import entity.Stock;
+import use_case.analysis.StockFinancialService;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.concurrent.TimeUnit;
@@ -5,7 +11,7 @@ import java.util.concurrent.TimeUnit;
     /* Access data now
      */
 
-    /*public class Main {
+    /*public class app.Main {
 
         public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -65,22 +71,22 @@ import java.util.concurrent.TimeUnit;
 
 
 
-    /*public class Main {
+    /*public class app.Main {
         // This is the entry point Java requires
         public static void main(String[] args) {
-            // Create an instance of Main to call your test method
-            Main mainInstance = new Main();
+            // Create an instance of app.Main to call your test method
+            app.Main mainInstance = new app.Main();
             mainInstance.testSharpeRatioLogic();
         }
         public void testSharpeRatioLogic() {
-            // 1. Setup: Create a Stock with perfectly predictable data
-            Stock mockStock = new Stock();
+            // 1. Setup: Create a entity.Stock with perfectly predictable data
+            entity.Stock mockStock = new entity.Stock();
             mockStock.setTickerSymbol("TEST");
 
             // Create 100 days of data
-            List<DailyPriceData> timeline = new ArrayList<>();
+            List<entity.DailyPriceData> timeline = new ArrayList<>();
             for (int i = 0; i < 100; i++) {
-                DailyPriceData data = new DailyPriceData();
+                entity.DailyPriceData data = new entity.DailyPriceData();
                 data.setDate("2026-01-" + (i + 1));
                 data.setOpen(BigDecimal.valueOf(100.0 + i));
                 data.setHigh(BigDecimal.valueOf(105.0 + i));

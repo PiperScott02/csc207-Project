@@ -1,12 +1,6 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
+package entity;
 
-import java.awt.*;
-import java.io.IOException;
 import java.math.RoundingMode;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
