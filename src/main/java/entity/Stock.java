@@ -37,7 +37,7 @@ public class Stock {
 
     private Map<LocalDate, DailyPriceData> timeSeries;
 
-    void setTickerSymbol(String tickerSymbol) {
+    public void setTickerSymbol(String tickerSymbol) {
         this.tickerSymbol = tickerSymbol;
     }
 
