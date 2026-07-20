@@ -1,3 +1,5 @@
+package use_case.analysis;
+
 import java.util.List;
 
 public class StatisticsService {

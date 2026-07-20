@@ -1,4 +1,9 @@
-    import com.fasterxml.jackson.databind.ObjectMapper;
+package data_access.stock_daily;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+    import entity.DailyPriceData;
+    import entity.Stock;
+
     import java.io.IOException;
     import java.net.URI;
     import java.net.http.HttpClient;
@@ -11,8 +16,8 @@
     import java.util.Map;
 
     public class StockService {
-        /* Helper class that, given an API key, builds a Stock object for the correspdonding ticker symbol, and produces
-        a timeline of the last 100 DailyPriceData objects sorted by date.
+        /* Helper class that, given an API key, builds a entity.Stock object for the correspdonding ticker symbol, and produces
+        a timeline of the last 100 entity.DailyPriceData objects sorted by date.
          */
 
         private final HttpClient httpClient;

@@ -1,3 +1,5 @@
+package entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
@@ -70,7 +72,7 @@ public class DailyPriceData {
     @Override
     public String toString() {
         return  "Company=" + tickerSymbol +
-                ", DailyPriceData{" +
+                ", entity.DailyPriceData{" +
                 "date=" + date +
                 ", open=" + open +
                 ", high=" + high +

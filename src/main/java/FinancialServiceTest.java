@@ -6,7 +6,7 @@ import java.util.List;
 
     public static void main(String[] args) {
 
-        List<DailyPriceData> timeline = new ArrayList<>();
+        List<entity.DailyPriceData> timeline = new ArrayList<>();
 
         double[] prices = {
                 100,
@@ -18,13 +18,13 @@ import java.util.List;
         };
 
         for (int i = 0; i < prices.length; i++) {
-            DailyPriceData d = new DailyPriceData();
+            entity.DailyPriceData d = new entity.DailyPriceData();
             d.setDate("2026-01-" + String.format("%02d", i + 1));
             d.setClose(BigDecimal.valueOf(prices[i]));
             timeline.add(d);
         }
 
-        Stock stock = new Stock();
+        entity.Stock stock = new entity.Stock();
         stock.setHistoricalTimeline(timeline);
 
         FinancialService service = new FinancialService();

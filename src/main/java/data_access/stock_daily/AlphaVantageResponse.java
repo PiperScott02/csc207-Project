@@ -1,6 +1,9 @@
+package data_access.stock_daily;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import entity.DailyPriceData;
 
 import java.time.LocalDate;
 import java.util.Map;
