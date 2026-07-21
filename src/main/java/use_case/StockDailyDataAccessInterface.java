@@ -1,4 +1,4 @@
-package use_case.analysis;
+package use_case;
 
 import entity.Stock;
 
