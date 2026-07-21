@@ -29,7 +29,7 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
         final List<String> similarCompanyNames = similarSearchDataAccessObject.similarNames(tickerSymbol);
 
         if (similarCompanyNames.isEmpty()) {
-            similarSearchPresenter.prepareFailView("No Similar Items");
+            similarSearchPresenter.prepareFailView("No Similar Items.");
         }
         else {
             Stock[] similarStocks = new Stock[similarCompanyNames.size()];

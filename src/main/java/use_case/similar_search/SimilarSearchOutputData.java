@@ -2,8 +2,6 @@ package use_case.similar_search;
 
 import entity.Stock;
 
-import java.util.List;
-
 public class SimilarSearchOutputData {
 
     private final Stock[] similarStocks;

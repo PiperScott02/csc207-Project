@@ -20,6 +20,7 @@ public class TickerSearchInteractor implements TickerSearchInputBoundary {
     public void execute(TickerSearchInputData tickerSearchInputData) throws IOException, InterruptedException {
         final String tickerSymbol = tickerSearchInputData.getTickerSymbol();
         final Stock tickerStock = stockDailyDataAccessObject.createStockAndHistory(tickerSymbol);
+
         if (tickerStock == null) { // TODO: this is meant to check if the tickerSymbol was actually valid
             tickerSearchOutputPresenter.prepareFailView("No Match for Ticker Symbol");
         }

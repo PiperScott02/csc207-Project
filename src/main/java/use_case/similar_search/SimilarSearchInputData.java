@@ -5,7 +5,7 @@ package use_case.similar_search;
  */
 public class SimilarSearchInputData {
 
-    private String tickerSymbol;
+    private final String tickerSymbol;
 
     public SimilarSearchInputData(String tickerSymbol) {
         this.tickerSymbol = tickerSymbol;
@@ -13,9 +13,5 @@ public class SimilarSearchInputData {
 
     public String getTickerSymbol() {
         return tickerSymbol;
-    }
-
-    public void setTickerSymbol(String tickerSymbol) {
-        this.tickerSymbol = tickerSymbol;
     }
 }
