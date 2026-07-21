@@ -2,6 +2,9 @@ package use_case.similar_search;
 
 import entity.Stock;
 
+/**
+ * Output Data for the Similar Search Use Case.
+ */
 public class SimilarSearchOutputData {
 
     private final Stock[] similarStocks;

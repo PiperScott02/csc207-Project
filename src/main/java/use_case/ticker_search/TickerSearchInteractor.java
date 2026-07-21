@@ -5,6 +5,9 @@ import use_case.StockDailyDataAccessInterface;
 
 import java.io.IOException;
 
+/**
+ * The Ticker Search Interactor.
+ */
 public class TickerSearchInteractor implements TickerSearchInputBoundary {
 
     private final StockDailyDataAccessInterface stockDailyDataAccessObject;

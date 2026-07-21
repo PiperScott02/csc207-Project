@@ -2,6 +2,9 @@ package use_case.ticker_search;
 
 import entity.Stock;
 
+/**
+ * Output Data for Ticker Search Use Case.
+ */
 public class TickerSearchOutputData {
 
     private final Stock tickerStock;

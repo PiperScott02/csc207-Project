@@ -6,6 +6,9 @@ import use_case.StockDailyDataAccessInterface;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * The Similar Search Interactor.
+ */
 public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
 
     private final SimilarSearchDataAccessInterface similarSearchDataAccessObject;

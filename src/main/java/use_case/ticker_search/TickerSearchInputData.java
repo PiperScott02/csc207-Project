@@ -1,5 +1,8 @@
 package use_case.ticker_search;
 
+/**
+ * The Input Data for the Ticker Search Use Case.
+ */
 public class TickerSearchInputData {
 
     private final String tickerSymbol;

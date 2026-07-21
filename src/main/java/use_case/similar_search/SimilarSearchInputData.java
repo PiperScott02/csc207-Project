@@ -1,6 +1,6 @@
 package use_case.similar_search;
 
-/*
+/**
  * The input data for the Similar Search Use Case.
  */
 public class SimilarSearchInputData {
