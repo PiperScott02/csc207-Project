@@ -108,10 +108,9 @@ public final class PortfolioPilotMain {
         );
 
         final LoggedInView loggedInView =
-                ChangePasswordUseCaseFactory.create(
-                        viewManagerModel,
+                new LoggedInView(
                         loggedInViewModel,
-                        userDataAccessObject
+                        viewManagerModel
                 );
 
         views.add(
@@ -127,7 +126,7 @@ public final class PortfolioPilotMain {
         viewManagerModel.firePropertyChanged();
 
         application.pack();
-        application.setSize(700, 450);
+        application.setSize(1250, 750);
         application.setLocationRelativeTo(null);
         application.setVisible(true);
     }
