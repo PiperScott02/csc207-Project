@@ -34,9 +34,7 @@ public final class ChangePasswordUseCaseFactory {
             LoggedInViewModel loggedInViewModel,
             ChangePasswordUserDataAccessInterface userDataAccessObject) {
 
-        final ChangePasswordController changePasswordController =
-                    createChangePasswordUseCase(viewManagerModel, loggedInViewModel, userDataAccessObject);
-        return new LoggedInView(loggedInViewModel, changePasswordController);
+        return new LoggedInView(loggedInViewModel, viewManagerModel);
 
     }
 
