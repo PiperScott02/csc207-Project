@@ -15,6 +15,7 @@ import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import view.RiskPreferenceView;
 
 /**
  * Starts PortfolioPilot with signup and login functionality.
@@ -116,6 +117,14 @@ public final class PortfolioPilotMain {
         views.add(
                 loggedInView,
                 loggedInView.getViewName()
+        );
+
+        final RiskPreferenceView riskPreferenceView =
+                new RiskPreferenceView(viewManagerModel);
+
+        views.add(
+                riskPreferenceView,
+                riskPreferenceView.getViewName()
         );
 
         /*
