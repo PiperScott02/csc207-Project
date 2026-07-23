@@ -68,6 +68,26 @@ public class StockService {
         stock.setClose(timeline.get(size - 1).getClose());
         stock.setPreviousClose(timeline.get(size - 2).getClose());
         stock.setDailyChange(stock.getClose().subtract(stock.getPreviousClose()));
+
+        String overviewUrl =
+                "https://www.alphavantage.co/query" +
+                        "?function=OVERVIEW" +
+                        "&symbol=" + tickerSymbol +
+                        "&apikey=" + apiKey;
+
+        HttpRequest overviewRequest = HttpRequest.newBuilder().uri(URI.create(overviewUrl)).build();
+        TimeUnit.SECONDS.sleep(1);
+        HttpResponse<String> overviewResponse =
+                httpClient.send(overviewRequest, HttpResponse.BodyHandlers.ofString());
+
+        AlphaVantageOverviewResponse overview = objectMapper.readValue(overviewResponse.body(),
+                AlphaVantageOverviewResponse.class);
+        if (overview != null && overview.getCompanyName() != null) {
+            stock.setCompanyName(overview.getCompanyName());
+        } else {
+            stock.setCompanyName(tickerSymbol);
+        }
+
         return stock;
     }
 }
