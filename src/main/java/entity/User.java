@@ -17,4 +17,17 @@ public interface User {
      */
     String getPassword();
 
+    /**
+     * Returns the user's saved risk profile.
+     *
+     * @return the user's risk profile
+     */
+    RiskProfile getRiskProfile();
+
+    /**
+     * Updates the user's saved risk profile.
+     *
+     * @param riskProfile the new risk profile
+     */
+    void setRiskProfile(RiskProfile riskProfile);
 }
