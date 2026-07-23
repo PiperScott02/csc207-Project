@@ -5,6 +5,7 @@ public class StockOutputData {
     private final String ticker;
     private final String companyName;
     private final String close;
+    private final String dailyPriceChange;
     private final String beta;
     private final String alpha;
     private final String sharpeRatio;
@@ -14,16 +15,18 @@ public class StockOutputData {
      * @param ticker the stock ticker symbol.
      * @param companyName the name of the company.
      * @param close the closing price string.
+     * @param dailyPriceChange the daily price change string.
      * @param beta the beta metric string.
      * @param alpha the alpha metric string.
      * @param sharpeRatio the Sharpe ratio metric string.
      * @param useCaseFailed boolean indicating whether the operation failed.
      */
-    public StockOutputData(String ticker, String companyName, String close,
+    public StockOutputData(String ticker, String companyName, String close, String dailyPriceChange,
                            String beta, String alpha, String sharpeRatio, boolean useCaseFailed) {
         this.ticker = ticker;
         this.companyName = companyName;
         this.close = close;
+        this.dailyPriceChange = dailyPriceChange;
         this.beta = beta;
         this.alpha = alpha;
         this.sharpeRatio = sharpeRatio;
@@ -35,6 +38,13 @@ public class StockOutputData {
      */
     public String getTickerSymbol() {
         return ticker;
+    }
+
+    /** Returns the daily price change.
+     * @return the daily price change string.
+     */
+    public String getDailyPriceChange() {
+        return dailyPriceChange;
     }
 
     /** Returns the company name.

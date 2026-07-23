@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
             Stock market = stockService.createStockAndHistory(marketTickerSymbol);
             financialService.calculateAndAssignMetrics(google, market);
             System.out.println(google.getAlpha());
-            System.out.println(google.getDailyChange());
+            System.out.println(google.getDailyPriceChange());
             System.out.println(google.getCloseOnDate(LocalDate.now()));
             System.out.println(google.getOpenOnDate(LocalDate.now()));
             System.out.println(google.getCloseOnDate(LocalDate.now().minusDays(1)));

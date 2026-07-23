@@ -32,7 +32,10 @@ public class StockHolding {
         double quantity = 0;
         for (Transaction transaction: transactions) {
             if (!transaction.getDate().isAfter(date)) {
-                quantity += transaction.getNumberOfShares();
+                if (transaction.getType() == TransactionType.BUY)
+                    quantity += transaction.getNumberOfShares();
+                if (transaction.getType() == TransactionType.SELL)
+                    quantity -= transaction.getNumberOfShares();
             }
         }
         return quantity;
@@ -63,6 +66,21 @@ public class StockHolding {
      */
     public double getNumberOfShares() {
         return getQuantityOnDate(LocalDate.now());
+    }
+
+    public void makeTransaction(Stock stock, Double quantity, LocalDate date, TransactionType transactionType) {
+        Transaction transaction = new Transaction();
+        transaction.setDate(date);
+        transaction.setPricePerShare(stock.getCloseOnDate(date));
+        this.transactions.add(transaction);
+
+    }
+
+    public void makeTransaction(Stock stock, Double quantity) {
+        Transaction transaction = new Transaction();
+        LocalDate lastDay = stock.getLastTradingDay();
+        transaction.setPricePerShare(stock.getCloseOnDate(lastDay));
+        this.transactions.add(transaction);
     }
 
 

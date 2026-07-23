@@ -32,6 +32,7 @@ public class StockInteractor implements StockInputBoundary {
                 stock.getTickerSymbol(),
                 stock.getCompanyName(),
                 stock.getClose().toString(),
+                stock.getDailyPriceChange().toString(),
                 stock.getBeta().toString(),
                 stock.getAlpha().toString(),
                 stock.getSharpeRatio().toString(),

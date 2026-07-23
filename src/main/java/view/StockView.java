@@ -12,6 +12,7 @@ public class StockView extends JPanel implements PropertyChangeListener {
     private final JLabel tickerLabel = new JLabel("Ticker: ");
     private final JLabel companyNameLabel = new JLabel("Company: ");
     private final JLabel closePriceLabel = new JLabel("Close Price: ");
+    private final JLabel dailyPriceChangeLabel = new JLabel("Daily Price Change: ");
     private final JLabel betaLabel = new JLabel("Beta: ");
     private final JLabel alphaLabel = new JLabel("Alpha: ");
     private final JLabel sharpeRatioLabel = new JLabel("Sharpe Ratio: ");
@@ -25,6 +26,7 @@ public class StockView extends JPanel implements PropertyChangeListener {
         add(tickerLabel);
         add(companyNameLabel);
         add(closePriceLabel);
+        add(dailyPriceChangeLabel);
         add(betaLabel);
         add(alphaLabel);
         add(sharpeRatioLabel);
@@ -36,6 +38,7 @@ public class StockView extends JPanel implements PropertyChangeListener {
         tickerLabel.setText("Ticker: " + state.getTicker());
         companyNameLabel.setText("Company: " + state.getCompanyName());
         closePriceLabel.setText("Close Price: " + state.getClose());
+        dailyPriceChangeLabel.setText("Daily Price Change: " + state.getDailyPriceChange());
         betaLabel.setText("Beta: " + state.getBeta());
         alphaLabel.setText("Alpha: " + state.getAlpha());
         sharpeRatioLabel.setText("Sharpe Ratio: " + state.getSharpeRatio());

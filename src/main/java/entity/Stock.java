@@ -72,6 +72,13 @@ public class Stock {
         return companyName;
     }
 
+    /** Sets the company name of this stock.
+     * @param companyName the name of the company.
+     */
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
     /** Returns the closing price of this stock.
      * @return the close price.
      */
@@ -115,7 +122,7 @@ public class Stock {
     /** Returns the daily change in price.
      * @return the daily change.
      */
-    public BigDecimal getDailyChange() {
+    public BigDecimal getDailyPriceChange() {
         return dailyChange;
     }
 
@@ -144,6 +151,15 @@ public class Stock {
         }
         return dates.get(dateIndex - 1);
 
+    }
+
+    /** Returns the last Trading Day for this stock.
+     * @return the last entry in the getDatesSorted list.
+     */
+    public LocalDate getLastTradingDay() {
+        List<LocalDate> dates = getDatesSorted();
+        int listLength = dates.size();
+        return dates.get(listLength - 1);
     }
 
     /** Returns the dividend yield of this stock.
