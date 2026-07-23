@@ -36,13 +36,23 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
         }
         else {
             Stock[] similarStocks = new Stock[similarCompanyNames.size()];
-
             for (int i = 0; i < similarCompanyNames.size(); i++) {
                 similarStocks[i] = stockDailyDataAccessObject.createStockAndHistory(similarCompanyNames.get(i));
             }
 
-            final SimilarSearchOutputData similarSearchOutputData = new SimilarSearchOutputData(similarStocks, false);
-            similarSearchPresenter.prepareSuccessView(similarSearchOutputData);
+            SimilarSearchOutputData[] similarSearchOutputList =
+                    new SimilarSearchOutputData[similarCompanyNames.size()];
+            for (int i = 0; i < similarCompanyNames.size(); i++) {
+                similarSearchOutputList[i] =
+                        new SimilarSearchOutputData(similarStocks[i].getTickerSymbol(),
+                                similarStocks[i].getCompanyName(),
+                                null,
+                                null,
+                                similarStocks[i].getPreviousClose(),
+                                false);
+            }
+
+            similarSearchPresenter.prepareSuccessView(similarSearchOutputList);
         }
     }
 }
