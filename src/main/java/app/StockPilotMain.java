@@ -15,7 +15,6 @@ import use_case.stock.StockInteractor;
 import use_case.stock.StockDataAccessInterface;
 import view.ViewManager;
 import data_access.FileStockDataAccessObject;
-import data_access.InMemoryStockDataAccessObject;
 
 /**
  * Starts a test environment specifically for the Stock display UI.
@@ -59,11 +58,8 @@ public final class StockPilotMain {
          * Instantiate the Data Access Object.
          * NOTE: Replace this with whatever your actual Stock DAO class is named!
          */
-        /*final StockDataAccessInterface stockDataAccessObject =
-                new FileStockDataAccessObject();*/
-
         final StockDataAccessInterface stockDataAccessObject =
-                new InMemoryStockDataAccessObject();
+                new FileStockDataAccessObject();
 
         /*
          * Manually wire the Clean Architecture layers together.
@@ -100,4 +96,3 @@ public final class StockPilotMain {
         application.setVisible(true);
     }
 }
-

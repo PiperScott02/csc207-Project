@@ -51,6 +51,13 @@ public class Stock {
         return historicalTimeline;
     }
 
+    /** Returns the map of Local Date and their respective Daily Price Data.
+     * @return timeSeries map of Local Date and Daily Price Data.
+     */
+    public Map<LocalDate, DailyPriceData> getTimeSeries() {
+        return timeSeries;
+    }
+
     /** Sets the list of daily historical price data.
      * @param historicalTimeline the historical price data timeline to be set.
      */
@@ -257,5 +264,14 @@ public class Stock {
      */
     public void setTimeSeries(Map<LocalDate, DailyPriceData> timeSeries) {
         this.timeSeries = timeSeries;
+    }
+
+    /** Returns whether this stock object has had its financial metrics calculated.
+     * @return True or false depending on whether it has.
+     */
+    public boolean hasCalculatedMetrics() {
+        return beta != null
+                && alpha != null
+                && sharpeRatio != null;
     }
 }

@@ -21,7 +21,7 @@ public class StockService {
     and produces a timeline of the last 100 entity.DailyPriceData objects sorted by date.
      */
 
-    private static final String DEFAULT_API_KEY = "DISUI2UEZBJBNFBM";
+    private static final String DEFAULT_API_KEY = "PTZRDMMS8UYGPQ7G";
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -54,7 +54,7 @@ public class StockService {
         HttpResponse<String> response =
                 httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(response.body());
+        /*System.out.println(response.body());*/
 
         AlphaVantageResponse apiResponse = objectMapper.readValue(response.body(), AlphaVantageResponse.class);
         Map<LocalDate, DailyPriceData> timeSeries = apiResponse.getTimeSeries();

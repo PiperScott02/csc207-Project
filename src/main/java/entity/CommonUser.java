@@ -42,6 +42,9 @@ public class CommonUser implements User {
     public Portfolio getPortfolio() {return portfolio;}
 
     @Override
+    public void setPortfolio(Portfolio portfolio) {this.portfolio = portfolio;}
+
+    @Override
     public void setRiskProfile(RiskProfile riskProfile) {
         this.riskProfile = riskProfile;
     }

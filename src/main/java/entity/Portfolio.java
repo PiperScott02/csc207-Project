@@ -2,10 +2,7 @@ package entity;
 
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.math.BigDecimal;
 
 /** Represents a user's portfolio containing stock holdings, watchlists, timeline details, and financial metrics. */
@@ -14,9 +11,9 @@ public class Portfolio {
 
     private String userId;
 
-    private List<StockHolding> holdings;
+    private List<StockHolding> holdings = new ArrayList<>();
 
-    private List<StockHolding> watchlisted;
+    private List<StockHolding> watchlisted = new ArrayList<>();
 
     private List<LocalDate> masterTimeline;
 
@@ -66,6 +63,34 @@ public class Portfolio {
         this.sharpeRatio = sharpeRatio;
     }
 
+    /** Returns the true beta value of this portfolio.
+     * @return the true beta as a double.
+     */
+    public Double getTrueBeta() {
+        return this.trueBeta;
+    }
+
+    /** Returns the weighted beta value of this portfolio.
+     * @return the weighted beta as a double.
+     */
+    public Double getWeightedBeta() {
+        return this.weightedBeta;
+    }
+
+    /** Returns the alpha value of this portfolio.
+     * @return alpha as a double.
+     */
+    public Double getAlpha() {
+        return this.alpha;
+    }
+
+    /** Returns the Sharpe ratio of this portfolio.
+     * @return the Sharpe ratio as a double.
+     */
+    public Double getSharpeRatio() {
+        return this.sharpeRatio;
+    }
+
 
     /** Returns the master timeline of this portfolio.
      * @return the list of LocalDates for the master timeline.
@@ -80,6 +105,24 @@ public class Portfolio {
      */
     public List<StockHolding> getHoldings() {
         return this.holdings;
+    }
+
+    /** Builds the portfolio's master timeline.*/
+    public void buildMasterTimeline() {
+        System.out.println("Building master timeline.");
+
+
+        Set<LocalDate> dates = new TreeSet<>();
+
+        for (StockHolding holding : holdings) {
+            dates.addAll(
+                    holding.getStock().getDatesSorted()
+            );
+        }
+
+        masterTimeline = new ArrayList<>(dates);
+        Collections.sort(masterTimeline);
+        System.out.println("Size of master timeline: " + masterTimeline.size());
     }
 
     /** Calculates the total current value of all holdings in the portfolio.
@@ -99,9 +142,15 @@ public class Portfolio {
      */
     public BigDecimal calculateTotalPortfolioValueOnDate(LocalDate date) {
         BigDecimal value = BigDecimal.ZERO;
-        for (StockHolding holding: holdings) {
-            value = value.add(holding.calculateTotalValueOnDate(date));
+
+        for (StockHolding holding : holdings) {
+            BigDecimal holdingValue = holding.calculateTotalValueOnDate(date);
+
+            if (holdingValue != null) {
+                value = value.add(holdingValue);
+            }
         }
+
         return value;
     }
 
@@ -145,7 +194,7 @@ public class Portfolio {
      * @param holding the StockHolding to check.
      * @return the share of the portfolio as a double.
      */
-    public double getHoldingShare(StockHolding holding) {
+    public Double getHoldingShare(StockHolding holding) {
         BigDecimal holdingPrice = holding.calculateTotalValue();
         BigDecimal portfolioValue = this.calculateTotalPortfolioValue();
         if (portfolioValue.compareTo(BigDecimal.ZERO) == 0) {
@@ -160,29 +209,54 @@ public class Portfolio {
      * @param date the date for the calculation.
      * @return the share of the portfolio on that date as a double.
      */
-    public double calculateHoldingShareOnDay(StockHolding holding, LocalDate date) {
-        BigDecimal holdingPriceOnDate = holding.calculateTotalValueOnDate(date);
-        BigDecimal portfolioValueOnDate = this.calculateTotalPortfolioValueOnDate(date);
-        if (portfolioValueOnDate.compareTo(BigDecimal.ZERO) == 0) {
+    public Double calculateHoldingShareOnDay(
+            StockHolding holding,
+            LocalDate date) {
+        BigDecimal holdingPriceOnDate =
+                holding.calculateTotalValueOnDate(date);
+        BigDecimal portfolioValueOnDate =
+                this.calculateTotalPortfolioValueOnDate(date);
+        if (holdingPriceOnDate == null ||
+                portfolioValueOnDate.compareTo(BigDecimal.ZERO) == 0) {
             return 0.0;
         }
-        return holdingPriceOnDate.divide(portfolioValueOnDate, 12, java.math.RoundingMode.HALF_UP).doubleValue();
+        return holdingPriceOnDate
+                .divide(portfolioValueOnDate, 12, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     /** Calculates the daily return of the portfolio on a specific date.
      * @param date the date to calculate the return for.
      * @return the portfolio daily return as a double.
      */
-    public double calculatePortfolioDailyReturn (LocalDate date) {
-        BigDecimal portfolioValueToday = calculateTotalPortfolioValueOnDate(date);
+    public Double calculatePortfolioDailyReturn(LocalDate date) {
+
         int dateIndex = this.masterTimeline.indexOf(date);
+
         if (dateIndex <= 0) {
-            return 0.0;
+            return null;
         }
+
         LocalDate dateBefore = this.masterTimeline.get(dateIndex - 1);
-        BigDecimal portfolioValueYesterday = calculateTotalPortfolioValueOnDate(dateBefore);
-        BigDecimal dailyChange = portfolioValueToday.subtract(portfolioValueYesterday);
-        return dailyChange.divide(portfolioValueYesterday, 12, RoundingMode.HALF_UP).doubleValue();
+
+        BigDecimal portfolioValueToday =
+                calculateTotalPortfolioValueOnDate(date);
+
+        BigDecimal portfolioValueYesterday =
+                calculateTotalPortfolioValueOnDate(dateBefore);
+
+        if (portfolioValueYesterday.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }
+
+        BigDecimal dailyChange =
+                portfolioValueToday.subtract(portfolioValueYesterday);
+
+        return dailyChange.divide(
+                portfolioValueYesterday,
+                12,
+                RoundingMode.HALF_UP
+        ).doubleValue();
     }
 
     /** Retrieves a specific stock holding from the portfolio using its ticker symbol.
@@ -198,5 +272,10 @@ public class Portfolio {
         return null;
     }
 
-
+    /** Adds a stock holding to the portfolio.
+     * @param holding the StockHolding to add.
+     */
+    public void addHolding(StockHolding holding) {
+        this.holdings.add(holding);
+    }
 }

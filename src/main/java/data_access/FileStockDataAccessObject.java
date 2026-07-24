@@ -2,6 +2,7 @@ package data_access;
 
 import data_access.stock_daily.StockService;
 import entity.Stock;
+import use_case.analysis.StockFinancialService;
 import use_case.stock.StockDataAccessInterface;
 
 import java.io.IOException;

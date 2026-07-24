@@ -2,13 +2,14 @@ package entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /** Represents a holding of a specific stock along with its transaction history. */
 public class StockHolding {
     private Stock stock;
 
-    private List<Transaction> transactions;
+    private List<Transaction> transactions = new ArrayList<>();
 
     private BigDecimal purchaseDate;
 
@@ -47,6 +48,8 @@ public class StockHolding {
      */
     public BigDecimal calculateTotalValueOnDate(LocalDate date) {
         BigDecimal price = stock.getCloseOnDate(date);
+
+
         if (price == null) {
             return null;
         }
@@ -61,6 +64,12 @@ public class StockHolding {
         return this.stock;
     }
 
+    /** Sets the stock of this StockHolding.
+     * @param stock  the stock to be set.
+     */
+    public void setStock(Stock stock) {this.stock = stock;
+    }
+
     /** Returns the current number of shares held.
      * @return the number of shares as a double.
      */
@@ -70,16 +79,20 @@ public class StockHolding {
 
     public void makeTransaction(Stock stock, Double quantity, LocalDate date, TransactionType transactionType) {
         Transaction transaction = new Transaction();
+
         transaction.setDate(date);
         transaction.setPricePerShare(stock.getCloseOnDate(date));
+        transaction.setNumberOfShares(quantity);
+        transaction.setType(transactionType);
+
         this.transactions.add(transaction);
-
     }
-
-    public void makeTransaction(Stock stock, Double quantity) {
+    public void makeTransaction(Stock stock, Double quantity, TransactionType type) {
         Transaction transaction = new Transaction();
         LocalDate lastDay = stock.getLastTradingDay();
         transaction.setPricePerShare(stock.getCloseOnDate(lastDay));
+        transaction.setNumberOfShares(quantity);
+        transaction.setType(type);
         this.transactions.add(transaction);
     }
 

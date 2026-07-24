@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 
     public class Main {
         public static void main(String[] args) throws IOException, InterruptedException {
-                StockService stockService = new StockService("DISUI2UEZBJBNFBM");
+                StockService stockService = new StockService("PTZRDMMS8UYGPQ7G");
             StockFinancialService financialService = new StockFinancialService();
             String tickerSymbol = "GOOG";
             String marketTickerSymbol  = "SPY";
@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
             TimeUnit.SECONDS.sleep(1);
             Stock market = stockService.createStockAndHistory(marketTickerSymbol);
             financialService.calculateAndAssignMetrics(google, market);
-            System.out.println(google.getAlpha());
+            System.out.println("This is the beta " +     google.getBeta());
             System.out.println(google.getDailyPriceChange());
             System.out.println(google.getCloseOnDate(LocalDate.now()));
             System.out.println(google.getOpenOnDate(LocalDate.now()));
