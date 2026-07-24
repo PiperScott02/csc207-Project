@@ -22,6 +22,12 @@ public interface User {
      *
      * @return the user's risk profile
      */
+
+    /** Returns the user's portfolio.
+     * @return the user's portfolio entity.
+     */
+    Portfolio getPortfolio();
+
     RiskProfile getRiskProfile();
 
     /**

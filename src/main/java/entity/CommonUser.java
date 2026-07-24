@@ -8,6 +8,7 @@ public class CommonUser implements User {
     private final String name;
     private final String password;
     private RiskProfile riskProfile;
+    private Portfolio portfolio;
 
     /**
      * Creates a new user.
@@ -19,6 +20,7 @@ public class CommonUser implements User {
         this.name = name;
         this.password = password;
         this.riskProfile = new RiskProfile();
+        this.portfolio = new Portfolio();
     }
 
     @Override
@@ -35,6 +37,9 @@ public class CommonUser implements User {
     public RiskProfile getRiskProfile() {
         return riskProfile;
     }
+
+    @Override
+    public Portfolio getPortfolio() {return portfolio;}
 
     @Override
     public void setRiskProfile(RiskProfile riskProfile) {
