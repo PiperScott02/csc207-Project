@@ -6,6 +6,10 @@ import interface_adapter.ticker_search.TickerSearchController;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 
 public class SearchView extends JPanel {
 
@@ -21,8 +25,47 @@ public class SearchView extends JPanel {
         this.similarSearchViewModel = similarSearchViewModel;
         this.tickerSearchController = tickerSearchController;
         this.tickerSearchViewModel = tickerSearchViewModel;
+
+        add(createHeader());
+        add(createSearchBar());
     }
 
-    // TODO: methods for UI
+    private JPanel createHeader() {
+        final JPanel headerPanel = new JPanel();
+
+        final JLabel title = new JLabel("Search", SwingConstants.CENTER);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        title.setFont(new Font("SansSerif", Font.BOLD, 28));
+        headerPanel.add(title);
+
+        return headerPanel;
+    }
+
+    private JPanel createSearchBar() {
+        final JTextField searchInputField = new JTextField(50);
+        final JLabel searchBarLabel = new JLabel("Search");
+        final JButton searchButton = new JButton("Search");
+        searchButton.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        if (evt.getSource().equals(searchButton)) {
+                            try {
+                                similarSearchController.execute(searchButton.getText());
+                                tickerSearchController.execute(searchButton.getText());
+                            } catch (IOException e) {
+                                System.out.println("IOException");
+                            } catch (InterruptedException e) {
+                                System.out.println("Interrupted Exception");
+                            }
+                        }
+                    }
+                });
+
+        final LabelTextPanel searchBarPanel = new LabelTextPanel(searchBarLabel, searchInputField);
+
+        return searchBarPanel;
+    }
+
+
 
 }
