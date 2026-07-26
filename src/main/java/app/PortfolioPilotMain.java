@@ -7,14 +7,17 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import data_access.InMemoryUserDataAccessObject;
+import data_access.SimilarSearchDataAccessObject;
+import data_access.stock_daily.StockService;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.signup.SignupViewModel;
-import view.LoggedInView;
-import view.LoginView;
-import view.SignupView;
-import view.ViewManager;
+import interface_adapter.similar_search.SimilarSearchViewModel;
+import interface_adapter.ticker_search.TickerSearchViewModel;
+import use_case.StockDailyDataAccessInterface;
+import use_case.similar_search.SimilarSearchDataAccessInterface;
+import view.*;
 
 /**
  * Starts PortfolioPilot with signup and login functionality.
@@ -116,6 +119,24 @@ public final class PortfolioPilotMain {
         views.add(
                 loggedInView,
                 loggedInView.getViewName()
+        );
+
+        final SimilarSearchViewModel similarSearchViewModel = new SimilarSearchViewModel();
+        final TickerSearchViewModel tickerSearchViewModel = new TickerSearchViewModel();
+        final StockDailyDataAccessInterface stockDailyDataAccessObject = new
+                StockService("PTZRDMMS8UYGPQ7G");
+        final SimilarSearchDataAccessInterface similarSearchDataAccessObject = new SimilarSearchDataAccessObject();
+
+        final SearchView searchView =
+                SearchUseCaseFactory.create(viewManagerModel,
+                        similarSearchViewModel,
+                        tickerSearchViewModel,
+                        stockDailyDataAccessObject,
+                        similarSearchDataAccessObject);
+
+        views.add(
+                searchView,
+                searchView.getViewName()
         );
 
         /*

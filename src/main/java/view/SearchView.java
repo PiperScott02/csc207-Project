@@ -20,7 +20,10 @@ public class SearchView extends JPanel {
     private final TickerSearchController tickerSearchController;
     private final TickerSearchViewModel tickerSearchViewModel;
 
-    public SearchView(SimilarSearchController similarSearchController, SimilarSearchViewModel similarSearchViewModel, TickerSearchController tickerSearchController, TickerSearchViewModel tickerSearchViewModel) {
+    public SearchView(SimilarSearchController similarSearchController,
+                      SimilarSearchViewModel similarSearchViewModel,
+                      TickerSearchController tickerSearchController,
+                      TickerSearchViewModel tickerSearchViewModel) {
         this.similarSearchController = similarSearchController;
         this.similarSearchViewModel = similarSearchViewModel;
         this.tickerSearchController = tickerSearchController;
@@ -44,28 +47,14 @@ public class SearchView extends JPanel {
     private JPanel createSearchBar() {
         final JTextField searchInputField = new JTextField(50);
         final JLabel searchBarLabel = new JLabel("Search");
-        final JButton searchButton = new JButton("Search");
-        searchButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(searchButton)) {
-                            try {
-                                similarSearchController.execute(searchButton.getText());
-                                tickerSearchController.execute(searchButton.getText());
-                            } catch (IOException e) {
-                                System.out.println("IOException");
-                            } catch (InterruptedException e) {
-                                System.out.println("Interrupted Exception");
-                            }
-                        }
-                    }
-                });
 
         final LabelTextPanel searchBarPanel = new LabelTextPanel(searchBarLabel, searchInputField);
 
         return searchBarPanel;
     }
 
-
+    public String getViewName() {
+        return SEARCH_VIEW_NAME;
+    }
 
 }

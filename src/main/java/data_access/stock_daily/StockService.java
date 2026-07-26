@@ -3,8 +3,9 @@ package data_access.stock_daily;
 import com.fasterxml.jackson.databind.ObjectMapper;
     import entity.DailyPriceData;
     import entity.Stock;
+import use_case.StockDailyDataAccessInterface;
 
-    import java.io.IOException;
+import java.io.IOException;
     import java.net.URI;
     import java.net.http.HttpClient;
     import java.net.http.HttpRequest;
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
     import java.util.List;
     import java.util.Map;
 
-    public class StockService {
+    public class StockService implements StockDailyDataAccessInterface {
         /* Helper class that, given an API key, builds a entity.Stock object for the correspdonding ticker symbol, and produces
         a timeline of the last 100 entity.DailyPriceData objects sorted by date.
          */
@@ -32,6 +33,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
             this.objectMapper = new ObjectMapper();
             this.objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         }
+
+        @Override
         public Stock createStockAndHistory(String tickerSymbol) throws IOException, InterruptedException {
             String url =
                     "https://www.alphavantage.co/query" +
