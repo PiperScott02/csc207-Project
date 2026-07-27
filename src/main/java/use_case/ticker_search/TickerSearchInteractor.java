@@ -25,11 +25,16 @@ public class TickerSearchInteractor implements TickerSearchInputBoundary {
         final Stock tickerStock = stockDailyDataAccessObject.createStockAndHistory(tickerSymbol);
 
         if (tickerStock == null) { // TODO: this is meant to check if the tickerSymbol was actually valid
-            tickerSearchOutputPresenter.prepareFailView("No Match for Ticker Symbol");
+            tickerSearchOutputPresenter.prepareFailView("No Exact Match for Ticker Symbol");
         }
         else {
             final TickerSearchOutputData tickerSearchOutputData =
-                    new TickerSearchOutputData(tickerStock, false);
+                    new TickerSearchOutputData(tickerStock.getTickerSymbol(),
+                            tickerStock.getCompanyName(),
+                            null,
+                            null,
+                            tickerStock.getPreviousClose(),
+                            false);
             tickerSearchOutputPresenter.prepareSuccessView(tickerSearchOutputData);
         }
     }

@@ -26,6 +26,7 @@ import interface_adapter.logged_in.LoggedInViewModel;
 public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private static final String LOGIN_VIEW_NAME = "log in";
+    private static final String SEARCH_VIEW_NAME = "search";
 
     private static final String RISK_PREFERENCE_VIEW_NAME =
             "risk preference";
@@ -177,7 +178,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         final JPanel buttonPanel = new JPanel(new GridLayout(1, 7, 8, 0));
 
         buttonPanel.add(createFeatureButton("Add Holding"));
-        buttonPanel.add(createFeatureButton("Search Stock"));
         buttonPanel.add(createFeatureButton("Watchlist"));
 
         // The requested News button.
@@ -203,6 +203,15 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         });
 
         buttonPanel.add(logOutButton);
+
+        final JButton searchButton = new JButton("Search Stocks");
+
+        searchButton.addActionListener(event -> {
+            viewManagerModel.setState(SEARCH_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        });
+
+        buttonPanel.add(searchButton);
 
         return buttonPanel;
     }
