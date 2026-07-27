@@ -11,11 +11,16 @@ import java.util.List;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
+/** Service class for calculating financial metrics and analytics for a portfolio. */
 public class PortfolioFinancialService {
-    private static double threemonthusbillreturn = 0.0379;
+    private static double THREE_MONTH_US_BILL_RETURN = 0.0379;
 
-    private static final double riskFreeRate = Math.pow(1+threemonthusbillreturn, 1.0/252.0) - 1.0;
+    private static final double RISK_FREE_RATE = Math.pow(1+ THREE_MONTH_US_BILL_RETURN, 1.0/252.0) - 1.0;
 
+    /** Calculates the weighted beta of the portfolio based on individual stock holdings.
+     * @param portfolio the Portfolio to evaluate.
+     * @return the calculated weighted beta as a double.
+     */
     private static double calculatePortfolioWeightedBeta(Portfolio portfolio) {
         double totalBeta = 0;
         for (StockHolding holding : portfolio.getHoldings()) {
@@ -27,6 +32,11 @@ public class PortfolioFinancialService {
         return totalBeta;
     }
 
+    /** Calculates the true beta of the portfolio relative to a market stock.
+     * @param portfolio the Portfolio to evaluate.
+     * @param market the market Stock benchmark.
+     * @return the calculated true beta as a double.
+     */
     private static double calculatePortfolioTrueBeta(Portfolio portfolio, Stock market) {
         List<Double> portfolioReturns = calculatePortfolioReturnsList(portfolio);
         List<Double> marketReturns = StockFinancialService.returnRatios(market);
@@ -35,6 +45,10 @@ public class PortfolioFinancialService {
         return portfolioCovariance/marketVariance;
     }
 
+    /** Generates a list of daily portfolio returns over the master timeline.
+     * @param portfolio the Portfolio to evaluate.
+     * @return a list of daily return doubles.
+     */
     public static List<Double> calculatePortfolioReturnsList(Portfolio portfolio) {
         List<Double> returns = new ArrayList<>();
         List<LocalDate> timeline = portfolio.getMasterTimeline();
@@ -46,6 +60,11 @@ public class PortfolioFinancialService {
 
     }
 
+    /** Calculates the alpha of the portfolio relative to a market stock.
+     * @param portfolio the Portfolio to evaluate.
+     * @param market the market Stock benchmark.
+     * @return the calculated alpha as a double.
+     */
     public static double calculatePortfolioAlpha(Portfolio portfolio, Stock market) {
         List<Double> returns = calculatePortfolioReturnsList(portfolio);
         double portfolioReturnsMean = StatisticsService.calculateMean(returns);
@@ -53,9 +72,13 @@ public class PortfolioFinancialService {
         double portfolioCovariance = StatisticsService.calculateCovariance(returns, marketRatios);
         double marketMean = StatisticsService.calculateMean(marketRatios);
         return StatisticsService.calculateAlpha(portfolioReturnsMean, marketMean,
-                calculatePortfolioTrueBeta(portfolio, market), riskFreeRate);
+                calculatePortfolioTrueBeta(portfolio, market), RISK_FREE_RATE);
     }
 
+    /** Computes and assigns financial metrics (weighted beta, alpha, true beta, Sharpe ratio) to the portfolio.
+     * @param portfolio the Portfolio to update.
+     * @param market the market Stock benchmark.
+     */
     public static void calculateAndAssignMetrics(Portfolio portfolio, Stock market) {
         double weightedBeta = calculatePortfolioWeightedBeta(portfolio);
 
@@ -76,6 +99,10 @@ public class PortfolioFinancialService {
 
     }
 
+    /** Builds a 2D array of holding weights for the portfolio.
+     * @param portfolio the Portfolio to evaluate.
+     * @return a 2D double array representing weights.
+     */
     public static double[][] buildWeightsArray(Portfolio portfolio) {
         List<StockHolding> holdings = portfolio.getHoldings();
         int numberOfHoldings = holdings.size();
@@ -88,10 +115,18 @@ public class PortfolioFinancialService {
         return weightsArray;
     }
 
+    /** Converts a weights 2D array into a RealMatrix.
+     * @param weightsArray the weights 2D double array.
+     * @return a RealMatrix representation of the weights.
+     */
     public static RealMatrix buildWeightsMatrix(double[][] weightsArray) {
         return new Array2DRowRealMatrix(weightsArray);
     }
 
+    /** Calculates the variance of the portfolio.
+     * @param portfolio the Portfolio to evaluate.
+     * @return the portfolio variance as a double.
+     */
     public static double calculatePortfolioVariance(Portfolio portfolio) {
         List<Stock> stockList = portfolio.getStocks();
         double[][] weightsArray = buildWeightsArray(portfolio);
@@ -101,11 +136,15 @@ public class PortfolioFinancialService {
         RealMatrix stocksCovarianceMatrix = StockFinancialService.
                 buildCovarianceMatrix(covariancesArray);
         RealMatrix weightsMatrixTranspose = weightsMatrix.transpose();
-            RealMatrix portfolioCovariance = weightsMatrix.multiply(stocksCovarianceMatrix).
+        RealMatrix portfolioCovariance = weightsMatrix.multiply(stocksCovarianceMatrix).
                 multiply(weightsMatrixTranspose);
         return portfolioCovariance.getEntry(0,0);
     }
 
+    /** Calculates the expected portfolio returns number.
+     * @param portfolio the Portfolio to evaluate.
+     * @return the expected returns as a double.
+     */
     public static double calculatePortfolioReturnsNumber(Portfolio portfolio) {
         double returns = 0.0;
         List<Stock> stockList = portfolio.getStocks();
@@ -120,13 +159,14 @@ public class PortfolioFinancialService {
         return returns;
     }
 
+    /** Calculates the Sharpe ratio of the portfolio.
+     * @param portfolio the Portfolio to evaluate.
+     * @return the Sharpe ratio as a double.
+     */
     public static double calculateSharpeRatio(Portfolio portfolio) {
         double portfolioStandardDeviation = Math.sqrt(calculatePortfolioVariance(portfolio));
         double portfolioReturns = calculatePortfolioReturnsNumber(portfolio);
-        return (portfolioReturns - riskFreeRate)/portfolioStandardDeviation;
+        return (portfolioReturns - RISK_FREE_RATE)/portfolioStandardDeviation;
 
     }
 }
-
-
-

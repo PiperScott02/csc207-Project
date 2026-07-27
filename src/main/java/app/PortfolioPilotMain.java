@@ -124,7 +124,7 @@ public final class PortfolioPilotMain {
         final SimilarSearchViewModel similarSearchViewModel = new SimilarSearchViewModel();
         final TickerSearchViewModel tickerSearchViewModel = new TickerSearchViewModel();
         final StockDailyDataAccessInterface stockDailyDataAccessObject = new
-                StockService("PTZRDMMS8UYGPQ7G");
+                StockService();
         final SimilarSearchDataAccessInterface similarSearchDataAccessObject = new SimilarSearchDataAccessObject();
 
         final SearchView searchView =
@@ -137,6 +137,14 @@ public final class PortfolioPilotMain {
         views.add(
                 searchView,
                 searchView.getViewName()
+        );
+
+        final RiskPreferenceView riskPreferenceView =
+                new RiskPreferenceView(viewManagerModel);
+
+        views.add(
+                riskPreferenceView,
+                riskPreferenceView.getViewName()
         );
 
         /*

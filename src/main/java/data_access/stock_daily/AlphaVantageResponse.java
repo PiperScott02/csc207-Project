@@ -8,23 +8,33 @@ import entity.DailyPriceData;
 import java.time.LocalDate;
 import java.util.Map;
 
+/** Response mapper object for parsing Alpha Vantage's JSON daily time series payload. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlphaVantageResponse {
 
     @JsonProperty("Time Series (Daily)")
     private Map<LocalDate, DailyPriceData> timeSeries;
 
-    public Map<LocalDate,   DailyPriceData> getTimeSeries(){
+    /** Returns the map of daily price data keyed by date.
+     * @return the time series map.
+     */
+    public Map<LocalDate, DailyPriceData> getTimeSeries() {
         return timeSeries;
     }
+
+    /** Sets the time series map and injects the corresponding date into each DailyPriceData value.
+     * @param timeSeries the raw time series map parsed from JSON.
+     */
     @JsonSetter("Time Series (Daily)")
     public void setTimeSeries(Map<LocalDate, DailyPriceData> timeSeries) {
         this.timeSeries = timeSeries;
 
         if (timeSeries != null) {
-            for (Map.Entry<LocalDate, DailyPriceData> entry: timeSeries.entrySet()) {
-                entry.getValue().setDate(entry.getKey());
+            for (Map.Entry<LocalDate, DailyPriceData> entry : timeSeries.entrySet()) {
+                if (entry.getValue() != null) {
+                    entry.getValue().setDate(entry.getKey());
+                }
             }
         }
-
-    }}
+    }
+}
