@@ -19,6 +19,8 @@ public class TickerSearchPresenter implements TickerSearchOutputBoundary {
         final TickerSearchState state = tickerSearchViewModel.getState();
         state.setTickerSearchOutputData(tickerSearchOutputData);
         state.setUseCaseFailed(false);
+        this.tickerSearchViewModel.setState(state);
+        tickerSearchViewModel.firePropertyChanged();
 
         viewManagerModel.setState(tickerSearchViewModel.getViewName());
         viewManagerModel.firePropertyChanged();
@@ -28,6 +30,8 @@ public class TickerSearchPresenter implements TickerSearchOutputBoundary {
     public void prepareFailView(String errorMessage) {
         final TickerSearchState state = tickerSearchViewModel.getState();
         state.setUseCaseFailed(true);
+        this.tickerSearchViewModel.setState(state);
+        tickerSearchViewModel.firePropertyChanged();
 
         viewManagerModel.setState(tickerSearchViewModel.getViewName());
         viewManagerModel.firePropertyChanged();
