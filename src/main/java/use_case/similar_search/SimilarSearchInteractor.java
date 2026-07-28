@@ -29,22 +29,23 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
     @Override
     public void execute(SimilarSearchInputData similarSearchInputData) throws IOException, InterruptedException {
         final String tickerSymbol = similarSearchInputData.getTickerSymbol();
-        final List<String> similarCompanyNames = similarSearchDataAccessObject.similarNames(tickerSymbol);
+        final String[] similarCompanyNames = similarSearchDataAccessObject.similarNames(tickerSymbol);
 
-        if (similarCompanyNames.isEmpty()) {
+        if (similarCompanyNames == null || similarCompanyNames.length == 0) {
             similarSearchPresenter.prepareFailView("No Similar Items.");
         }
         else {
-            Stock[] similarStocks = new Stock[similarCompanyNames.size()];
-            for (int i = 0; i < similarCompanyNames.size(); i++) {
-                similarStocks[i] = stockDailyDataAccessObject.createStockAndHistory(similarCompanyNames.get(i));
+            Stock[] similarStocks = new Stock[similarCompanyNames.length];
+            for (int i = 0; i < similarCompanyNames.length; i++) {
+                similarStocks[i] = stockDailyDataAccessObject.createStockAndHistory(similarCompanyNames[i]);
             }
 
             SimilarSearchOutputData[] similarSearchOutputList =
-                    new SimilarSearchOutputData[similarCompanyNames.size()];
-            for (int i = 0; i < similarCompanyNames.size(); i++) {
+                    new SimilarSearchOutputData[similarCompanyNames.length];
+            for (int i = 0; i < similarCompanyNames.length; i++) {
                 similarSearchOutputList[i] =
-                        new SimilarSearchOutputData(similarStocks[i].getTickerSymbol(),
+                        new SimilarSearchOutputData(
+                                similarStocks[i].getTickerSymbol(),
                                 similarStocks[i].getCompanyName(),
                                 null,
                                 null,
