@@ -50,7 +50,7 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
 
     private String[] parseJSON(String responseBody) {
         SimilarSearchJSONResponse javaResponse =
-                GSON.<SimilarSearchJSONResponse>fromJson(responseBody, SimilarSearchJSONResponse.class);
+                GSON.fromJson(responseBody, SimilarSearchJSONResponse.class);
 
         String[] similarStockTickerSymbols = new String[javaResponse.bestMatches.length];
 

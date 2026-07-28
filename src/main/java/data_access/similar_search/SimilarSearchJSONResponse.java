@@ -3,34 +3,34 @@ package data_access.similar_search;
 import com.google.gson.annotations.SerializedName;
 
 public class SimilarSearchJSONResponse {
-    SpecificStockResponse[] bestMatches;
+    public SpecificStockResponse[] bestMatches;
 
     public static class SpecificStockResponse {
         @SerializedName("1. symbol")
-        String tickerSymbol;
+        public String tickerSymbol;
 
         @SerializedName("2. name")
-        String companyName;
+        public String companyName;
 
         @SerializedName("3. type")
-        String type;
+        public String type;
 
         @SerializedName("4. region")
-        String region;
+        public String region;
 
         @SerializedName("5. marketOpen")
-        String marketOpen;
+        public String marketOpen;
 
         @SerializedName("6. marketClose")
-        String marketClose;
+        public String marketClose;
 
-        @SerializedName("7. timeZone")
-        String timeZone;
+        @SerializedName("7. timezone")
+        public String timezone;
 
         @SerializedName("8. currency")
-        String currency;
+        public String currency;
 
         @SerializedName("9. matchScore")
-        String matchScore;
+        public String matchScore;
     }
 }
