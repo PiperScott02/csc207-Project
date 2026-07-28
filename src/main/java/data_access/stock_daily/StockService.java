@@ -22,7 +22,7 @@ public class StockService implements StockDailyDataAccessInterface {
     and produces a timeline of the last 100 entity.DailyPriceData objects sorted by date.
      */
 
-    private static final String DEFAULT_API_KEY = "1BPENK5QMO8ULOU1";
+    private static final String DEFAULT_API_KEY = "PTZRDMMS8UYGPQ7G";
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -69,6 +69,43 @@ public class StockService implements StockDailyDataAccessInterface {
         stock.setClose(timeline.get(size - 1).getClose());
         stock.setPreviousClose(timeline.get(size - 2).getClose());
         stock.setDailyChange(stock.getClose().subtract(stock.getPreviousClose()));
+
+        String overviewUrl =
+                "https://www.alphavantage.co/query" +
+                        "?function=OVERVIEW" +
+                        "&symbol=" + tickerSymbol +
+                        "&apikey=" + apiKey;
+
+        HttpRequest overviewRequest = HttpRequest.newBuilder().uri(URI.create(overviewUrl)).build();
+        TimeUnit.SECONDS.sleep(1);
+        HttpResponse<String> overviewResponse =
+                httpClient.send(overviewRequest, HttpResponse.BodyHandlers.ofString());
+
+        AlphaVantageOverviewResponse overview = objectMapper.readValue(overviewResponse.body(),
+                AlphaVantageOverviewResponse.class);
+
+        if (overview != null) {
+            stock.setCompanyName(overview.getCompanyName() != null ? overview.getCompanyName() : tickerSymbol);
+
+            // Populate Shares Outstanding
+            if (overview.getSharesOutstanding() != null) {
+                try {
+                    stock.setSharesOutstanding(Double.parseDouble(overview.getSharesOutstanding()));
+                } catch (NumberFormatException e) {
+                    stock.setSharesOutstanding(0.0);
+                }
+            } else {
+                stock.setSharesOutstanding(0.0);
+            }
+
+
+            stock.setCountry(overview.getCountry());
+            stock.setCurrency(overview.getCurrency());
+        } else {
+            stock.setCompanyName(tickerSymbol);
+            stock.setSharesOutstanding(0.0);
+        }
+
         return stock;
     }
 }

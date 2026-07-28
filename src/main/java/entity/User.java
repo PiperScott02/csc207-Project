@@ -22,6 +22,18 @@ public interface User {
      *
      * @return the user's risk profile
      */
+
+    /** Returns the user's portfolio.
+     * @return the user's portfolio entity.
+     */
+    Portfolio getPortfolio();
+
+    /** Sets the user's portfolio.
+     * @return the user's portfolio
+     */
+    void setPortfolio(Portfolio portfolio);
+
+
     RiskProfile getRiskProfile();
 
     /**
@@ -30,4 +42,6 @@ public interface User {
      * @param riskProfile the new risk profile
      */
     void setRiskProfile(RiskProfile riskProfile);
+
+
 }

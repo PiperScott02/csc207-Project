@@ -6,6 +6,7 @@ public class StockState {
     private String ticker = "";
     private String companyName = "";
     private String close = "";
+    private String dailyPriceChange = "";
     private String beta = "";
     private String alpha = "";
     private String sharpeRatio = "";
@@ -18,6 +19,7 @@ public class StockState {
         this.ticker = copy.ticker;
         this.companyName = copy.companyName;
         this.close = copy.close;
+        this.dailyPriceChange = copy.dailyPriceChange;
         this.beta = copy.beta;
         this.alpha = copy.alpha;
         this.sharpeRatio = copy.sharpeRatio;
@@ -76,6 +78,16 @@ public class StockState {
     public String getErrorMessage() {
         return errorMessage;
     }
+
+    /** Returns the Daily Price Change.
+     * @return the Daily Price Change string.
+     */
+    public String getDailyPriceChange() { return dailyPriceChange;}
+
+    /**  Sets the Daily Price Change.
+     * @param dailyPriceChange the daily Price Change to set.
+     */
+    public void setDailyPriceChange(String dailyPriceChange) { this.dailyPriceChange = dailyPriceChange;}
 
     /** Sets the ticker symbol.
      * @param ticker the ticker string to set.

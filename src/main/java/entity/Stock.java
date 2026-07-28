@@ -19,6 +19,8 @@ public class Stock {
 
     private BigDecimal previousClose;
 
+    private Double sharesOutstanding;
+
     private String country;
 
     private String currency;
@@ -37,6 +39,7 @@ public class Stock {
 
     private Map<LocalDate, DailyPriceData> timeSeries;
 
+
     /** Sets the ticker symbol for this stock.
      * @param tickerSymbol the ticker symbol to set.
      */
@@ -47,8 +50,45 @@ public class Stock {
     /** Returns the list of daily historical price data.
      * @return historical price data timeline list.
      */
+
+    /** Gets the country for this stock.
+     * @return the country this stock is based at.
+     */
+    public String getCountry() {
+        return country;
+    }
+
+    /** Sets the country for this stock.
+     * @param country the country this is based at.
+     */
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    /** Gets the currency for this stock.
+     * @return the string for the currency this stock uses.
+     */
+    public String getCurrency() {
+        return currency;
+    }
+
+    /** Sets the currency for this stock.
+     * @return the string for the currency this stock uses.
+     */
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+
     public List<DailyPriceData> getHistoricalTimeline() {
         return historicalTimeline;
+    }
+
+    /** Returns the map of Local Date and their respective Daily Price Data.
+     * @return timeSeries map of Local Date and Daily Price Data.
+     */
+    public Map<LocalDate, DailyPriceData> getTimeSeries() {
+        return timeSeries;
     }
 
     /** Sets the list of daily historical price data.
@@ -56,6 +96,20 @@ public class Stock {
      */
     public void setHistoricalTimeline(List<DailyPriceData> historicalTimeline) {
         this.historicalTimeline = historicalTimeline;
+    }
+
+    /** Returns the shares outstanding of the stock.
+     * @return a double of the number of shares.
+     */
+    public Double getSharesOutstanding() {
+        return sharesOutstanding;
+    }
+
+    /** Sets the shares outstanding of the stock.
+     * @param sharesOutstanding a double of the number of shares outstanding.
+     */
+    public void setSharesOutstanding(Double sharesOutstanding) {
+        this.sharesOutstanding = sharesOutstanding;
     }
 
     /** Returns the ticker symbol of this stock.
@@ -70,6 +124,13 @@ public class Stock {
      */
     public String getCompanyName() {
         return companyName;
+    }
+
+    /** Sets the company name of this stock.
+     * @param companyName the name of the company.
+     */
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     /** Returns the closing price of this stock.
@@ -115,7 +176,7 @@ public class Stock {
     /** Returns the daily change in price.
      * @return the daily change.
      */
-    public BigDecimal getDailyChange() {
+    public BigDecimal getDailyPriceChange() {
         return dailyChange;
     }
 
@@ -144,6 +205,15 @@ public class Stock {
         }
         return dates.get(dateIndex - 1);
 
+    }
+
+    /** Returns the last Trading Day for this stock.
+     * @return the last entry in the getDatesSorted list.
+     */
+    public LocalDate getLastTradingDay() {
+        List<LocalDate> dates = getDatesSorted();
+        int listLength = dates.size();
+        return dates.get(listLength - 1);
     }
 
     /** Returns the dividend yield of this stock.
@@ -241,5 +311,14 @@ public class Stock {
      */
     public void setTimeSeries(Map<LocalDate, DailyPriceData> timeSeries) {
         this.timeSeries = timeSeries;
+    }
+
+    /** Returns whether this stock object has had its financial metrics calculated.
+     * @return True or false depending on whether it has.
+     */
+    public boolean hasCalculatedMetrics() {
+        return beta != null
+                && alpha != null
+                && sharpeRatio != null;
     }
 }

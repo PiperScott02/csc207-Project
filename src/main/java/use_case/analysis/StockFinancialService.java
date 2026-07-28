@@ -3,8 +3,7 @@ package use_case.analysis;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import entity.Stock;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -48,6 +47,17 @@ public class StockFinancialService {
             ratiosList.add(returnRatioOnDate(stock, today));
         }
         return ratiosList;
+    }
+
+    public static Map<LocalDate, Double> returnDateRatiosMap(Stock stock) {
+        Map<LocalDate, Double> dateRatiosList = new TreeMap<>();
+        List<LocalDate> dates = stock.getDatesSorted();
+        for (int i = 1; i < dates.size(); i += 1) {
+            LocalDate today = dates.get(i);
+            Double returnToday = returnRatioOnDate(stock, today);
+            dateRatiosList.put(today, returnToday);
+        }
+        return dateRatiosList;
     }
 
     /** Calculates the beta of a stock relative to a market stock.
