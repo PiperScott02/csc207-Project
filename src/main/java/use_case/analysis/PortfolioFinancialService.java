@@ -63,7 +63,6 @@
          */
         private static double calculatePortfolioTrueBeta(Portfolio portfolio, Stock market) {
 
-            System.out.println("We made it to calculating True Beta.");
 
             Map<LocalDate, Double> portfolioReturns =
                     calculatePortfolioReturnsMap(portfolio);
@@ -71,8 +70,7 @@
             Map<LocalDate, Double> marketReturns =
                     StockFinancialService.returnDateRatiosMap(market);
 
-            System.out.println("Portfolio returns map size: " + portfolioReturns.size());
-            System.out.println("Market returns map size: " + marketReturns.size());
+
 
             List<List<Double>> aligned =
                     getAlignedReturns(portfolioReturns, marketReturns);
@@ -80,29 +78,20 @@
             List<Double> portfolioRatios = aligned.get(0);
 
 
-            System.out.println("List of portfolio Ratios: " + portfolioRatios);
             List<Double> marketRatios = aligned.get(1);
 
-            System.out.println("List of market Ratios: " + marketRatios);
             double covariance =
                     StatisticsService.calculateCovariance(
                             portfolioRatios,
                             marketRatios);
 
-            System.out.println("6");
             double variance =
                     StatisticsService.calculateVariance(marketRatios);
 
-            System.out.println("7");
             if (variance == 0) {
-                System.out.println("Variance is zero.");
                 return 0.0;
             }
 
-            System.out.println("Aligned portfolio size: " + portfolioRatios.size());
-            System.out.println("Aligned market size: " + marketRatios.size());
-            System.out.println("Market Variance: " + variance);
-            System.out.println("Hi");
 
             return covariance / variance;
         }
@@ -188,9 +177,6 @@
             ensurePortfolioTimeline(portfolio);
 
             ensureStockMetrics(portfolio, market);
-
-            System.out.println("In Portfolio Financial Service. Size of master timeline: " +
-                    portfolio.getMasterTimeline().size());
 
 
             double weightedBeta = calculatePortfolioWeightedBeta(portfolio);
@@ -280,6 +266,34 @@
             double portfolioStandardDeviation = Math.sqrt(calculatePortfolioVariance(portfolio));
             double portfolioReturns = calculatePortfolioReturnsNumber(portfolio);
             return (portfolioReturns - RISK_FREE_RATE)/portfolioStandardDeviation;
+
+        }
+
+        /** Calculates the Choueifaty Diversification ratio of the portfolio.
+         * @param portfolio the Portfolio to evaluate.
+         * @return the Choueifaty Diversification ratio as a double.
+         */
+        public static double calculateCdr(Portfolio portfolio) {
+            List<StockHolding> holdings = portfolio.getHoldings();
+            int n = holdings.size();
+            double weightVolatilitySum = 0.0;
+            double portfolioVariance = calculatePortfolioVariance(portfolio);
+            double portfolioStandardDeviation = Math.sqrt(portfolioVariance);
+
+            for (int i = 0; i < n; i++) {
+                StockHolding holding = holdings.get(i);
+                Stock stock = holding.getStock();
+                List<Double> stockRatios = StockFinancialService.returnRatios(stock);
+                double variance = StatisticsService.calculateVariance(stockRatios);
+                Double standardDeviation = Math.sqrt(variance);
+                weightVolatilitySum += portfolio.getHoldingShare(holding)*standardDeviation;
+            }
+
+            if (portfolioStandardDeviation == 0) {
+                return 0.0;
+            }
+
+            return weightVolatilitySum/portfolioStandardDeviation;
 
         }
     }

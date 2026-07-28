@@ -11,7 +11,7 @@ public class PortfolioHealthViewModel extends ViewModel<PortfolioHealthState> {
      * Constructs a new PortfolioHealthViewModel with the view name matching the view and initializes its default state.
      */
     public PortfolioHealthViewModel() {
-        super("portfolioHealth view"); // Must match PortfolioHealthView's viewName string!
+        super("portfolioHealth view");
         setState(new PortfolioHealthState());
     }
 }

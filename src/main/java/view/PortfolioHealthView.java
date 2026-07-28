@@ -20,6 +20,12 @@ public class PortfolioHealthView extends JPanel implements PropertyChangeListene
     private final JLabel alphaLabel = new JLabel("Alpha: ");
     private final JLabel sharpeRatioLabel = new JLabel("Sharpe Ratio: ");
 
+    // Advice labels
+    private final JLabel sharpeAdviceLabel = new JLabel("Sharpe Advice: ");
+    private final JLabel riskAlignmentAdviceLabel = new JLabel("Risk Alignment Advice: ");
+    private final JLabel diversificationAdviceLabel = new JLabel("Diversification Advice: ");
+    private final JLabel newsAdviceLabel = new JLabel("News Advice: ");
+
     public PortfolioHealthView(PortfolioHealthViewModel portfolioHealthViewModel) {
         this.portfolioHealthViewModel = portfolioHealthViewModel;
         this.portfolioHealthViewModel.addPropertyChangeListener(this);
@@ -41,6 +47,16 @@ public class PortfolioHealthView extends JPanel implements PropertyChangeListene
         add(alphaLabel);
         add(Box.createVerticalStrut(8));
         add(sharpeRatioLabel);
+        add(Box.createVerticalStrut(12));
+
+        // Add advice components
+        add(sharpeAdviceLabel);
+        add(Box.createVerticalStrut(6));
+        add(riskAlignmentAdviceLabel);
+        add(Box.createVerticalStrut(6));
+        add(diversificationAdviceLabel);
+        add(Box.createVerticalStrut(6));
+        add(newsAdviceLabel);
     }
 
     @Override
@@ -51,5 +67,10 @@ public class PortfolioHealthView extends JPanel implements PropertyChangeListene
         betaLabel.setText("Beta: " + state.getBeta());
         alphaLabel.setText("Alpha: " + state.getAlpha());
         sharpeRatioLabel.setText("Sharpe Ratio: " + state.getSharpeRatio());
+
+        sharpeAdviceLabel.setText("Sharpe Advice: " + state.getSharpeAdvice());
+        riskAlignmentAdviceLabel.setText("Risk Alignment Advice: " + state.getRiskAlignmentAdvice());
+        diversificationAdviceLabel.setText("Diversification Advice: " + state.getDiversificationAdvice());
+        newsAdviceLabel.setText("News Advice: " + state.getNewsAdvice());
     }
 }

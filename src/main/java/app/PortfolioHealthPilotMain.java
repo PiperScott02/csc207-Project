@@ -11,6 +11,8 @@ import javax.swing.WindowConstants;
 import data_access.FileStockDataAccessObject;
 import entity.CommonUser;
 import entity.Portfolio;
+import entity.RiskLevel;
+import entity.RiskProfile;
 import entity.Stock;
 import entity.StockHolding;
 import entity.TransactionType;
@@ -23,7 +25,6 @@ import use_case.analysis.StockFinancialService;
 import use_case.portfolio_health.PortfolioHealthDataAccessInterface;
 import use_case.portfolio_health.PortfolioHealthInteractor;
 import use_case.stock.StockDataAccessInterface;
-import app.StockHoldingFactory;
 import view.PortfolioHealthView;
 import view.ViewManager;
 
@@ -101,30 +102,52 @@ public final class PortfolioHealthPilotMain {
         viewManagerModel.firePropertyChanged();
 
         /*
-         * Create a test user using CommonUser.
+         * Create a test user with a Moderate risk profile using CommonUser.
          */
         final User testUser = new CommonUser("testUser", "password");
+
+        // Give the user a mock risk profile so the risk alignment score triggers cleanly
+        final RiskProfile mockRiskProfile = new RiskProfile();
+        mockRiskProfile.setRiskLevel(RiskLevel.MODERATE);
+        testUser.setRiskProfile(mockRiskProfile);
+
         final Portfolio portfolio = testUser.getPortfolio();
 
         /*
-         * Create a stock holding for AAPL using the factory, make a 200 share purchase, and add it to the portfolio.
+         * Use the factory to build and populate multiple holdings for a robust test portfolio.
          */
         final StockHoldingFactory stockHoldingFactory = new StockHoldingFactory(stockDataAccessObject);
-        final StockHolding testHolding = stockHoldingFactory.create("GOOG");
 
-        final Stock testStock = testHolding.getStock();
+        // 1. Holding: Google (GOOG)
+        final StockHolding googleHolding = stockHoldingFactory.create("GOOG");
+        final Stock googleStock = googleHolding.getStock();
+        if (googleStock != null && !googleStock.getDatesSorted().isEmpty()) {
+            LocalDate pastDate = googleStock.getDatesSorted().get(Math.min(5, googleStock.getDatesSorted().size() - 1));
+            googleHolding.makeTransaction(googleStock, 150.0, pastDate, TransactionType.BUY);
+            portfolio.addHolding(googleHolding);
+        }
 
-        List<LocalDate> stockDates = testStock.getDatesSorted();
+        // 2. Holding: Apple (AAPL)
+        final StockHolding appleHolding = stockHoldingFactory.create("AAPL");
+        final Stock appleStock = appleHolding.getStock();
+        if (appleStock != null && !appleStock.getDatesSorted().isEmpty()) {
+            LocalDate pastDate = appleStock.getDatesSorted().get(Math.min(5, appleStock.getDatesSorted().size() - 1));
+            appleHolding.makeTransaction(appleStock, 200.0, pastDate, TransactionType.BUY);
+            portfolio.addHolding(appleHolding);
+        }
 
-        LocalDate pastDate = stockDates.get(5);
-
-
-        testHolding.makeTransaction(testStock, 200.0, pastDate, TransactionType.BUY);
-
-        portfolio.addHolding(testHolding);
+        // 3. Holding: Microsoft (MSFT)
+        final StockHolding microsoftHolding = stockHoldingFactory.create("MSFT");
+        final Stock microsoftStock = microsoftHolding.getStock();
+        if (microsoftStock != null && !microsoftStock.getDatesSorted().isEmpty()) {
+            LocalDate pastDate = microsoftStock.getDatesSorted().get(Math.min(5,
+                    microsoftStock.getDatesSorted().size() - 1));
+            microsoftHolding.makeTransaction(microsoftStock, 100.0, pastDate, TransactionType.BUY);
+            portfolio.addHolding(microsoftHolding);
+        }
 
         /*
-         * Trigger the controller to calculate and display portfolio health metrics with the populated portfolio!
+         * Trigger the controller to calculate and display portfolio health metrics with the multi-stock portfolio!
          */
         portfolioHealthController.execute(testUser);
 

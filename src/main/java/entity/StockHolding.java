@@ -96,5 +96,20 @@ public class StockHolding {
         this.transactions.add(transaction);
     }
 
+    /**
+     * Extracts and returns a list of unique Stock entities from a given list of StockHoldings.
+     * @param holdings the list of stock holdings to extract stocks from
+     * @return a list of Stock objects associated with the holdings
+     */
+    public static List<Stock> extractStocks(List<StockHolding> holdings) {
+        List<Stock> stocks = new ArrayList<>();
+        for (StockHolding holding : holdings) {
+            if (holding.getStock() != null) {
+                stocks.add(holding.getStock());
+            }
+        }
+        return stocks;
+    }
+
 
 }

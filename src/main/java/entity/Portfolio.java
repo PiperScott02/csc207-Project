@@ -109,7 +109,6 @@ public class Portfolio {
 
     /** Builds the portfolio's master timeline.*/
     public void buildMasterTimeline() {
-        System.out.println("Building master timeline.");
 
 
         Set<LocalDate> dates = new TreeSet<>();
@@ -122,7 +121,6 @@ public class Portfolio {
 
         masterTimeline = new ArrayList<>(dates);
         Collections.sort(masterTimeline);
-        System.out.println("Size of master timeline: " + masterTimeline.size());
     }
 
     /** Calculates the total current value of all holdings in the portfolio.
@@ -277,5 +275,22 @@ public class Portfolio {
      */
     public void addHolding(StockHolding holding) {
         this.holdings.add(holding);
+    }
+
+    /**
+     * Constructs a Portfolio initialized with an empty collection of stock holdings.
+     */
+
+    public Portfolio() {
+        this.holdings = new ArrayList<>();
+    }
+
+    /**
+     * Constructs a Portfolio initialized with a collection of stock holdings.
+     * @param holdings the list of stock holdings to initialize the portfolio with
+     */
+
+    public Portfolio(List<StockHolding> holdings) {
+        this.holdings = new ArrayList<>(holdings);
     }
 }
