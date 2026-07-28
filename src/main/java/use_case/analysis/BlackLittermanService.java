@@ -23,32 +23,35 @@ public class BlackLittermanService {
     public Map<String, Double> computeMarketWeightCaps(List<StockHolding> holdings) {
         Map<String, Double> marketWeightCaps = new HashMap<>();
         AssetUniverseService universe = new AssetUniverseService(holdings);
-        BigDecimal totalValue = BigDecimal.ZERO;
 
-        for (StockHolding holding : holdings) {
-            totalValue = totalValue.add(holding.calculateTotalValue());
-        }
+        // Map to store individual stock market caps (Price * Shares Outstanding)
+        Map<String, BigDecimal> stockMarketCaps = new HashMap<>();
+        BigDecimal totalMarketCap = BigDecimal.ZERO;
 
-        if (totalValue.compareTo(BigDecimal.ZERO) == 0) {
-            return marketWeightCaps;
-        }
+        for (Stock stock : universe.getStocks()) {
+            if (stock != null && stock.getClose() != null) {
+                BigDecimal shares = BigDecimal.valueOf(stock.getSharesOutstanding());
+                BigDecimal marketCap = stock.getClose().multiply(shares);
 
-        Map<String, BigDecimal> holdingValues = new HashMap<>();
-        for (StockHolding holding : holdings) {
-            if (holding.getStock() != null) {
-                holdingValues.put(holding.getStock().getTickerSymbol(), holding.calculateTotalValue());
+                stockMarketCaps.put(stock.getTickerSymbol(), marketCap);
+                totalMarketCap = totalMarketCap.add(marketCap);
             }
         }
 
+        if (totalMarketCap.compareTo(BigDecimal.ZERO) == 0) {
+            return marketWeightCaps;
+        }
+
+        // Compute the true market weight cap for each stock
         for (Stock stock : universe.getStocks()) {
             String ticker = stock.getTickerSymbol();
-            BigDecimal holdingValue = holdingValues.getOrDefault(ticker, BigDecimal.ZERO);
+            BigDecimal marketCap = stockMarketCaps.getOrDefault(ticker, BigDecimal.ZERO);
 
-            double marketCap = holdingValue
-                    .divide(totalValue, 12, RoundingMode.HALF_UP)
+            double marketWeight = marketCap
+                    .divide(totalMarketCap, 12, RoundingMode.HALF_UP)
                     .doubleValue();
 
-            marketWeightCaps.put(ticker, marketCap);
+            marketWeightCaps.put(ticker, marketWeight);
         }
 
         return marketWeightCaps;
