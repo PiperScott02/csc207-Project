@@ -54,8 +54,6 @@ public class StockService {
         HttpResponse<String> response =
                 httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        /*System.out.println(response.body());*/
-
         AlphaVantageResponse apiResponse = objectMapper.readValue(response.body(), AlphaVantageResponse.class);
         Map<LocalDate, DailyPriceData> timeSeries = apiResponse.getTimeSeries();
 
@@ -84,10 +82,27 @@ public class StockService {
 
         AlphaVantageOverviewResponse overview = objectMapper.readValue(overviewResponse.body(),
                 AlphaVantageOverviewResponse.class);
-        if (overview != null && overview.getCompanyName() != null) {
-            stock.setCompanyName(overview.getCompanyName());
+
+        if (overview != null) {
+            stock.setCompanyName(overview.getCompanyName() != null ? overview.getCompanyName() : tickerSymbol);
+
+            // Populate Shares Outstanding
+            if (overview.getSharesOutstanding() != null) {
+                try {
+                    stock.setSharesOutstanding(Double.parseDouble(overview.getSharesOutstanding()));
+                } catch (NumberFormatException e) {
+                    stock.setSharesOutstanding(0.0);
+                }
+            } else {
+                stock.setSharesOutstanding(0.0);
+            }
+
+
+            stock.setCountry(overview.getCountry());
+            stock.setCurrency(overview.getCurrency());
         } else {
             stock.setCompanyName(tickerSymbol);
+            stock.setSharesOutstanding(0.0);
         }
 
         return stock;

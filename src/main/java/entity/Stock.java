@@ -19,6 +19,8 @@ public class Stock {
 
     private BigDecimal previousClose;
 
+    private Double sharesOutstanding;
+
     private String country;
 
     private String currency;
@@ -37,6 +39,7 @@ public class Stock {
 
     private Map<LocalDate, DailyPriceData> timeSeries;
 
+
     /** Sets the ticker symbol for this stock.
      * @param tickerSymbol the ticker symbol to set.
      */
@@ -47,6 +50,36 @@ public class Stock {
     /** Returns the list of daily historical price data.
      * @return historical price data timeline list.
      */
+
+    /** Gets the country for this stock.
+     * @return the country this stock is based at.
+     */
+    public String getCountry() {
+        return country;
+    }
+
+    /** Sets the country for this stock.
+     * @param country the country this is based at.
+     */
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    /** Gets the currency for this stock.
+     * @return the string for the currency this stock uses.
+     */
+    public String getCurrency() {
+        return currency;
+    }
+
+    /** Sets the currency for this stock.
+     * @return the string for the currency this stock uses.
+     */
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+
     public List<DailyPriceData> getHistoricalTimeline() {
         return historicalTimeline;
     }
@@ -63,6 +96,20 @@ public class Stock {
      */
     public void setHistoricalTimeline(List<DailyPriceData> historicalTimeline) {
         this.historicalTimeline = historicalTimeline;
+    }
+
+    /** Returns the shares outstanding of the stock.
+     * @return a double of the number of shares.
+     */
+    public Double getSharesOutstanding() {
+        return sharesOutstanding;
+    }
+
+    /** Sets the shares outstanding of the stock.
+     * @param sharesOutstanding a double of the number of shares outstanding.
+     */
+    public void setSharesOutstanding(Double sharesOutstanding) {
+        this.sharesOutstanding = sharesOutstanding;
     }
 
     /** Returns the ticker symbol of this stock.
