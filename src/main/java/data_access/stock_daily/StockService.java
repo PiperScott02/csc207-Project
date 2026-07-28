@@ -22,7 +22,7 @@ public class StockService implements StockDailyDataAccessInterface {
     and produces a timeline of the last 100 entity.DailyPriceData objects sorted by date.
      */
 
-    private static final String DEFAULT_API_KEY = "PTZRDMMS8UYGPQ7G";
+    private static final String DEFAULT_API_KEY = "";
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
