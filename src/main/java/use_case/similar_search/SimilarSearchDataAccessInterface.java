@@ -15,6 +15,6 @@ public interface SimilarSearchDataAccessInterface {
      * @throws IOException
      * @throws InterruptedException
      */
-    List<String> similarNames(String tickerSymbol) throws IOException, InterruptedException;
+    String[] similarNames(String tickerSymbol) throws IOException, InterruptedException;
 
 }

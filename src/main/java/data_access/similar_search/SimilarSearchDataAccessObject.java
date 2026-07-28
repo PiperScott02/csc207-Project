@@ -1,5 +1,7 @@
-package data_access;
+package data_access.similar_search;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
 
 import java.io.IOException;
@@ -21,7 +23,7 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
     }
 
     @Override
-    public List<String> similarNames(String keywords) throws IOException, InterruptedException {
+    public String[] similarNames(String keywords) throws IOException, InterruptedException {
         final String query = "?function=" + function +
                 "&keywords=" + keywords +
                 "&apikey=" + api_key;
@@ -42,7 +44,20 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
         return parseJSON(response.body());
     }
 
-    private List<String> parseJSON(String responseBody) {
-        return List.of(); // TODO: implement
+    private static final Gson GSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+
+    private String[] parseJSON(String responseBody) {
+        SimilarSearchJSONResponse javaResponse =
+                GSON.<SimilarSearchJSONResponse>fromJson(responseBody, SimilarSearchJSONResponse.class);
+
+        String[] similarStockTickerSymbols = new String[javaResponse.bestMatches.length];
+
+        for (int i = 0; i < javaResponse.bestMatches.length; i++) {
+            similarStockTickerSymbols[i] = javaResponse.bestMatches[i].tickerSymbol;
+        }
+
+        return similarStockTickerSymbols;
     }
 }

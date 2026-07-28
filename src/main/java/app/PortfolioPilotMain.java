@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import data_access.InMemoryUserDataAccessObject;
-import data_access.SimilarSearchDataAccessObject;
+import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInViewModel;
