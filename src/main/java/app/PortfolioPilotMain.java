@@ -18,6 +18,8 @@ import interface_adapter.ticker_search.TickerSearchViewModel;
 import use_case.StockDailyDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
 import view.*;
+import interface_adapter.news.NewsViewModel;
+import view.NewsView;
 
 /**
  * Starts PortfolioPilot with signup and login functionality.
@@ -75,6 +77,10 @@ public final class PortfolioPilotMain {
         final LoggedInViewModel loggedInViewModel =
                 new LoggedInViewModel();
 
+        final NewsViewModel newsViewModel =
+                new NewsViewModel();
+
+        final String alphaVantageApiKey = "YOUR_REAL_ALPHA_VANTAGE_KEY";
         /*
          * Both signup and login must use the same DAO.
          *
@@ -119,6 +125,17 @@ public final class PortfolioPilotMain {
         views.add(
                 loggedInView,
                 loggedInView.getViewName()
+        );
+        final NewsView newsView =
+                NewsUseCaseFactory.create(
+                        newsViewModel,
+                        viewManagerModel,
+                        alphaVantageApiKey
+                );
+
+        views.add(
+                newsView,
+                newsView.getViewName()
         );
 
         final SimilarSearchViewModel similarSearchViewModel = new SimilarSearchViewModel();
