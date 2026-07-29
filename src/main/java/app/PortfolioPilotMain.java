@@ -131,6 +131,17 @@ public final class PortfolioPilotMain {
                 loggedInView,
                 loggedInView.getViewName()
         );
+        final NewsView newsView =
+                NewsUseCaseFactory.create(
+                        newsViewModel,
+                        viewManagerModel,
+                        alphaVantageApiKey
+                );
+
+        views.add(
+                newsView,
+                newsView.getViewName()
+        );
 
         final NewsView newsView =
                 NewsUseCaseFactory.create(
