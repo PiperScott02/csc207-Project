@@ -84,7 +84,7 @@ public final class PortfolioPilotMain {
          * Read the Alpha Vantage API key once.
          */
         final String apiKey =
-                "NKH8SNZW8I690AJQ";
+                "ALPHA_VANTAGE_API_KEY";
 
         final InMemoryUserDataAccessObject userDataAccessObject =
                 new InMemoryUserDataAccessObject();
