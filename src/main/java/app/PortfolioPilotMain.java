@@ -12,12 +12,19 @@ import data_access.stock_daily.StockService;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.news.NewsViewModel;
 import interface_adapter.signup.SignupViewModel;
 import interface_adapter.similar_search.SimilarSearchViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import use_case.StockDailyDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
-import view.*;
+import view.LoggedInView;
+import view.LoginView;
+import view.NewsView;
+import view.RiskPreferenceView;
+import view.SearchView;
+import view.SignupView;
+import view.ViewManager;
 
 /**
  * Starts PortfolioPilot with signup and login functionality.
@@ -34,7 +41,8 @@ public final class PortfolioPilotMain {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
-        final JFrame application = new JFrame("PortfolioPilot");
+        final JFrame application =
+                new JFrame("PortfolioPilot");
 
         application.setDefaultCloseOperation(
                 WindowConstants.EXIT_ON_CLOSE
@@ -74,6 +82,28 @@ public final class PortfolioPilotMain {
 
         final LoggedInViewModel loggedInViewModel =
                 new LoggedInViewModel();
+
+        final NewsViewModel newsViewModel =
+                new NewsViewModel();
+
+        final SimilarSearchViewModel similarSearchViewModel =
+                new SimilarSearchViewModel();
+
+        final TickerSearchViewModel tickerSearchViewModel =
+                new TickerSearchViewModel();
+
+        /*
+         * Read the Alpha Vantage API key once and share it with
+         * every service that uses Alpha Vantage.
+         */
+        final String apiKey =
+                System.getenv("ALPHA_VANTAGE_API_KEY");
+
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException(
+                    "ALPHA_VANTAGE_API_KEY is missing."
+            );
+        }
 
         /*
          * Both signup and login must use the same DAO.
@@ -121,19 +151,41 @@ public final class PortfolioPilotMain {
                 loggedInView.getViewName()
         );
 
-        final SimilarSearchViewModel similarSearchViewModel = new SimilarSearchViewModel();
-        final TickerSearchViewModel tickerSearchViewModel = new TickerSearchViewModel();
-        final StockDailyDataAccessInterface stockDailyDataAccessObject = new
-                StockService();
-        final SimilarSearchDataAccessInterface similarSearchDataAccessObject =
-                new SimilarSearchDataAccessObject("");
+        /*
+         * Create the News feature using the shared Alpha Vantage key.
+         */
+        final NewsView newsView =
+                NewsUseCaseFactory.create(
+                        newsViewModel,
+                        viewManagerModel,
+                        apiKey
+                );
+
+        views.add(
+                newsView,
+                newsView.getViewName()
+        );
+
+        /*
+         * Create the stock and similar-search data-access objects
+         * using the same Alpha Vantage key.
+         */
+        final StockDailyDataAccessInterface
+                stockDailyDataAccessObject =
+                new StockService(apiKey);
+
+        final SimilarSearchDataAccessInterface
+                similarSearchDataAccessObject =
+                new SimilarSearchDataAccessObject(apiKey);
 
         final SearchView searchView =
-                SearchUseCaseFactory.create(viewManagerModel,
+                SearchUseCaseFactory.create(
+                        viewManagerModel,
                         similarSearchViewModel,
                         tickerSearchViewModel,
                         stockDailyDataAccessObject,
-                        similarSearchDataAccessObject);
+                        similarSearchDataAccessObject
+                );
 
         views.add(
                 searchView,
@@ -152,7 +204,10 @@ public final class PortfolioPilotMain {
          * Start on signup for now because the existing signup page
          * already has a button that switches to the login page.
          */
-        viewManagerModel.setState(signupView.getViewName());
+        viewManagerModel.setState(
+                signupView.getViewName()
+        );
+
         viewManagerModel.firePropertyChanged();
 
         application.pack();
