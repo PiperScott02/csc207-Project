@@ -12,14 +12,19 @@ import data_access.stock_daily.StockService;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.news.NewsViewModel;
 import interface_adapter.signup.SignupViewModel;
 import interface_adapter.similar_search.SimilarSearchViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import use_case.StockDailyDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
-import view.*;
-import interface_adapter.news.NewsViewModel;
+import view.LoggedInView;
+import view.LoginView;
 import view.NewsView;
+import view.RiskPreferenceView;
+import view.SearchView;
+import view.SignupView;
+import view.ViewManager;
 
 /**
  * Starts PortfolioPilot with signup and login functionality.
@@ -36,25 +41,18 @@ public final class PortfolioPilotMain {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
-        final JFrame application = new JFrame("PortfolioPilot");
+        final JFrame application =
+                new JFrame("PortfolioPilot");
 
         application.setDefaultCloseOperation(
                 WindowConstants.EXIT_ON_CLOSE
         );
 
-        /*
-         * CardLayout lets the application hold several pages while
-         * displaying only one page at a time.
-         */
         final CardLayout cardLayout = new CardLayout();
         final JPanel views = new JPanel(cardLayout);
 
         application.add(views);
 
-        /*
-         * ViewManagerModel stores the name of the page that should
-         * currently be displayed.
-         */
         final ViewManagerModel viewManagerModel =
                 new ViewManagerModel();
 
@@ -64,10 +62,6 @@ public final class PortfolioPilotMain {
                 viewManagerModel
         );
 
-        /*
-         * Each page has a ViewModel containing the information
-         * displayed by that page.
-         */
         final LoginViewModel loginViewModel =
                 new LoginViewModel();
 
@@ -80,13 +74,24 @@ public final class PortfolioPilotMain {
         final NewsViewModel newsViewModel =
                 new NewsViewModel();
 
-        final String alphaVantageApiKey = "YOUR_REAL_ALPHA_VANTAGE_KEY";
+        final SimilarSearchViewModel similarSearchViewModel =
+                new SimilarSearchViewModel();
+
+        final TickerSearchViewModel tickerSearchViewModel =
+                new TickerSearchViewModel();
+
         /*
-         * Both signup and login must use the same DAO.
-         *
-         * That allows a user created during signup to be found
-         * later during login.
+         * Read the Alpha Vantage API key once.
          */
+        final String apiKey =
+                System.getenv("ALPHA_VANTAGE_API_KEY");
+
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException(
+                    "ALPHA_VANTAGE_API_KEY is missing."
+            );
+        }
+
         final InMemoryUserDataAccessObject userDataAccessObject =
                 new InMemoryUserDataAccessObject();
 
@@ -138,18 +143,34 @@ public final class PortfolioPilotMain {
                 newsView.getViewName()
         );
 
-        final SimilarSearchViewModel similarSearchViewModel = new SimilarSearchViewModel();
-        final TickerSearchViewModel tickerSearchViewModel = new TickerSearchViewModel();
-        final StockDailyDataAccessInterface stockDailyDataAccessObject = new
-                StockService();
-        final SimilarSearchDataAccessInterface similarSearchDataAccessObject = new SimilarSearchDataAccessObject();
+        final NewsView newsView =
+                NewsUseCaseFactory.create(
+                        newsViewModel,
+                        viewManagerModel,
+                        apiKey
+                );
+
+        views.add(
+                newsView,
+                newsView.getViewName()
+        );
+
+        final StockDailyDataAccessInterface
+                stockDailyDataAccessObject =
+                new StockService(apiKey);
+
+        final SimilarSearchDataAccessInterface
+                similarSearchDataAccessObject =
+                new SimilarSearchDataAccessObject(apiKey);
 
         final SearchView searchView =
-                SearchUseCaseFactory.create(viewManagerModel,
+                SearchUseCaseFactory.create(
+                        viewManagerModel,
                         similarSearchViewModel,
                         tickerSearchViewModel,
                         stockDailyDataAccessObject,
-                        similarSearchDataAccessObject);
+                        similarSearchDataAccessObject
+                );
 
         views.add(
                 searchView,
@@ -164,11 +185,10 @@ public final class PortfolioPilotMain {
                 riskPreferenceView.getViewName()
         );
 
-        /*
-         * Start on signup for now because the existing signup page
-         * already has a button that switches to the login page.
-         */
-        viewManagerModel.setState(signupView.getViewName());
+        viewManagerModel.setState(
+                signupView.getViewName()
+        );
+
         viewManagerModel.firePropertyChanged();
 
         application.pack();
