@@ -3,6 +3,7 @@ package data_access.similar_search;
 import com.google.gson.annotations.SerializedName;
 
 public class SimilarSearchJSONResponse {
+    @SerializedName("bestMatches")
     public SpecificStockResponse[] bestMatches;
 
     public static class SpecificStockResponse {

@@ -125,7 +125,8 @@ public final class PortfolioPilotMain {
         final TickerSearchViewModel tickerSearchViewModel = new TickerSearchViewModel();
         final StockDailyDataAccessInterface stockDailyDataAccessObject = new
                 StockService();
-        final SimilarSearchDataAccessInterface similarSearchDataAccessObject = new SimilarSearchDataAccessObject();
+        final SimilarSearchDataAccessInterface similarSearchDataAccessObject =
+                new SimilarSearchDataAccessObject("");
 
         final SearchView searchView =
                 SearchUseCaseFactory.create(viewManagerModel,

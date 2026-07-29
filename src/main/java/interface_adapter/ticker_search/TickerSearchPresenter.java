@@ -20,10 +20,10 @@ public class TickerSearchPresenter implements TickerSearchOutputBoundary {
         state.setTickerSearchOutputData(tickerSearchOutputData);
         state.setUseCaseFailed(false);
         this.tickerSearchViewModel.setState(state);
-        tickerSearchViewModel.firePropertyChanged();
+        tickerSearchViewModel.firePropertyChanged("ticker search");
 
         viewManagerModel.setState(tickerSearchViewModel.getViewName());
-        viewManagerModel.firePropertyChanged();
+        viewManagerModel.firePropertyChanged("ticker search");
     }
 
     @Override

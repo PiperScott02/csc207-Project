@@ -3,6 +3,7 @@ package data_access.similar_search;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
+import use_case.similar_search.SimilarSearchOutputData;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,16 +11,16 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInterface {
-    public static final String DEFAULT_API_KEY = "PTZRDMMS8UYGPQ7G";
     public static final String function = "SYMBOL_SEARCH";
     public static final HttpClient client = HttpClient.newBuilder().build();
 
     public final String api_key;
 
-    public SimilarSearchDataAccessObject() {
-        this.api_key = DEFAULT_API_KEY;
+    public SimilarSearchDataAccessObject(String api_key) {
+        this.api_key = api_key;
     }
 
     @Override
@@ -33,6 +34,7 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
                         .newBuilder()
                         .uri(URI.create(location))
                         .build();
+        TimeUnit.SECONDS.sleep(1);
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {

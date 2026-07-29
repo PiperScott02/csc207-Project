@@ -1,10 +1,12 @@
 package view;
 
 import interface_adapter.similar_search.SimilarSearchController;
+import interface_adapter.similar_search.SimilarSearchState;
 import interface_adapter.similar_search.SimilarSearchViewModel;
 import interface_adapter.ticker_search.TickerSearchController;
 import interface_adapter.ticker_search.TickerSearchState;
 import interface_adapter.ticker_search.TickerSearchViewModel;
+import use_case.similar_search.SimilarSearchOutputData;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +27,9 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final JLabel tickerSearchIndustry = new JLabel("N/A");
     private final JLabel tickerSearchPreviousClose = new JLabel("N/A");
 
+    // Similar Search Panel
+    private final JPanel similarSearchResultsPanel = createSimilarSearchResultsPanel();
+
     private final SimilarSearchController similarSearchController;
     private final SimilarSearchViewModel similarSearchViewModel;
     private final TickerSearchController tickerSearchController;
@@ -39,6 +44,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.tickerSearchController = tickerSearchController;
         this.tickerSearchViewModel = tickerSearchViewModel;
         tickerSearchViewModel.addPropertyChangeListener(this);
+        similarSearchViewModel.addPropertyChangeListener(this);
 
         setLayout(new BorderLayout(15, 15));
 
@@ -47,7 +53,11 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         final JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.add(createSearchBar());
+        centerPanel.add(Box.createVerticalStrut(2));
         centerPanel.add(tickerSearchResult());
+        centerPanel.add(Box.createVerticalStrut(2));
+        centerPanel.add(createSimilarSearchPanel(similarSearchResultsPanel));
+
         add(centerPanel, BorderLayout.CENTER);
 
         // Adding Buffer around Left, Right, and Bottom of Search View
@@ -75,6 +85,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             public void actionPerformed(ActionEvent e) {
                 try {
                     tickerSearchController.execute(searchInputField.getText());
+                    similarSearchController.execute(searchInputField.getText());
                 } catch (InterruptedException ex) {
                     System.out.println("InterruptedException");
                 } catch (IOException ex) {
@@ -87,14 +98,37 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         final JPanel searchPanel = new JPanel();
         searchPanel.add(searchButton);
         searchPanel.add(searchInputField);
+        searchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
 
         return searchPanel;
+    }
+
+    private JPanel createSimilarSearchPanel(JPanel similarSearchResultsPanel) {
+        final JPanel similarSearchPanel = new JPanel();
+        similarSearchPanel.setLayout(new BoxLayout(similarSearchPanel, BoxLayout.Y_AXIS));
+        similarSearchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+
+        similarSearchPanel.add(new JLabel("Similar Search Results"));
+
+        final JPanel topOfSimilarSearchPanel = new JPanel();
+        topOfSimilarSearchPanel.setLayout(new GridLayout(1, 5));
+        topOfSimilarSearchPanel.add(new JLabel("Ticker Symbol"));
+        topOfSimilarSearchPanel.add(new JLabel("Country"));
+        topOfSimilarSearchPanel.add(new JLabel("Company Name"));
+        topOfSimilarSearchPanel.add(new JLabel("Industry"));
+        topOfSimilarSearchPanel.add(new JLabel("Previous Close"));
+
+        similarSearchPanel.add(topOfSimilarSearchPanel);
+        similarSearchPanel.add(similarSearchResultsPanel);
+
+        return similarSearchPanel;
     }
 
     public JPanel tickerSearchResult() {
         final JPanel tickerSearchResultPanel = new JPanel();
         tickerSearchResultPanel.setLayout(
                 new BoxLayout(tickerSearchResultPanel, BoxLayout.Y_AXIS));
+        tickerSearchResultPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
 
         final JPanel tickerSearchValuesPanel = new JPanel();
         tickerSearchValuesPanel.setLayout(new GridLayout(2, 5));
@@ -121,14 +155,56 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         return tickerSearchResultPanel;
     }
 
-    public void propertyChange(PropertyChangeEvent evt) {
-        final TickerSearchState state = (TickerSearchState) evt.getNewValue();
+    private JPanel createSimilarSearchResultsPanel() {
+        final JPanel similarSearchResultPanel = new JPanel();
+        similarSearchResultPanel.setLayout(
+                new BoxLayout(similarSearchResultPanel, BoxLayout.Y_AXIS));
 
-        tickerSearchSymbol.setText(state.getTickerSymbol());
-        tickerSearchCompanyName.setText(state.getCompanyName());
-        tickerSearchCountry.setText(state.getCountry());
-        tickerSearchPreviousClose.setText(state.getPreviousClose().toPlainString());
-        tickerSearchIndustry.setText(state.getIndustry());
+        return similarSearchResultPanel;
+    }
+
+    private void removeSimilarSearchResults(JPanel similarSearchResultsPanel) {
+        similarSearchResultsPanel.removeAll();
+        similarSearchResultsPanel.revalidate();
+        similarSearchResultsPanel.repaint();
+    }
+
+    private void addSimilarSearchResults(JPanel similarSearchResultsPanel,
+                                         SimilarSearchOutputData[] similarSearchOutputData) {
+        for (SimilarSearchOutputData outputData : similarSearchOutputData) {
+            JPanel outputDataPanel = new JPanel();
+            outputDataPanel.setLayout(new GridLayout(1, 5));
+            outputDataPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+            outputDataPanel.add(new JButton(outputData.getTickerSymbol()));
+            outputDataPanel.add(new JLabel(outputData.getCountry()));
+            outputDataPanel.add(new JLabel(outputData.getCompanyName()));
+            outputDataPanel.add(new JLabel(outputData.getIndustry()));
+            outputDataPanel.add(new JLabel(outputData.getPreviousClose().toPlainString()));
+
+            similarSearchResultsPanel.add(outputDataPanel);
+            similarSearchResultsPanel.revalidate();
+            similarSearchResultsPanel.repaint();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("ticker search")) {
+            TickerSearchState tickerSearchState = (TickerSearchState) evt.getNewValue();
+
+            tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol().toUpperCase());
+            tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
+            tickerSearchCountry.setText(tickerSearchState.getCountry());
+            tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());
+            tickerSearchIndustry.setText(tickerSearchState.getIndustry());
+
+        } else if (evt.getPropertyName().equals("similar search")) {
+            SimilarSearchState similarSearchState = (SimilarSearchState) evt.getNewValue();
+            removeSimilarSearchResults(similarSearchResultsPanel);
+            addSimilarSearchResults(similarSearchResultsPanel,
+                    similarSearchState.getSimilarSearchOutputData());
+        }
     }
 
     public String getViewName() {
