@@ -84,13 +84,7 @@ public final class PortfolioPilotMain {
          * Read the Alpha Vantage API key once.
          */
         final String apiKey =
-                System.getenv("ALPHA_VANTAGE_API_KEY");
-
-        if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException(
-                    "ALPHA_VANTAGE_API_KEY is missing."
-            );
-        }
+                "NKH8SNZW8I690AJQ";
 
         final InMemoryUserDataAccessObject userDataAccessObject =
                 new InMemoryUserDataAccessObject();
@@ -130,17 +124,6 @@ public final class PortfolioPilotMain {
         views.add(
                 loggedInView,
                 loggedInView.getViewName()
-        );
-        final NewsView newsView =
-                NewsUseCaseFactory.create(
-                        newsViewModel,
-                        viewManagerModel,
-                        alphaVantageApiKey
-                );
-
-        views.add(
-                newsView,
-                newsView.getViewName()
         );
 
         final NewsView newsView =
