@@ -48,19 +48,11 @@ public final class PortfolioPilotMain {
                 WindowConstants.EXIT_ON_CLOSE
         );
 
-        /*
-         * CardLayout lets the application hold several pages while
-         * displaying only one page at a time.
-         */
         final CardLayout cardLayout = new CardLayout();
         final JPanel views = new JPanel(cardLayout);
 
         application.add(views);
 
-        /*
-         * ViewManagerModel stores the name of the page that should
-         * currently be displayed.
-         */
         final ViewManagerModel viewManagerModel =
                 new ViewManagerModel();
 
@@ -70,10 +62,6 @@ public final class PortfolioPilotMain {
                 viewManagerModel
         );
 
-        /*
-         * Each page has a ViewModel containing the information
-         * displayed by that page.
-         */
         final LoginViewModel loginViewModel =
                 new LoginViewModel();
 
@@ -93,8 +81,7 @@ public final class PortfolioPilotMain {
                 new TickerSearchViewModel();
 
         /*
-         * Read the Alpha Vantage API key once and share it with
-         * every service that uses Alpha Vantage.
+         * Read the Alpha Vantage API key once.
          */
         final String apiKey =
                 System.getenv("ALPHA_VANTAGE_API_KEY");
@@ -105,12 +92,6 @@ public final class PortfolioPilotMain {
             );
         }
 
-        /*
-         * Both signup and login must use the same DAO.
-         *
-         * That allows a user created during signup to be found
-         * later during login.
-         */
         final InMemoryUserDataAccessObject userDataAccessObject =
                 new InMemoryUserDataAccessObject();
 
@@ -151,9 +132,6 @@ public final class PortfolioPilotMain {
                 loggedInView.getViewName()
         );
 
-        /*
-         * Create the News feature using the shared Alpha Vantage key.
-         */
         final NewsView newsView =
                 NewsUseCaseFactory.create(
                         newsViewModel,
@@ -166,10 +144,6 @@ public final class PortfolioPilotMain {
                 newsView.getViewName()
         );
 
-        /*
-         * Create the stock and similar-search data-access objects
-         * using the same Alpha Vantage key.
-         */
         final StockDailyDataAccessInterface
                 stockDailyDataAccessObject =
                 new StockService(apiKey);
@@ -200,10 +174,6 @@ public final class PortfolioPilotMain {
                 riskPreferenceView.getViewName()
         );
 
-        /*
-         * Start on signup for now because the existing signup page
-         * already has a button that switches to the login page.
-         */
         viewManagerModel.setState(
                 signupView.getViewName()
         );
