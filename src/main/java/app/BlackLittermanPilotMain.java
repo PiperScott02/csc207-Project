@@ -77,9 +77,12 @@ public class BlackLittermanPilotMain {
             final BlackLittermanController blackLittermanController =
                     new BlackLittermanController(blackLittermanInteractor);
 
-            // 5. Instantiate View and wire Controller
-            final BlackLittermanView blackLittermanView = new BlackLittermanView(blackLittermanViewModel);
-            blackLittermanView.setBlackLittermanController(blackLittermanController);
+            // 5. Instantiate View with ViewManagerModel and wire Controller
+            final BlackLittermanView blackLittermanView = new BlackLittermanView(
+                    viewManagerModel,
+                    blackLittermanViewModel,
+                    blackLittermanController
+            );
 
             // 6. Automatically trigger initial market data load so labels populate right away
             blackLittermanController.loadMarketData(testUser);

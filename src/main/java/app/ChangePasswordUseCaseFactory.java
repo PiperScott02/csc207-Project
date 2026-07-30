@@ -4,12 +4,16 @@ import data_access.FileStockDataAccessObject;
 import entity.CommonUserFactory;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.black_litterman.BlackLittermanController;
+import interface_adapter.black_litterman.BlackLittermanViewModel;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.LoggedInPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.portfolio_health.PortfolioHealthPresenter;
 import interface_adapter.portfolio_health.PortfolioHealthViewModel;
+import use_case.analysis.BlackLittermanService;
+import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -42,12 +46,21 @@ public final class ChangePasswordUseCaseFactory {
             ChangePasswordUserDataAccessInterface userDataAccessObject) {
 
         final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
+        final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel();
         final StockDataAccessInterface stockDataAccessObject = new FileStockDataAccessObject();
 
         final PortfolioHealthController portfolioHealthController =
                 createPortfolioHealthController(viewManagerModel, portfolioHealthViewModel, stockDataAccessObject);
 
-        return new LoggedInView(loggedInViewModel, viewManagerModel, portfolioHealthController);
+        final BlackLittermanController blackLittermanController =
+                BlackLittermanUseCaseFactory.createBlackLittermanUseCase(
+                        viewManagerModel,
+                        blackLittermanViewModel,
+                        (BlackLittermanDataAccessInterface) stockDataAccessObject,
+                        new BlackLittermanService()
+                );
+
+        return new LoggedInView(loggedInViewModel, viewManagerModel, portfolioHealthController, blackLittermanController);
 
     }
 

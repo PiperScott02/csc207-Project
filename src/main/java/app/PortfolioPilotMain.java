@@ -12,6 +12,8 @@ import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.black_litterman.BlackLittermanController; // <-- Added
+import interface_adapter.black_litterman.BlackLittermanViewModel; // <-- Added
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.news.NewsViewModel;
@@ -26,7 +28,8 @@ import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistViewModel;
 
 import use_case.StockDailyDataAccessInterface;
-import use_case.portfolio_health.PortfolioHealthDataAccessInterface;
+import use_case.analysis.BlackLittermanService;
+import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
 
@@ -80,6 +83,7 @@ public final class PortfolioPilotMain {
         final StockViewModel stockViewModel = new StockViewModel();
         final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
         final WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
+        final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel(); // <-- Added
 
         /*
          * Alpha Vantage API key
@@ -126,6 +130,20 @@ public final class PortfolioPilotMain {
                         stockDataAccessObject
                 );
 
+        // Instantiate dependencies for Black-Litterman
+        final BlackLittermanDataAccessInterface blackLittermanDataAccessObject =
+                (BlackLittermanDataAccessInterface) stockDataAccessObject; // Or your specific DAO
+        final BlackLittermanService blackLittermanService = new BlackLittermanService();
+
+        // Black-Litterman Controller Creation with correct parameters
+        final BlackLittermanController blackLittermanController =
+                BlackLittermanUseCaseFactory.createBlackLittermanUseCase(
+                        viewManagerModel,
+                        blackLittermanViewModel,
+                        blackLittermanDataAccessObject,
+                        blackLittermanService
+                );
+
         // ==========================================
         // 4. View Creation & Assembly
         // ==========================================
@@ -150,12 +168,13 @@ public final class PortfolioPilotMain {
                 );
         views.add(loginView, loginView.getViewName());
 
-        // 3. Logged In View
+        // 3. Logged In View (Updated to receive BlackLittermanController)
         final LoggedInView loggedInView =
                 new LoggedInView(
                         loggedInViewModel,
                         viewManagerModel,
-                        portfolioHealthController
+                        portfolioHealthController,
+                        blackLittermanController
                 );
         views.add(loggedInView, loggedInView.getViewName());
 
@@ -214,6 +233,16 @@ public final class PortfolioPilotMain {
                         stockDataAccessObject
                 );
         views.add(watchlistView, watchlistView.getViewName());
+
+// 10. Black-Litterman View (Added to CardLayout)
+        final BlackLittermanView blackLittermanView =
+                BlackLittermanUseCaseFactory.create(
+                        viewManagerModel,
+                        blackLittermanViewModel,
+                        blackLittermanDataAccessObject,
+                        blackLittermanService
+                );
+        views.add(blackLittermanView, blackLittermanView.getViewName());
 
         // ==========================================
         // 5. Startup Configuration

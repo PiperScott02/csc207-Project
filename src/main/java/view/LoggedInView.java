@@ -17,6 +17,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthController;
@@ -37,8 +38,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final ViewManagerModel viewManagerModel;
     private final LoggedInViewModel loggedInViewModel;
 
-    // NEW: Dependency for Portfolio Health Controller
     private final PortfolioHealthController portfolioHealthController;
+    private final BlackLittermanController blackLittermanController;
+
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
 
@@ -49,13 +51,17 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
      * @param viewManagerModel controls which application screen is visible
      * @param portfolioHealthController triggers calculation of portfolio health
      */
+
+    // Update Constructor:
     public LoggedInView(LoggedInViewModel loggedInViewModel,
                         ViewManagerModel viewManagerModel,
-                        PortfolioHealthController portfolioHealthController) {
+                        PortfolioHealthController portfolioHealthController,
+                        BlackLittermanController blackLittermanController) {
 
         this.loggedInViewModel = loggedInViewModel;
         this.viewManagerModel = viewManagerModel;
         this.portfolioHealthController = portfolioHealthController;
+        this.blackLittermanController = blackLittermanController;
 
         loggedInViewModel.addPropertyChangeListener(this);
 
@@ -130,7 +136,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     }
 
     private JPanel createButtonPanel() {
-        final JPanel buttonPanel = new JPanel(new GridLayout(1, 7, 8, 0));
+        final JPanel buttonPanel = new JPanel(new GridLayout(1, 8, 8, 0));
 
         buttonPanel.add(createFeatureButton("Add Holding"));
 
@@ -185,6 +191,19 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             viewManagerModel.firePropertyChanged();
         });
         buttonPanel.add(searchButton);
+
+        // Input Stock Views Button (Black-Litterman)
+        final JButton stockViewsButton = new JButton("Input Stock Views");
+        stockViewsButton.addActionListener(event -> {
+            LoggedInState state = loggedInViewModel.getState();
+            if (state != null && state.getUser() != null) {
+                // Triggers the initial load to fetch market data and switch views, just like Portfolio Health
+                blackLittermanController.loadMarketData(state.getUser());
+            } else {
+                JOptionPane.showMessageDialog(this, "No active user session found.");
+            }
+        });
+        buttonPanel.add(stockViewsButton);
 
         return buttonPanel;
     }
