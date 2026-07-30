@@ -1,22 +1,24 @@
 package use_case.add_holding;
 
+import java.time.LocalDate;
+
 /**
  * The input data for the Add Holding Use Case.
  */
 public class AddHoldingInputData {
     private final String ticker;
     private final double shares;
-    private final double averageBuyPrice;
+    private final LocalDate purchaseDate;
 
-    public AddHoldingInputData(String ticker, double shares, double averageBuyPrice) {
+    public AddHoldingInputData(String ticker, double shares, LocalDate purchaseDate) {
         this.ticker = ticker;
         this.shares = shares;
-        this.averageBuyPrice = averageBuyPrice;
+        this.purchaseDate = purchaseDate;
     }
 
     public String getTicker() { return ticker; }
 
     public double getShares() { return shares; }
 
-    public double getAverageBuyPrice() { return averageBuyPrice; }
+    public LocalDate getPurchaseDate () { return purchaseDate; }
 }
