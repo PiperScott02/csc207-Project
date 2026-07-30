@@ -16,6 +16,9 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
+import entity.Stock;
+import entity.StockHolding;
+
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -30,15 +33,15 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private static final String SEARCH_VIEW_NAME = "search";
     private static final String RISK_PREFERENCE_VIEW_NAME = "risk preference";
     private static final String NEWS_VIEW_NAME = "news";
+    private static final String ADD_HOLDING_VIEW_NAME = "add holding";
 
     private final String viewName = "logged in";
     private final ViewManagerModel viewManagerModel;
     private final LoggedInViewModel loggedInViewModel;
-
-    // NEW: Dependency for Portfolio Health Controller
     private final PortfolioHealthController portfolioHealthController;
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
+    private DefaultTableModel tableModel;
 
     /**
      * Creates the home screen.
@@ -130,7 +133,13 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private JPanel createButtonPanel() {
         final JPanel buttonPanel = new JPanel(new GridLayout(1, 7, 8, 0));
 
-        buttonPanel.add(createFeatureButton("Add Holding"));
+        final JButton addHoldingButton = new JButton("Add Holding");
+        addHoldingButton.addActionListener(event -> {
+            viewManagerModel.setState(ADD_HOLDING_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        });
+        buttonPanel.add(addHoldingButton);
+
         buttonPanel.add(createFeatureButton("Watchlist"));
 
         // News Button
@@ -145,7 +154,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         portfolioHealthButton.addActionListener(event -> {
             LoggedInState state = loggedInViewModel.getState();
             if (state != null && state.getUser() != null) {
-                // Execute calculation for current user. Presenter will switch views on success.
                 portfolioHealthController.execute(state.getUser());
             } else {
                 JOptionPane.showMessageDialog(this, "No active user session found.");
@@ -196,7 +204,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                 "Ticker", "Company", "Shares", "Avg Price", "Current Price", "Gain / Loss", "Gain %"
         };
 
-        final DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+        // Assign to the class-level tableModel instance variable
+        tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -219,6 +228,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         return holdingsPanel;
     }
 
+    /**
+     * Updates the username AND holdings table displayed on the home screen.
+     *
+     * @param event property-change event from the view model
+     */
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         if ("state".equals(event.getPropertyName())) {
@@ -229,6 +243,23 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                 welcomeLabel.setText("Welcome");
             } else {
                 welcomeLabel.setText("Welcome, " + username);
+            }
+
+            // Repopulate the holdings table whenever the state changes
+            if (tableModel != null && state.getHoldings() != null) {
+                tableModel.setRowCount(0); // Clear current rows
+                for (StockHolding holding : state.getHoldings()) {
+                    Stock stock = holding.getStock();
+                    tableModel.addRow(new Object[]{
+                            stock != null ? stock.getTickerSymbol() : "",
+                            stock != null ? stock.getCompanyName() : "",
+                            holding.getNumberOfShares(),
+                            (!holding.getTransactions().isEmpty()) ? holding.getTransactions().get(0).getPricePerShare() : "",
+                            stock != null ? stock.getClose() : "",
+                            "-",
+                            "-"
+                    });
+                }
             }
         }
     }
