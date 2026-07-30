@@ -18,6 +18,7 @@ import entity.StockHolding;
 import entity.TransactionType;
 import entity.User;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.portfolio_health.PortfolioHealthPresenter;
 import interface_adapter.portfolio_health.PortfolioHealthViewModel;
@@ -62,15 +63,15 @@ public final class PortfolioHealthPilotMain {
         new ViewManager(views, cardLayout, viewManagerModel);
 
         /*
-         * Instantiate the ViewModel for the portfolio health page.
+         * Instantiate the ViewModels.
          */
         final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
+        final LoggedInViewModel loggedInViewModel = new LoggedInViewModel(); // Needed for back button
 
         /*
          * Instantiate the Data Access Objects.
          */
         final StockDataAccessInterface stockDataAccessObject = new FileStockDataAccessObject();
-        final PortfolioHealthDataAccessInterface portfolioHealthDataAccessObject = null;
 
         /*
          * Manually wire the Clean Architecture layers together.
@@ -86,9 +87,11 @@ public final class PortfolioHealthPilotMain {
         );
 
         /*
-         * Instantiate the View, passing in the ViewModel it needs to listen to.
+         * Instantiate the View using the factory method or direct instantiation with LoggedInViewModel.
          */
-        final PortfolioHealthView portfolioHealthView = new PortfolioHealthView(portfolioHealthViewModel);
+        final PortfolioHealthView portfolioHealthView = PortfolioHealthUseCaseFactory.create(
+                viewManagerModel, portfolioHealthViewModel, loggedInViewModel
+        );
 
         /*
          * Add the View to the CardLayout stack.

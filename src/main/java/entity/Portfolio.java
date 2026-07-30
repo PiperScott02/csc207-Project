@@ -13,7 +13,7 @@ public class Portfolio {
 
     private List<StockHolding> holdings = new ArrayList<>();
 
-    private List<StockHolding> watchlisted = new ArrayList<>();
+    private List<WatchlistStockItem> watchlist = new ArrayList<>();
 
     private List<LocalDate> masterTimeline;
 
@@ -27,6 +27,9 @@ public class Portfolio {
 
     private double sharpeRatio;
 
+    private boolean hasCustomViews;
+
+    private Map<String, Double> customViews;
 
     /** Sets the master timeline for this portfolio.
      * @param timeline the list of LocalDates representing the master timeline to set.
@@ -293,4 +296,47 @@ public class Portfolio {
     public Portfolio(List<StockHolding> holdings) {
         this.holdings = new ArrayList<>(holdings);
     }
+
+    /** Returns whether the user has set custom views regarding their stocks' perfomances.
+     * @return a boolean representing whether they have set custom views or not.
+     */
+    public boolean hasCustomViews() {
+        return hasCustomViews;
+    }
+
+    /** Sets whether the user has set custom views regarding their stocks' perfomances.
+     * @param hasCustomViews a boolean representing whether they have set custom views or not.
+     */
+    public void setHasCustomViews(boolean hasCustomViews) {
+        this.hasCustomViews = hasCustomViews;
+    }
+
+    /** Returns the users' custom views on the perfomances of stock.
+     * @return a map mapping the ticker symbol of the stock to the adjusted custom expected return.
+     */
+    public Map<String, Double> getCustomViews() {
+        return customViews;
+    }
+
+    /** Sets the users' custom views on the perfomances of stock.
+     * @param customViews a map mapping the ticker symbol of the stock to the adjusted custom expected return.
+     */
+    public void setCustomViews(Map<String, Double> customViews) {
+        this.customViews = customViews;
+    }
+
+    /** Returns the users' watchlist.
+     * @return a list of the stocks the user has waitlisted.
+     */
+    public List<WatchlistStockItem> getWatchlist() {
+        return watchlist;
+    }
+
+    /** Sets the users' watchlist.
+     * @param watchlist  a list of the stocks the user has waitlisted.
+     */
+    public void setWatchlist(List<WatchlistStockItem> watchlist) {
+        this.watchlist = watchlist;
+    }
+
 }

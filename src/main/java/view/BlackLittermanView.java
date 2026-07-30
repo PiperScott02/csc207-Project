@@ -1,6 +1,7 @@
 package view;
 
 import entity.User;
+import interface_adapter.ViewManagerModel;
 import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.black_litterman.BlackLittermanState;
 import interface_adapter.black_litterman.BlackLittermanViewModel;
@@ -19,6 +20,7 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
 
     private final BlackLittermanViewModel blackLittermanViewModel;
     private BlackLittermanController blackLittermanController;
+    private final ViewManagerModel viewManagerModel;
 
     private final JLabel headerLabel = new JLabel("Your 5 most heavily weighted stocks:");
 
@@ -48,9 +50,14 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
     private final JComboBox<String> stock5ConfidenceBox = new JComboBox<>(new String[]{"None", "Low", "Medium", "High", "Very High"});
 
     private final JButton inputViews = new JButton("Input views");
+    private final JButton backButton = new JButton("← Back to Profile"); // <-- Added Back Button
 
-    public BlackLittermanView(BlackLittermanViewModel blackLittermanViewModel) {
+    public BlackLittermanView(ViewManagerModel viewManagerModel,
+                              BlackLittermanViewModel blackLittermanViewModel,
+                              BlackLittermanController blackLittermanController) {
+        this.viewManagerModel = viewManagerModel;
         this.blackLittermanViewModel = blackLittermanViewModel;
+        this.blackLittermanController = blackLittermanController;
         this.blackLittermanViewModel.addPropertyChangeListener(this);
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -77,11 +84,17 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         buttonPanel.add(inputViews);
+        buttonPanel.add(Box.createHorizontalStrut(10)); // Spacing between buttons
+        buttonPanel.add(backButton); // <-- Added to button panel
         add(buttonPanel);
 
         // Update display if state already contains populated data upon view creation
         if (blackLittermanViewModel.getState() != null) {
             updateStockRows(blackLittermanViewModel.getState());
+        }
+
+        if (blackLittermanViewModel.getState() != null && blackLittermanViewModel.getState().getUser() != null) {
+            blackLittermanController.loadMarketData(blackLittermanViewModel.getState().getUser());
         }
 
         inputViews.addActionListener(e -> {
@@ -111,6 +124,12 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
                         blackLittermanViewModel.getState().getConfidenceLevels()
                 );
             }
+        });
+
+        // Back button behavior utilizing ViewManagerModel cleanly
+        backButton.addActionListener(e -> {
+            viewManagerModel.setState("logged in"); // Matches LoggedInView's view name
+            viewManagerModel.firePropertyChanged();
         });
     }
 
@@ -146,6 +165,10 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
                 } catch (NumberFormatException ignored) {}
             }
         }
+    }
+
+    public String getViewName() {
+        return viewName;
     }
 
     private String extractTickerFromText(String labelText) {

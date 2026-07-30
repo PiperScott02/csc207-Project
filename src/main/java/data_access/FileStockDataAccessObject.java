@@ -3,13 +3,13 @@ package data_access;
 import data_access.stock_daily.StockService;
 import entity.Stock;
 import use_case.analysis.StockFinancialService;
+import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class FileStockDataAccessObject implements StockDataAccessInterface {
-
+public class FileStockDataAccessObject implements StockDataAccessInterface, BlackLittermanDataAccessInterface {
     /** Checks whether a stock with the ticker identifier exists in the APIs' data by trying to create a stock obect
      * with it and seeing if it is successfully created.
      * @param ticker the stock ticker symbol.

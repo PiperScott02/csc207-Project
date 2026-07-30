@@ -1,6 +1,7 @@
 package app;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.portfolio_health.PortfolioHealthPresenter;
 import interface_adapter.portfolio_health.PortfolioHealthViewModel;
@@ -17,9 +18,11 @@ public final class PortfolioHealthUseCaseFactory {
 
     public static PortfolioHealthView create(
             ViewManagerModel viewManagerModel,
-            PortfolioHealthViewModel portfolioHealthViewModel) {
+            PortfolioHealthViewModel portfolioHealthViewModel, LoggedInViewModel loggedInViewModel) {
 
-        return new PortfolioHealthView(portfolioHealthViewModel);
+        return new PortfolioHealthView(portfolioHealthViewModel, viewManagerModel,
+                loggedInViewModel
+        );
     }
 
     public static PortfolioHealthController createPortfolioHealthUseCase(

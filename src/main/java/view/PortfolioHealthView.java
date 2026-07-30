@@ -1,5 +1,7 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthState;
 
@@ -13,6 +15,8 @@ public class PortfolioHealthView extends JPanel implements PropertyChangeListene
     public final String viewName = "portfolioHealth view";
 
     private final PortfolioHealthViewModel portfolioHealthViewModel;
+    private final ViewManagerModel viewManagerModel;
+    private final LoggedInViewModel loggedInViewModel;
 
     private final JLabel portfolioHealthScoreLabel = new JLabel("Portfolio Health Score: ");
     private final JLabel riskPreferenceLabel = new JLabel("Risk Preference: ");
@@ -26,8 +30,11 @@ public class PortfolioHealthView extends JPanel implements PropertyChangeListene
     private final JLabel diversificationAdviceLabel = new JLabel("Diversification Advice: ");
     private final JLabel newsAdviceLabel = new JLabel("News Advice: ");
 
-    public PortfolioHealthView(PortfolioHealthViewModel portfolioHealthViewModel) {
+    public PortfolioHealthView(PortfolioHealthViewModel portfolioHealthViewModel, ViewManagerModel viewManagerModel,
+                               LoggedInViewModel loggedInViewModel) {
         this.portfolioHealthViewModel = portfolioHealthViewModel;
+        this.viewManagerModel = viewManagerModel;
+        this.loggedInViewModel = loggedInViewModel;
         this.portfolioHealthViewModel.addPropertyChangeListener(this);
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -57,6 +64,18 @@ public class PortfolioHealthView extends JPanel implements PropertyChangeListene
         add(diversificationAdviceLabel);
         add(Box.createVerticalStrut(6));
         add(newsAdviceLabel);
+
+        add(Box.createVerticalStrut(15));
+
+        // Back Button setup
+        JButton backButton = new JButton("← Back to Profile");
+        backButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        backButton.addActionListener(e -> {
+            this.viewManagerModel.setState(this.loggedInViewModel.getViewName());
+            this.viewManagerModel.firePropertyChanged();
+        });
+
+        add(backButton);
     }
 
     @Override
