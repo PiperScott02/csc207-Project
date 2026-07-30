@@ -207,7 +207,8 @@ public final class PortfolioPilotMain {
                         stockViewModel,
                         stockDailyDataAccessObject,
                         similarSearchDataAccessObject,
-                        stockController
+                        stockController,
+                        loggedInViewModel
                 );
         views.add(searchView, searchView.getViewName());
 

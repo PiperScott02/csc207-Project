@@ -1,6 +1,7 @@
 package app;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.similar_search.SimilarSearchController;
 import interface_adapter.similar_search.SimilarSearchPresenter;
 import interface_adapter.similar_search.SimilarSearchViewModel;
@@ -31,7 +32,8 @@ public class SearchUseCaseFactory {
             StockViewModel stockViewModel,
             StockDailyDataAccessInterface stockDailyDataAccessObject,
             SimilarSearchDataAccessInterface similarSearchDataAccessObject,
-            StockController stockController) {
+            StockController stockController,
+            LoggedInViewModel loggedInViewModel) {
 
         final SimilarSearchController similarSearchController =
                 createSimilarSearchController(viewManagerModel, similarSearchViewModel,
@@ -46,7 +48,8 @@ public class SearchUseCaseFactory {
                 tickerSearchViewModel,
                 stockController,
                 viewManagerModel,
-                stockViewModel
+                stockViewModel,
+                loggedInViewModel
         );
 
     }
