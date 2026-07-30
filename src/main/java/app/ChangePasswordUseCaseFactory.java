@@ -1,15 +1,22 @@
 package app;
 
+import data_access.FileStockDataAccessObject;
 import entity.CommonUserFactory;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.LoggedInPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
+import interface_adapter.portfolio_health.PortfolioHealthPresenter;
+import interface_adapter.portfolio_health.PortfolioHealthViewModel;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
+import use_case.portfolio_health.PortfolioHealthInteractor;
+import use_case.portfolio_health.PortfolioHealthOutputBoundary;
+import use_case.stock.StockDataAccessInterface;
 import view.LoggedInView;
 
 /**
@@ -34,8 +41,28 @@ public final class ChangePasswordUseCaseFactory {
             LoggedInViewModel loggedInViewModel,
             ChangePasswordUserDataAccessInterface userDataAccessObject) {
 
-        return new LoggedInView(loggedInViewModel, viewManagerModel);
+        final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
+        final StockDataAccessInterface stockDataAccessObject = new FileStockDataAccessObject();
 
+        final PortfolioHealthController portfolioHealthController =
+                createPortfolioHealthController(viewManagerModel, portfolioHealthViewModel, stockDataAccessObject);
+
+        return new LoggedInView(loggedInViewModel, viewManagerModel, portfolioHealthController);
+
+    }
+
+    private static PortfolioHealthController createPortfolioHealthController(
+            ViewManagerModel viewManagerModel,
+            PortfolioHealthViewModel portfolioHealthViewModel,
+            StockDataAccessInterface stockDataAccessObject) {
+
+        final PortfolioHealthOutputBoundary portfolioHealthPresenter =
+                new PortfolioHealthPresenter(viewManagerModel, portfolioHealthViewModel);
+
+        final PortfolioHealthInteractor portfolioHealthInteractor = new PortfolioHealthInteractor(stockDataAccessObject, portfolioHealthPresenter
+        );
+
+        return new PortfolioHealthController(portfolioHealthInteractor);
     }
 
     private static ChangePasswordController createChangePasswordUseCase(
@@ -43,9 +70,8 @@ public final class ChangePasswordUseCaseFactory {
             LoggedInViewModel loggedInViewModel,
             ChangePasswordUserDataAccessInterface userDataAccessObject) {
 
-        // Notice how we pass this method's parameters through to the Presenter.
         final ChangePasswordOutputBoundary changePasswordOutputBoundary = new LoggedInPresenter(viewManagerModel,
-                                                                                                loggedInViewModel);
+                loggedInViewModel);
 
         final UserFactory userFactory = new CommonUserFactory();
 

@@ -6,32 +6,32 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import entity.Portfolio;
-
+import data_access.FileStockDataAccessObject;
 import data_access.InMemoryUserDataAccessObject;
 import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
+
+import entity.Portfolio;
 
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.news.NewsViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
+import interface_adapter.portfolio_health.PortfolioHealthViewModel;
 import interface_adapter.signup.SignupViewModel;
 import interface_adapter.similar_search.SimilarSearchViewModel;
+import interface_adapter.stock.StockController;
+import interface_adapter.stock.StockViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import interface_adapter.add_holding.AddHoldingViewModel;
 
 import use_case.StockDailyDataAccessInterface;
+import use_case.portfolio_health.PortfolioHealthDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
+import use_case.stock.StockDataAccessInterface;
 
-import view.LoggedInView;
-import view.LoginView;
-import view.NewsView;
-import view.RiskPreferenceView;
-import view.SearchView;
-import view.SignupView;
-import view.ViewManager;
-import view.AddHoldingView;
+import view.*;
 
 /**
  * Starts PortfolioPilot with signup and login functionality.
@@ -69,33 +69,61 @@ public final class PortfolioPilotMain {
                 viewManagerModel
         );
 
-        final LoginViewModel loginViewModel =
-                new LoginViewModel();
-
-        final SignupViewModel signupViewModel =
-                new SignupViewModel();
-
-        final LoggedInViewModel loggedInViewModel =
-                new LoggedInViewModel();
-
-        final NewsViewModel newsViewModel =
-                new NewsViewModel();
-
-        final SimilarSearchViewModel similarSearchViewModel =
-                new SimilarSearchViewModel();
-
-        final TickerSearchViewModel tickerSearchViewModel =
-                new TickerSearchViewModel();
+        // ==========================================
+        // 1. View Models
+        // ==========================================
+        final LoginViewModel loginViewModel = new LoginViewModel();
+        final SignupViewModel signupViewModel = new SignupViewModel();
+        final LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
+        final NewsViewModel newsViewModel = new NewsViewModel();
+        final SimilarSearchViewModel similarSearchViewModel = new SimilarSearchViewModel();
+        final TickerSearchViewModel tickerSearchViewModel = new TickerSearchViewModel();
+        final StockViewModel stockViewModel = new StockViewModel();
+        final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
+        final AddHoldingViewModel addHoldingViewModel = new AddHoldingViewModel();
 
         /*
-         * Read the Alpha Vantage API key once.
+         * Alpha Vantage API key
          */
-        final String apiKey =
-                "INSERT_API_KEY";
+        final String apiKey = "placeholderkey";
 
+        // ==========================================
+        // 2. Data Access Objects
+        // ==========================================
         final InMemoryUserDataAccessObject userDataAccessObject =
                 new InMemoryUserDataAccessObject();
 
+        final StockDailyDataAccessInterface stockDailyDataAccessObject =
+                new StockService(apiKey);
+
+        final SimilarSearchDataAccessInterface similarSearchDataAccessObject =
+                new SimilarSearchDataAccessObject(apiKey);
+
+        final StockDataAccessInterface stockDataAccessObject =
+                new FileStockDataAccessObject();
+
+        // ==========================================
+        // 3. Controllers
+        // ==========================================
+        final StockController stockController =
+                StockUseCaseFactory.createStockUseCase(
+                        viewManagerModel,
+                        stockViewModel,
+                        stockDataAccessObject
+                );
+
+        final PortfolioHealthController portfolioHealthController =
+                PortfolioHealthUseCaseFactory.createPortfolioHealthUseCase(
+                        viewManagerModel,
+                        portfolioHealthViewModel,
+                        stockDataAccessObject
+                );
+
+        // ==========================================
+        // 4. View Creation & Assembly
+        // ==========================================
+
+        // 1. Signup View
         final SignupView signupView =
                 SignupUseCaseFactory.create(
                         viewManagerModel,
@@ -103,12 +131,9 @@ public final class PortfolioPilotMain {
                         signupViewModel,
                         userDataAccessObject
                 );
+        views.add(signupView, signupView.getViewName());
 
-        views.add(
-                signupView,
-                signupView.getViewName()
-        );
-
+        // 2. Login View
         final LoginView loginView =
                 LoginUseCaseFactory.create(
                         viewManagerModel,
@@ -116,62 +141,64 @@ public final class PortfolioPilotMain {
                         loggedInViewModel,
                         userDataAccessObject
                 );
+        views.add(loginView, loginView.getViewName());
 
-        views.add(
-                loginView,
-                loginView.getViewName()
-        );
-
+        // 3. Logged In View
         final LoggedInView loggedInView =
                 new LoggedInView(
                         loggedInViewModel,
-                        viewManagerModel
+                        viewManagerModel,
+                        portfolioHealthController
                 );
+        views.add(loggedInView, loggedInView.getViewName());
 
-        views.add(
-                loggedInView,
-                loggedInView.getViewName()
-        );
+        // 4. Portfolio Health View
+        final PortfolioHealthView portfolioHealthView =
+                PortfolioHealthUseCaseFactory.create(
+                        viewManagerModel,
+                        portfolioHealthViewModel
+                );
+        views.add(portfolioHealthView, portfolioHealthView.viewName);
 
+        // 5. News View
         final NewsView newsView =
                 NewsUseCaseFactory.create(
                         newsViewModel,
                         viewManagerModel,
                         apiKey
                 );
+        views.add(newsView, newsView.getViewName());
 
-        views.add(
-                newsView,
-                newsView.getViewName()
-        );
-
-        final StockDailyDataAccessInterface
-                stockDailyDataAccessObject =
-                new StockService(apiKey);
-
-        final SimilarSearchDataAccessInterface
-                similarSearchDataAccessObject =
-                new SimilarSearchDataAccessObject(apiKey);
-
+        // 6. Search View
         final SearchView searchView =
                 SearchUseCaseFactory.create(
                         viewManagerModel,
                         similarSearchViewModel,
                         tickerSearchViewModel,
+                        stockViewModel,
                         stockDailyDataAccessObject,
-                        similarSearchDataAccessObject
+                        similarSearchDataAccessObject,
+                        stockController
                 );
+        views.add(searchView, searchView.getViewName());
 
-        views.add(
-                searchView,
-                searchView.getViewName()
-        );
+        // 7. Stock View
+        final StockView stockView =
+                StockUseCaseFactory.create(
+                        viewManagerModel,
+                        stockViewModel,
+                        loggedInViewModel,
+                        stockDataAccessObject
+                );
+        views.add(stockView, stockView.getViewName());
 
-        final AddHoldingViewModel addHoldingViewModel =
-                new AddHoldingViewModel();
+        // 8. Risk Preference View
+        final RiskPreferenceView riskPreferenceView =
+                new RiskPreferenceView(viewManagerModel);
+        views.add(riskPreferenceView, riskPreferenceView.getViewName());
 
+        // 9. Add Holding View
         final Portfolio portfolio = new Portfolio();
-
         final AddHoldingView addHoldingView =
                 AddHoldingUseCaseFactory.create(
                         viewManagerModel,
@@ -180,24 +207,12 @@ public final class PortfolioPilotMain {
                         stockDailyDataAccessObject,
                         portfolio
                 );
+        views.add(addHoldingView, addHoldingView.getViewName());
 
-        views.add(
-                addHoldingView,
-                addHoldingView.getViewName()
-        );
-
-        final RiskPreferenceView riskPreferenceView =
-                new RiskPreferenceView(viewManagerModel);
-
-        views.add(
-                riskPreferenceView,
-                riskPreferenceView.getViewName()
-        );
-
-        viewManagerModel.setState(
-                signupView.getViewName()
-        );
-
+        // ==========================================
+        // 9. Startup Configuration
+        // ==========================================
+        viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChanged();
 
         application.pack();

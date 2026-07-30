@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.time.LocalDate;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -23,6 +22,7 @@ import entity.StockHolding;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 
 /**
  * The home screen displayed after a user successfully logs in.
@@ -31,18 +31,16 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private static final String LOGIN_VIEW_NAME = "log in";
     private static final String SEARCH_VIEW_NAME = "search";
-
-    private static final String RISK_PREFERENCE_VIEW_NAME =
-            "risk preference";
+    private static final String RISK_PREFERENCE_VIEW_NAME = "risk preference";
     private static final String NEWS_VIEW_NAME = "news";
-
     private static final String ADD_HOLDING_VIEW_NAME = "add holding";
 
     private final String viewName = "logged in";
     private final ViewManagerModel viewManagerModel;
+    private final LoggedInViewModel loggedInViewModel;
+    private final PortfolioHealthController portfolioHealthController;
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
-
     private DefaultTableModel tableModel;
 
     /**
@@ -50,11 +48,15 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
      *
      * @param loggedInViewModel contains information about the logged-in user
      * @param viewManagerModel controls which application screen is visible
+     * @param portfolioHealthController triggers calculation of portfolio health
      */
     public LoggedInView(LoggedInViewModel loggedInViewModel,
-                        ViewManagerModel viewManagerModel) {
+                        ViewManagerModel viewManagerModel,
+                        PortfolioHealthController portfolioHealthController) {
 
+        this.loggedInViewModel = loggedInViewModel;
         this.viewManagerModel = viewManagerModel;
+        this.portfolioHealthController = portfolioHealthController;
 
         loggedInViewModel.addPropertyChangeListener(this);
 
@@ -65,11 +67,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         add(createHoldingsPanel(), BorderLayout.CENTER);
     }
 
-    /**
-     * Creates the upper portion of the dashboard.
-     *
-     * @return the completed top panel
-     */
     private JPanel createTopPanel() {
         final JPanel topPanel = new JPanel(new BorderLayout(0, 15));
 
@@ -80,26 +77,14 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         return topPanel;
     }
 
-    /**
-     * Creates the application title and welcome message.
-     *
-     * @return the header panel
-     */
     private JPanel createHeaderPanel() {
         final JPanel headerPanel = new JPanel(new BorderLayout());
-
         final JPanel titlePanel = new JPanel(new GridLayout(2, 1));
 
-        final JLabel title = new JLabel(
-                "PortfolioPilot",
-                SwingConstants.CENTER
-        );
+        final JLabel title = new JLabel("PortfolioPilot", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 28));
 
-        final JLabel subtitle = new JLabel(
-                "Personal Investment Portfolio Tracker",
-                SwingConstants.CENTER
-        );
+        final JLabel subtitle = new JLabel("Personal Investment Portfolio Tracker", SwingConstants.CENTER);
         subtitle.setFont(new Font("SansSerif", Font.PLAIN, 16));
 
         titlePanel.add(title);
@@ -113,46 +98,19 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         return headerPanel;
     }
 
-    /**
-     * Creates the portfolio-summary section.
-     *
-     * @return the summary panel
-     */
     private JPanel createSummaryPanel() {
         final JPanel summaryPanel = new JPanel(new GridLayout(1, 3, 15, 0));
+        summaryPanel.setBorder(BorderFactory.createTitledBorder("Portfolio Summary"));
 
-        summaryPanel.setBorder(
-                BorderFactory.createTitledBorder("Portfolio Summary")
-        );
-
-        summaryPanel.add(createSummaryBox(
-                "Total Portfolio Value",
-                "$0.00"
-        ));
-
-        summaryPanel.add(createSummaryBox(
-                "Total Gain / Loss",
-                "$0.00"
-        ));
-
-        summaryPanel.add(createSummaryBox(
-                "Daily Change",
-                "$0.00 (0.00%)"
-        ));
+        summaryPanel.add(createSummaryBox("Total Portfolio Value", "$0.00"));
+        summaryPanel.add(createSummaryBox("Total Gain / Loss", "$0.00"));
+        summaryPanel.add(createSummaryBox("Daily Change", "$0.00 (0.00%)"));
 
         return summaryPanel;
     }
 
-    /**
-     * Creates one summary box.
-     *
-     * @param heading heading shown above the value
-     * @param value value displayed in the box
-     * @return the completed summary box
-     */
     private JPanel createSummaryBox(String heading, String value) {
         final JPanel panel = new JPanel(new GridLayout(2, 1, 0, 5));
-
         panel.setBorder(
                 BorderFactory.createCompoundBorder(
                         BorderFactory.createEtchedBorder(),
@@ -160,16 +118,10 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                 )
         );
 
-        final JLabel headingLabel = new JLabel(
-                heading,
-                SwingConstants.CENTER
-        );
+        final JLabel headingLabel = new JLabel(heading, SwingConstants.CENTER);
         headingLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
 
-        final JLabel valueLabel = new JLabel(
-                value,
-                SwingConstants.CENTER
-        );
+        final JLabel valueLabel = new JLabel(value, SwingConstants.CENTER);
         valueLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
 
         panel.add(headingLabel);
@@ -178,137 +130,97 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         return panel;
     }
 
-    /**
-     * Creates the navigation buttons.
-     *
-     * @return the button panel
-     */
     private JPanel createButtonPanel() {
         final JPanel buttonPanel = new JPanel(new GridLayout(1, 7, 8, 0));
 
-
         final JButton addHoldingButton = new JButton("Add Holding");
-
         addHoldingButton.addActionListener(event -> {
             viewManagerModel.setState(ADD_HOLDING_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
         });
         buttonPanel.add(addHoldingButton);
 
-
         buttonPanel.add(createFeatureButton("Watchlist"));
 
+        // News Button
         final JButton newsButton = new JButton("News");
-
         newsButton.addActionListener(event -> {
             viewManagerModel.setState(NEWS_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
         });
-
         buttonPanel.add(newsButton);
 
-        buttonPanel.add(createFeatureButton("Insights"));
+        final JButton portfolioHealthButton = new JButton("Portfolio Health");
+        portfolioHealthButton.addActionListener(event -> {
+            LoggedInState state = loggedInViewModel.getState();
+            if (state != null && state.getUser() != null) {
+                portfolioHealthController.execute(state.getUser());
+            } else {
+                JOptionPane.showMessageDialog(this, "No active user session found.");
+            }
+        });
+        buttonPanel.add(portfolioHealthButton);
 
-        final JButton riskPreferenceButton =
-                new JButton("Risk Preference");
-
+        // Risk Preference Button
+        final JButton riskPreferenceButton = new JButton("Risk Preference");
         riskPreferenceButton.addActionListener(event -> {
             viewManagerModel.setState(RISK_PREFERENCE_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
         });
-
         buttonPanel.add(riskPreferenceButton);
 
+        // Log Out Button
         final JButton logOutButton = new JButton("Log Out");
-
         logOutButton.addActionListener(event -> {
             viewManagerModel.setState(LOGIN_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
         });
-
         buttonPanel.add(logOutButton);
 
+        // Search Button
         final JButton searchButton = new JButton("Search Stocks");
-
         searchButton.addActionListener(event -> {
             viewManagerModel.setState(SEARCH_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
         });
-
         buttonPanel.add(searchButton);
 
         return buttonPanel;
     }
 
-    /**
-     * Creates a feature button that can be connected to another view later.
-     *
-     * @param buttonText text displayed on the button
-     * @return the completed button
-     */
     private JButton createFeatureButton(String buttonText) {
         final JButton button = new JButton(buttonText);
-
         button.addActionListener(event ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        buttonText + " screen will be connected here."
-                )
+                JOptionPane.showMessageDialog(this, buttonText + " screen will be connected here.")
         );
-
         return button;
     }
 
-    /**
-     * Creates the holdings table.
-     *
-     * @return the holdings panel
-     */
     private JPanel createHoldingsPanel() {
         final JPanel holdingsPanel = new JPanel(new BorderLayout(0, 10));
-
-        holdingsPanel.setBorder(
-                BorderFactory.createTitledBorder("Your Holdings")
-        );
+        holdingsPanel.setBorder(BorderFactory.createTitledBorder("Your Holdings"));
 
         final String[] columnNames = {
-                "Ticker",
-                "Company",
-                "Shares",
-                "Avg Price",
-                "Current Price",
-                "Gain / Loss",
-                "Gain %"
+                "Ticker", "Company", "Shares", "Avg Price", "Current Price", "Gain / Loss", "Gain %"
         };
 
         // Assign to the class-level tableModel instance variable
-        tableModel =
-                new DefaultTableModel(columnNames, 0) {
-
-                    @Override
-                    public boolean isCellEditable(int row, int column) {
-                        return false;
-                    }
-                };
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
         final JTable holdingsTable = new JTable(tableModel);
         holdingsTable.setRowHeight(28);
         holdingsTable.setFillsViewportHeight(true);
 
-        final JScrollPane scrollPane =
-                new JScrollPane(holdingsTable);
-
+        final JScrollPane scrollPane = new JScrollPane(holdingsTable);
         final JPanel statusPanel = new JPanel(new BorderLayout());
 
-        statusPanel.add(
-                new JLabel("Total Holdings: 0"),
-                BorderLayout.WEST
-        );
-
-        statusPanel.add(
-                new JLabel("Last updated: --"),
-                BorderLayout.EAST
-        );
+        statusPanel.add(new JLabel("Total Holdings: 0"), BorderLayout.WEST);
+        statusPanel.add(new JLabel("Last updated: --"), BorderLayout.EAST);
 
         holdingsPanel.add(scrollPane, BorderLayout.CENTER);
         holdingsPanel.add(statusPanel, BorderLayout.SOUTH);
@@ -324,15 +236,12 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         if ("state".equals(event.getPropertyName())) {
-            final LoggedInState state =
-                    (LoggedInState) event.getNewValue();
-
+            final LoggedInState state = (LoggedInState) event.getNewValue();
             final String username = state.getUsername();
 
             if (username == null || username.isBlank()) {
                 welcomeLabel.setText("Welcome");
-            }
-            else {
+            } else {
                 welcomeLabel.setText("Welcome, " + username);
             }
 
@@ -345,22 +254,16 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                             stock != null ? stock.getTickerSymbol() : "",
                             stock != null ? stock.getCompanyName() : "",
                             holding.getNumberOfShares(),
-                            // Safely inline the purchase price without a separate variable declaration:
                             (!holding.getTransactions().isEmpty()) ? holding.getTransactions().get(0).getPricePerShare() : "",
-                            stock != null ? stock.getClose() : "",  // Current live price
-                            "-", // Placeholder or calculation for Gain / Loss
-                            "-"  // Placeholder or calculation for Gain %
+                            stock != null ? stock.getClose() : "",
+                            "-",
+                            "-"
                     });
                 }
             }
         }
     }
 
-    /**
-     * Returns the name used by CardLayout.
-     *
-     * @return the view name
-     */
     public String getViewName() {
         return viewName;
     }

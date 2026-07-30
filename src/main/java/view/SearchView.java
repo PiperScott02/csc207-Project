@@ -1,8 +1,11 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.similar_search.SimilarSearchController;
 import interface_adapter.similar_search.SimilarSearchState;
 import interface_adapter.similar_search.SimilarSearchViewModel;
+import interface_adapter.stock.StockController;
+import interface_adapter.stock.StockViewModel;
 import interface_adapter.ticker_search.TickerSearchController;
 import interface_adapter.ticker_search.TickerSearchState;
 import interface_adapter.ticker_search.TickerSearchViewModel;
@@ -35,16 +38,38 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final TickerSearchController tickerSearchController;
     private final TickerSearchViewModel tickerSearchViewModel;
 
+    // Stock Navigation Dependencies
+    private final StockController stockController;
+    private final ViewManagerModel viewManagerModel;
+    private final StockViewModel stockViewModel;
+
     public SearchView(SimilarSearchController similarSearchController,
                       SimilarSearchViewModel similarSearchViewModel,
                       TickerSearchController tickerSearchController,
-                      TickerSearchViewModel tickerSearchViewModel) {
+                      TickerSearchViewModel tickerSearchViewModel,
+                      StockController stockController,
+                      ViewManagerModel viewManagerModel,
+                      StockViewModel stockViewModel) {
         this.similarSearchController = similarSearchController;
         this.similarSearchViewModel = similarSearchViewModel;
         this.tickerSearchController = tickerSearchController;
         this.tickerSearchViewModel = tickerSearchViewModel;
+        this.stockController = stockController;
+        this.viewManagerModel = viewManagerModel;
+        this.stockViewModel = stockViewModel;
+
         tickerSearchViewModel.addPropertyChangeListener(this);
         similarSearchViewModel.addPropertyChangeListener(this);
+
+        // Click main ticker button -> Execute StockUseCase & Switch to Stock View
+        tickerSearchSymbol.addActionListener(e -> {
+            String ticker = tickerSearchSymbol.getText();
+            if (!ticker.equals("N/A") && !ticker.trim().isEmpty()) {
+                this.stockController.execute(ticker);
+                this.viewManagerModel.setState(this.stockViewModel.getViewName());
+                this.viewManagerModel.firePropertyChanged();
+            }
+        });
 
         setLayout(new BorderLayout(15, 15));
 
@@ -176,7 +201,15 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             outputDataPanel.setLayout(new GridLayout(1, 5));
             outputDataPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-            outputDataPanel.add(new JButton(outputData.getTickerSymbol()));
+            JButton symbolButton = new JButton(outputData.getTickerSymbol());
+            // Click similar search symbol button -> Execute StockUseCase & Switch to Stock View
+            symbolButton.addActionListener(e -> {
+                this.stockController.execute(outputData.getTickerSymbol());
+                this.viewManagerModel.setState(this.stockViewModel.getViewName());
+                this.viewManagerModel.firePropertyChanged();
+            });
+
+            outputDataPanel.add(symbolButton);
             outputDataPanel.add(new JLabel(outputData.getCountry()));
             outputDataPanel.add(new JLabel(outputData.getCompanyName()));
             outputDataPanel.add(new JLabel(outputData.getIndustry()));

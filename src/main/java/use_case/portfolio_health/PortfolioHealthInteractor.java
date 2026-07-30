@@ -8,14 +8,12 @@ import use_case.stock.StockDataAccessInterface;
 
 /** The Interactor for the Portfolio Health use case, handling the portfolio health score calculations. */
 public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
-    private final PortfolioHealthDataAccessInterface portfolioHealthDataAccessObject;
     private final StockDataAccessInterface stockDataAccessObject;
     private final PortfolioHealthOutputBoundary portfolioHealthPresenter;
 
-    public PortfolioHealthInteractor(PortfolioHealthDataAccessInterface portfolioHealthDataAccessObject,
-                                     StockDataAccessInterface stockDataAccessObject,
+    // Simplified constructor: Only requires stockDataAccessObject and presenter
+    public PortfolioHealthInteractor(StockDataAccessInterface stockDataAccessObject,
                                      PortfolioHealthOutputBoundary portfolioHealthPresenter) {
-        this.portfolioHealthDataAccessObject = portfolioHealthDataAccessObject;
         this.stockDataAccessObject = stockDataAccessObject;
         this.portfolioHealthPresenter = portfolioHealthPresenter;
     }
@@ -23,14 +21,17 @@ public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
     @Override
     public void execute(PortfolioHealthInputData portfolioHealthInputData) {
         try {
-
             User user = portfolioHealthInputData.getUser();
+            Portfolio portfolio = user.getPortfolio();
+
+            // Check if the portfolio has any holdings to prevent matrix errors
+            if (portfolio.getHoldings() == null || portfolio.getHoldings().isEmpty()) {
+                portfolioHealthPresenter.prepareFailView("Your portfolio has no holdings. Please add a holding first.");
+                return;
+            }
 
             RiskProfile riskProfile = user.getRiskProfile();
-
             String riskPreference = (riskProfile != null) ? riskProfile.getRiskLevel().toString() : "Unknown";
-
-            Portfolio portfolio = user.getPortfolio();
 
             Stock marketStock = stockDataAccessObject.get("SPY");
 
@@ -55,9 +56,9 @@ public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
             PortfolioHealthOutputData portfolioHealthOutputData = new PortfolioHealthOutputData(
                     riskPreference,
                     portfolioHealthScoreString,
-                    portfolio.getTrueBeta().toString(),
-                    portfolio.getAlpha().toString(),
-                    portfolio.getSharpeRatio().toString(),
+                    portfolio.getTrueBeta() != null ? portfolio.getTrueBeta().toString() : "0.0",
+                    portfolio.getAlpha() != null ? portfolio.getAlpha().toString() : "0.0",
+                    portfolio.getSharpeRatio() != null ? portfolio.getSharpeRatio().toString() : "0.0",
                     sharpeAdvice,
                     riskAlignmentAdvice,
                     diversificationAdvice,

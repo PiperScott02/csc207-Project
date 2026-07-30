@@ -3,14 +3,17 @@ package app;
 import java.awt.CardLayout;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.stock.StockController;
 import interface_adapter.stock.StockPresenter;
 import interface_adapter.stock.StockViewModel;
-import interface_adapter.stock.StockView;
+import view.StockView;
 import use_case.stock.StockInteractor;
 import use_case.stock.StockDataAccessInterface;
 import view.ViewManager;
@@ -50,44 +53,53 @@ public final class StockPilotMain {
         new ViewManager(views, cardLayout, viewManagerModel);
 
         /*
-         * Instantiate the ViewModel for the stock page.
+         * Instantiate ViewModels.
          */
         final StockViewModel stockViewModel = new StockViewModel();
+        final LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
 
         /*
          * Instantiate the Data Access Object.
-         * NOTE: Replace this with whatever your actual Stock DAO class is named!
          */
         final StockDataAccessInterface stockDataAccessObject =
                 new FileStockDataAccessObject();
 
         /*
          * Manually wire the Clean Architecture layers together.
-         * (If you create a StockUseCaseFactory later, you can replace this block with it).
          */
         final StockPresenter stockPresenter = new StockPresenter(viewManagerModel, stockViewModel);
         final StockInteractor stockInteractor = new StockInteractor(stockDataAccessObject, stockPresenter);
         final StockController stockController = new StockController(stockInteractor);
 
         /*
-         * Instantiate the View, passing in the ViewModel it needs to listen to.
+         * Instantiate StockView with the 3 required constructor arguments.
          */
-        final StockView stockView = new StockView(stockViewModel);
+        final StockView stockView = new StockView(
+                stockViewModel,
+                viewManagerModel,
+                loggedInViewModel
+        );
 
         /*
-         * Add the View to the CardLayout stack.
+         * Add StockView to CardLayout using its getter method.
          */
-        views.add(stockView, stockView.viewName);
+        views.add(stockView, stockView.getViewName());
+
+        /*
+         * Add a placeholder LoggedIn panel so pressing the back button has a target view.
+         */
+        final JPanel placeholderLoggedInView = new JPanel();
+        placeholderLoggedInView.add(new JLabel("Profile / Logged In View Placeholder", SwingConstants.CENTER));
+        views.add(placeholderLoggedInView, loggedInViewModel.getViewName());
 
         /*
          * Set the initial view to be the Stock View.
          */
-        viewManagerModel.setState(stockView.viewName);
+        viewManagerModel.setState(stockView.getViewName());
         viewManagerModel.firePropertyChanged();
 
         /*
          * Trigger the controller to fetch and display data for a test stock!
-         * Without this, the view will just show empty labels.
          */
         stockController.execute("AAPL");
         application.pack();
