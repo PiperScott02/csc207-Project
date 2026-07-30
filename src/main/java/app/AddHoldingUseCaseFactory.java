@@ -1,7 +1,5 @@
 package app;
 
-import entity.Portfolio;
-
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_holding.AddHoldingController;
 import interface_adapter.add_holding.AddHoldingPresenter;
@@ -28,11 +26,10 @@ public final class AddHoldingUseCaseFactory {
             ViewManagerModel viewManagerModel,
             AddHoldingViewModel addHoldingViewModel,
             LoggedInViewModel loggedInViewModel,
-            StockDailyDataAccessInterface stockDataAccessObject,
-            Portfolio portfolio) {
+            StockDailyDataAccessInterface stockDataAccessObject) {
 
         final AddHoldingController addHoldingController =
-                createAddHoldingUseCase(viewManagerModel, addHoldingViewModel, loggedInViewModel, stockDataAccessObject, portfolio);
+                createAddHoldingUseCase(viewManagerModel, addHoldingViewModel, loggedInViewModel, stockDataAccessObject);
 
         return new AddHoldingView(addHoldingViewModel, addHoldingController, viewManagerModel);
     }
@@ -41,14 +38,13 @@ public final class AddHoldingUseCaseFactory {
             ViewManagerModel viewManagerModel,
             AddHoldingViewModel addHoldingViewModel,
             LoggedInViewModel loggedInViewModel,
-            StockDailyDataAccessInterface stockDataAccessObject,
-            Portfolio portfolio) {
+            StockDailyDataAccessInterface stockDataAccessObject) {
 
         final AddHoldingOutputBoundary addHoldingOutputBoundary =
                 new AddHoldingPresenter(addHoldingViewModel, loggedInViewModel, viewManagerModel);
 
         final AddHoldingInputBoundary addHoldingInteractor =
-                new AddHoldingInteractor(stockDataAccessObject, addHoldingOutputBoundary, portfolio);
+                new AddHoldingInteractor(stockDataAccessObject, addHoldingOutputBoundary, loggedInViewModel);
 
         return new AddHoldingController(addHoldingInteractor);
     }

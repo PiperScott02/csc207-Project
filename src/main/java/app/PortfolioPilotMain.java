@@ -91,7 +91,7 @@ public final class PortfolioPilotMain {
         /*
          * Alpha Vantage API key
          */
-        final String apiKey = "placeholderkey";
+        final String apiKey = "NKH8SNZW8I690AJQ";
 
         // ==========================================
         // 2. Data Access Objects
@@ -248,14 +248,12 @@ public final class PortfolioPilotMain {
 
         // ========================================================
         // 11. Add Holding View
-        final Portfolio portfolio = new Portfolio();
         final AddHoldingView addHoldingView =
                 AddHoldingUseCaseFactory.create(
                         viewManagerModel,
                         addHoldingViewModel,
                         loggedInViewModel,
-                        stockDailyDataAccessObject,
-                        portfolio
+                        stockDailyDataAccessObject
                 );
         views.add(addHoldingView, addHoldingView.getViewName());
 
