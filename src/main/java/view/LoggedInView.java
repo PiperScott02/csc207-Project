@@ -142,8 +142,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private JPanel createButtonPanel() {
         final JPanel buttonPanel = new JPanel(new GridLayout(1, 8, 8, 0));
 
-        buttonPanel.add(createFeatureButton("Add Holding"));
-
         final JButton watchlistButton = new JButton("Watchlist");
         watchlistButton.addActionListener(event -> {
             viewManagerModel.setState(WATCHLIST_VIEW_NAME);
@@ -157,7 +155,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         });
         buttonPanel.add(addHoldingButton);
 
-        buttonPanel.add(createFeatureButton("Watchlist"));
 
         // News Button
         final JButton newsButton = new JButton("News");
