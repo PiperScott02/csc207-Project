@@ -79,7 +79,7 @@ public final class PortfolioHealthPilotMain {
                 viewManagerModel, portfolioHealthViewModel
         );
         final PortfolioHealthInteractor portfolioHealthInteractor = new PortfolioHealthInteractor(
-                portfolioHealthDataAccessObject, stockDataAccessObject, portfolioHealthPresenter
+                stockDataAccessObject, portfolioHealthPresenter
         );
         final PortfolioHealthController portfolioHealthController = new PortfolioHealthController(
                 portfolioHealthInteractor

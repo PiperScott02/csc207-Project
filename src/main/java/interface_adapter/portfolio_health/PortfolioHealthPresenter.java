@@ -1,5 +1,6 @@
 package interface_adapter.portfolio_health;
 
+import javax.swing.JOptionPane;
 import interface_adapter.ViewManagerModel;
 import use_case.portfolio_health.PortfolioHealthOutputBoundary;
 import use_case.portfolio_health.PortfolioHealthOutputData;
@@ -28,7 +29,7 @@ public class PortfolioHealthPresenter implements PortfolioHealthOutputBoundary {
         currentState.setRiskAlignmentAdvice(outputData.getRiskAlignmentAdvice());
         currentState.setDiversificationAdvice(outputData.getDiversificationAdvice());
         currentState.setNewsAdvice(outputData.getNewsAdvice());
-        currentState.setErrorMessage(null); // Clear any previous errors
+        currentState.setErrorMessage(null);
 
         portfolioHealthViewModel.setState(currentState);
         portfolioHealthViewModel.firePropertyChanged();
@@ -44,5 +45,7 @@ public class PortfolioHealthPresenter implements PortfolioHealthOutputBoundary {
 
         portfolioHealthViewModel.setState(currentState);
         portfolioHealthViewModel.firePropertyChanged();
+
+        JOptionPane.showMessageDialog(null, errorMessage, "Portfolio Health Error", JOptionPane.ERROR_MESSAGE);
     }
 }
