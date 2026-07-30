@@ -73,6 +73,16 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
                 );
             }
 
+
+            // Save the custom views to the portfolio.
+            if (!adjustedReturns.isEmpty()) {
+                user.getPortfolio().setCustomViews(adjustedReturns);
+                user.getPortfolio().setHasCustomViews(true); // Explicitly set the flag
+            } else {
+                user.getPortfolio().setCustomViews(null);
+                user.getPortfolio().setHasCustomViews(false);
+            }
+
             // 4. Package into output data
             BlackLittermanOutputData outputData = new BlackLittermanOutputData(
                     user,

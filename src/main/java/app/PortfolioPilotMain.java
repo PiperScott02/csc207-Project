@@ -82,7 +82,7 @@
             /*
              * Alpha Vantage API key
              */
-            final String apiKey = "NKH8SNZW8I690AJQ";
+            final String apiKey = "placeholderkey";
 
             // ==========================================
             // 2. Data Access Objects

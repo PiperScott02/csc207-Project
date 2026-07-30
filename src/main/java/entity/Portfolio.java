@@ -13,7 +13,7 @@ public class Portfolio {
 
     private List<StockHolding> holdings = new ArrayList<>();
 
-    private List<StockHolding> watchlisted = new ArrayList<>();
+    private List<WatchlistStockItem> watchlist = new ArrayList<>();
 
     private List<LocalDate> masterTimeline;
 
@@ -26,7 +26,6 @@ public class Portfolio {
     private double alpha;
 
     private double sharpeRatio;
-
 
     private boolean hasCustomViews;
 
@@ -301,7 +300,7 @@ public class Portfolio {
     /** Returns whether the user has set custom views regarding their stocks' perfomances.
      * @return a boolean representing whether they have set custom views or not.
      */
-    public boolean isHasCustomViews() {
+    public boolean hasCustomViews() {
         return hasCustomViews;
     }
 
@@ -324,6 +323,20 @@ public class Portfolio {
      */
     public void setCustomViews(Map<String, Double> customViews) {
         this.customViews = customViews;
+    }
+
+    /** Returns the users' watchlist.
+     * @return a list of the stocks the user has waitlisted.
+     */
+    public List<WatchlistStockItem> getWatchlist() {
+        return watchlist;
+    }
+
+    /** Sets the users' watchlist.
+     * @param watchlist  a list of the stocks the user has waitlisted.
+     */
+    public void setWatchlist(List<WatchlistStockItem> watchlist) {
+        this.watchlist = watchlist;
     }
 
 }
