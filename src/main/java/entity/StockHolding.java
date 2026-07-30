@@ -111,5 +111,11 @@ public class StockHolding {
         return stocks;
     }
 
+    /** Returns the list of transactions for this holding.
+     * @return the list of Transaction objects.
+     */
+    public List<Transaction> getTransactions() {
+        return this.transactions;
+    }
 
 }
