@@ -1,6 +1,7 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.similar_search.SimilarSearchController;
 import interface_adapter.similar_search.SimilarSearchState;
 import interface_adapter.similar_search.SimilarSearchViewModel;
@@ -43,13 +44,17 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final ViewManagerModel viewManagerModel;
     private final StockViewModel stockViewModel;
 
+    // Return to Portfolio Dependency
+    private final LoggedInViewModel loggedInViewModel;
+
     public SearchView(SimilarSearchController similarSearchController,
                       SimilarSearchViewModel similarSearchViewModel,
                       TickerSearchController tickerSearchController,
                       TickerSearchViewModel tickerSearchViewModel,
                       StockController stockController,
                       ViewManagerModel viewManagerModel,
-                      StockViewModel stockViewModel) {
+                      StockViewModel stockViewModel,
+                      LoggedInViewModel loggedInViewModel) {
         this.similarSearchController = similarSearchController;
         this.similarSearchViewModel = similarSearchViewModel;
         this.tickerSearchController = tickerSearchController;
@@ -57,6 +62,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.stockController = stockController;
         this.viewManagerModel = viewManagerModel;
         this.stockViewModel = stockViewModel;
+        this.loggedInViewModel = loggedInViewModel;
 
         tickerSearchViewModel.addPropertyChangeListener(this);
         similarSearchViewModel.addPropertyChangeListener(this);
@@ -85,10 +91,19 @@ public class SearchView extends JPanel implements PropertyChangeListener {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // Adding Buffer around Left, Right, and Bottom of Search View
+        // Adding Buffer around Left and Right of Search View
         add(new JPanel(), BorderLayout.WEST);
         add(new JPanel(), BorderLayout.EAST);
-        add(new JPanel(), BorderLayout.SOUTH);
+
+        // Adding Button to return to Portfolio View (a.k.a Logged in View)
+        final JPanel southPanel = new JPanel();
+        final JButton backButton = new JButton("Return to Portfolio View");
+        backButton.addActionListener(e -> {
+            this.viewManagerModel.setState(this.loggedInViewModel.getViewName());
+            this.viewManagerModel.firePropertyChanged();
+        });
+        southPanel.add(backButton);
+        add(southPanel, BorderLayout.SOUTH);
     }
 
     private JPanel createHeader() {
