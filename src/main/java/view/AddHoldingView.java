@@ -143,19 +143,27 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
     }
 
     private JPanel createFieldPanel(String labelText, JTextField textField, String subText) {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout(10, 0));
+
         JLabel label = new JLabel(labelText);
-        label.setPreferredSize(new Dimension(150, 25));
-
-        JPanel inputSubPanel = new JPanel(new BorderLayout());
-        inputSubPanel.add(textField, BorderLayout.NORTH);
-
-        JLabel subLabel = new JLabel(subText);
-        subLabel.setForeground(Color.BLUE);
-        subLabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        inputSubPanel.add(subLabel, BorderLayout.SOUTH);
-
+        label.setPreferredSize(new Dimension(120, 25));
+        label.setVerticalAlignment(JLabel.TOP);
         panel.add(label, BorderLayout.WEST);
+
+        JPanel inputSubPanel = new JPanel();
+        inputSubPanel.setLayout(new BoxLayout(inputSubPanel, BoxLayout.Y_AXIS));
+
+        textField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        inputSubPanel.add(textField);
+
+        if (subText != null && !subText.isEmpty()) {
+            inputSubPanel.add(Box.createRigidArea(new Dimension(0, 3)));
+            JLabel subLabel = new JLabel(subText);
+            subLabel.setForeground(Color.BLUE);
+            subLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+            inputSubPanel.add(subLabel);
+        }
+
         panel.add(inputSubPanel, BorderLayout.CENTER);
         return panel;
     }
