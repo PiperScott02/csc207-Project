@@ -11,6 +11,7 @@ import data_access.InMemoryUserDataAccessObject;
 import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
 
+import entity.Portfolio;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_holding.AddHoldingViewModel;
 import interface_adapter.black_litterman.BlackLittermanController;
@@ -31,6 +32,7 @@ import interface_adapter.watchlist.WatchlistViewModel;
 import use_case.StockDailyDataAccessInterface;
 import use_case.analysis.BlackLittermanService;
 import use_case.black_litterman.BlackLittermanDataAccessInterface;
+import use_case.similar_search.SimilarSearchDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
 
 import view.*;
