@@ -7,6 +7,10 @@ public class SimilarSearchState {
     private SimilarSearchOutputData[] similarSearchOutputData;
     private boolean useCaseFailed;
 
+    public SimilarSearchOutputData[] getSimilarSearchOutputData() {
+        return similarSearchOutputData;
+    }
+
     public void setUseCaseFailed(boolean useCaseFailed) {
         this.useCaseFailed = useCaseFailed;
     }
