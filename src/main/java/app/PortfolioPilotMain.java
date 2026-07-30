@@ -91,7 +91,7 @@ public final class PortfolioPilotMain {
          * Read the Alpha Vantage API key once.
          */
         final String apiKey =
-                "ALPHA_VANTAGE_API_KEY";
+                "INSERT_API_KEY";
 
         final InMemoryUserDataAccessObject userDataAccessObject =
                 new InMemoryUserDataAccessObject();
@@ -167,7 +167,6 @@ public final class PortfolioPilotMain {
                 searchView.getViewName()
         );
 
-        // --- ADD HOLDING VIEW SETUP ---
         final AddHoldingViewModel addHoldingViewModel =
                 new AddHoldingViewModel();
 
@@ -186,7 +185,6 @@ public final class PortfolioPilotMain {
                 addHoldingView,
                 addHoldingView.getViewName()
         );
-        // ------------------------------
 
         final RiskPreferenceView riskPreferenceView =
                 new RiskPreferenceView(viewManagerModel);

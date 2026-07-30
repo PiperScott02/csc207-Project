@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.time.LocalDate;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -15,6 +16,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
+
+import entity.Stock;
+import entity.StockHolding;
 
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInState;
@@ -38,6 +42,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final ViewManagerModel viewManagerModel;
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
+
+    private DefaultTableModel tableModel;
 
     /**
      * Creates the home screen.
@@ -275,7 +281,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                 "Gain %"
         };
 
-        final DefaultTableModel tableModel =
+        // Assign to the class-level tableModel instance variable
+        tableModel =
                 new DefaultTableModel(columnNames, 0) {
 
                     @Override
@@ -310,7 +317,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     }
 
     /**
-     * Updates the username displayed on the home screen.
+     * Updates the username AND holdings table displayed on the home screen.
      *
      * @param event property-change event from the view model
      */
@@ -327,6 +334,24 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
             else {
                 welcomeLabel.setText("Welcome, " + username);
+            }
+
+            // Repopulate the holdings table whenever the state changes
+            if (tableModel != null && state.getHoldings() != null) {
+                tableModel.setRowCount(0); // Clear current rows
+                for (StockHolding holding : state.getHoldings()) {
+                    Stock stock = holding.getStock();
+                    tableModel.addRow(new Object[]{
+                            stock != null ? stock.getTickerSymbol() : "",
+                            stock != null ? stock.getCompanyName() : "",
+                            holding.getNumberOfShares(),
+                            // Safely inline the purchase price without a separate variable declaration:
+                            (!holding.getTransactions().isEmpty()) ? holding.getTransactions().get(0).getPricePerShare() : "",
+                            stock != null ? stock.getClose() : "",  // Current live price
+                            "-", // Placeholder or calculation for Gain / Loss
+                            "-"  // Placeholder or calculation for Gain %
+                    });
+                }
             }
         }
     }

@@ -63,6 +63,8 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             portfolio.addHolding(holding);
         }
 
+        System.out.println("Price on " + purchaseDate + ": " + stock.getCloseOnDate(purchaseDate)); //TEST PRINT
+
         // 5. Record the purchase transaction using your StockHolding method
         // (Triggers the method that automatically looks up the closing price on that date)
         holding.makeTransaction(stock, shares, purchaseDate, TransactionType.BUY);

@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class AddHoldingView extends JPanel implements ActionListener, PropertyChangeListener {
 
@@ -21,7 +23,7 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
 
     private final JTextField tickerInputField = new JTextField(15);
     private final JTextField sharesInputField = new JTextField(15);
-    private final JTextField priceInputField = new JTextField(15);
+    private final JTextField dateInputField = new JTextField(15);
 
     private final JButton addHoldingButton;
     private final JButton backButton;
@@ -61,14 +63,14 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         formPanel.add(createFieldPanel(AddHoldingViewModel.SHARES_LABEL, sharesInputField, "Enter a positive number."));
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Price Row
-        formPanel.add(createFieldPanel(AddHoldingViewModel.PRICE_LABEL, priceInputField, "Enter the average price you paid per share."));
+        // Date Row
+        formPanel.add(createFieldPanel("Purchase Date:", dateInputField, "Enter purchase date in YYYY-MM-DD format."));
         formPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
         // Note Box
         JPanel notePanel = new JPanel(new BorderLayout());
         notePanel.setBorder(BorderFactory.createTitledBorder("Note"));
-        JTextArea noteText = new JTextArea("Current price will be retrieved automatically using the stock API when you add the holding.");
+        JTextArea noteText = new JTextArea("Historical closing price on the specified date will be retrieved automatically.");
         noteText.setEditable(false);
         noteText.setOpaque(false);
         noteText.setLineWrap(true);
@@ -95,17 +97,23 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
             public void actionPerformed(ActionEvent evt) {
                 if (evt.getSource().equals(addHoldingButton)) {
                     AddHoldingState currentState = addHoldingViewModel.getState();
+                    currentState.setTicker(tickerInputField.getText());
+                    currentState.setShares(sharesInputField.getText());
+                    currentState.setPurchaseDate(dateInputField.getText());
+
                     try {
                         double shares = Double.parseDouble(sharesInputField.getText());
-                        double price = Double.parseDouble(priceInputField.getText());
+                        LocalDate purchaseDate = LocalDate.parse(dateInputField.getText());
 
                         addHoldingController.execute(
                                 tickerInputField.getText(),
                                 shares,
-                                price
+                                purchaseDate
                         );
                     } catch (NumberFormatException e) {
-                        JOptionPane.showMessageDialog(AddHoldingView.this, "Please enter valid numerical values for shares and price.");
+                        JOptionPane.showMessageDialog(AddHoldingView.this, "Please enter valid numerical values for shares.");
+                    } catch (DateTimeParseException e) {
+                        JOptionPane.showMessageDialog(AddHoldingView.this, "Please enter a valid date in YYYY-MM-DD format.");
                     }
                 }
             }
@@ -114,9 +122,14 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         clearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                AddHoldingState currentState = addHoldingViewModel.getState();
+                currentState.setTicker("");
+                currentState.setShares("");
+                currentState.setPurchaseDate("");
+
                 tickerInputField.setText("");
                 sharesInputField.setText("");
-                priceInputField.setText("");
+                dateInputField.setText("");
             }
         });
 

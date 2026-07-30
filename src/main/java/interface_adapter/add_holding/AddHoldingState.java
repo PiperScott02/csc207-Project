@@ -6,13 +6,13 @@ package interface_adapter.add_holding;
 public class AddHoldingState {
     private String ticker = "";
     private String shares = "";
-    private String averageBuyPrice = "";
+    private String purchaseDate = "";
     private String addHoldingError = null;
 
     public AddHoldingState(AddHoldingState copy) {
         this.ticker = copy.ticker;
         this.shares = copy.shares;
-        this.averageBuyPrice = copy.averageBuyPrice;
+        this.purchaseDate = copy.purchaseDate;
         this.addHoldingError = copy.addHoldingError;
     }
 
@@ -23,9 +23,8 @@ public class AddHoldingState {
         return ticker;
     }
 
-    public void setTicker(String ticker) {
-        this.ticker = ticker;
-    }
+    public void setTicker(String ticker) { this.ticker = ticker; }
+
 
     public String getShares() {
         return shares;
@@ -35,13 +34,13 @@ public class AddHoldingState {
         this.shares = shares;
     }
 
-    public String getAverageBuyPrice() {
-        return averageBuyPrice;
+
+    public String getPurchaseDate() { return purchaseDate; }
+
+    public void setPurchaseDate(String purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 
-    public void setAverageBuyPrice(String averageBuyPrice) {
-        this.averageBuyPrice = averageBuyPrice;
-    }
 
     public String getAddHoldingError() {
         return addHoldingError;

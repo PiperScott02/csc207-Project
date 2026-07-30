@@ -1,13 +1,13 @@
 package interface_adapter.add_holding;
 
-import interface_adapter.ViewModel; // Adjust import based on your project structure
+import interface_adapter.ViewModel;
 
 public class AddHoldingViewModel extends ViewModel {
 
     public static final String TITLE_LABEL = "Add New Holding";
     public static final String TICKER_LABEL = "Ticker Symbol:";
     public static final String SHARES_LABEL = "Number of Shares:";
-    public static final String PRICE_LABEL = "Average Buy Price ($):";
+    public static final String DATE_LABEL = "Purchase Date:";
 
     public static final String ADD_BUTTON_LABEL = "Add Holding";
     public static final String BACK_BUTTON_LABEL = "Back to Dashboard";
