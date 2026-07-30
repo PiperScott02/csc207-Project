@@ -20,6 +20,7 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthController;
+import interface_adapter.watchlist.WatchlistController;
 
 /**
  * The home screen displayed after a user successfully logs in.
@@ -30,6 +31,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private static final String SEARCH_VIEW_NAME = "search";
     private static final String RISK_PREFERENCE_VIEW_NAME = "risk preference";
     private static final String NEWS_VIEW_NAME = "news";
+    private static final String WATCHLIST_VIEW_NAME = "watchlist";
 
     private final String viewName = "logged in";
     private final ViewManagerModel viewManagerModel;
@@ -131,7 +133,13 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         final JPanel buttonPanel = new JPanel(new GridLayout(1, 7, 8, 0));
 
         buttonPanel.add(createFeatureButton("Add Holding"));
-        buttonPanel.add(createFeatureButton("Watchlist"));
+
+        final JButton watchlistButton = new JButton("Watchlist");
+        watchlistButton.addActionListener(event -> {
+            viewManagerModel.setState(WATCHLIST_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        });
+        buttonPanel.add(watchlistButton);
 
         // News Button
         final JButton newsButton = new JButton("News");
@@ -237,4 +245,5 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     public String getViewName() {
         return viewName;
     }
+
 }

@@ -1,15 +1,19 @@
 package app;
 
 import data_access.DBUserDataAccessObject;
+import data_access.FileStockDataAccessObject;
 import entity.CommonUserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.watchlist.WatchlistViewModel;
+import use_case.stock.StockDataAccessInterface;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import view.WatchlistView;
 import data_access.InMemoryUserDataAccessObject;
 
 import javax.swing.*;
@@ -49,20 +53,30 @@ public class MainWithInMemory {
         final LoginViewModel loginViewModel = new LoginViewModel();
         final LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
         final SignupViewModel signupViewModel = new SignupViewModel();
+        final WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
 
         final InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
+        final StockDataAccessInterface stockDataAccessObject = new FileStockDataAccessObject();
 
         final SignupView signupView = SignupUseCaseFactory.create(viewManagerModel, loginViewModel,
-                                                                  signupViewModel, userDataAccessObject);
+                signupViewModel, userDataAccessObject);
         views.add(signupView, signupView.getViewName());
 
         final LoginView loginView = LoginUseCaseFactory.create(viewManagerModel, loginViewModel,
-                                                               loggedInViewModel, userDataAccessObject);
+                loggedInViewModel, userDataAccessObject);
         views.add(loginView, loginView.getViewName());
 
         final LoggedInView loggedInView = ChangePasswordUseCaseFactory.create(viewManagerModel,
-                                                                              loggedInViewModel, userDataAccessObject);
+                loggedInViewModel, userDataAccessObject);
         views.add(loggedInView, loggedInView.getViewName());
+
+        final WatchlistView watchlistView = WatchlistUseCaseFactory.create(
+                viewManagerModel,
+                watchlistViewModel,
+                loggedInViewModel,
+                stockDataAccessObject
+        );
+        views.add(watchlistView, watchlistView.getViewName());
 
         viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChanged();

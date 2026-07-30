@@ -15,6 +15,6 @@ public class WatchlistViewModel extends ViewModel<WatchlistState> {
 
     /** Returns the View Model's view name.**/
     public String getViewName() {
-        return TITLE_LABEL;
+        return "watchlist";
     }
 }
