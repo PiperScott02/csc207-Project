@@ -9,15 +9,13 @@ import java.util.List;
 public class AddHoldingOutputData {
     private final String ticker;
     private final double shares;
-    private final double averageBuyPrice;
     private final List<StockHolding> holdings;
     private final boolean useCaseFailed;
 
-    public AddHoldingOutputData(String ticker, double shares, double averageBuyPrice,
-                                List<StockHolding> holdings, boolean useCaseFailed) {
+    public AddHoldingOutputData(String ticker, double shares, List<StockHolding> holdings,
+                                boolean useCaseFailed) {
         this.ticker = ticker;
         this.shares = shares;
-        this.averageBuyPrice = averageBuyPrice;
         this.holdings = holdings;
         this.useCaseFailed = useCaseFailed;
     }
@@ -28,10 +26,6 @@ public class AddHoldingOutputData {
 
     public double getShares() {
         return shares;
-    }
-
-    public double getAverageBuyPrice() {
-        return averageBuyPrice;
     }
 
     public List<StockHolding> getHoldings() {

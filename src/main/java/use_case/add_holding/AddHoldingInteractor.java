@@ -1,6 +1,7 @@
 package use_case.add_holding;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import entity.Portfolio;
 import entity.Stock;
 import entity.StockHolding;
@@ -28,7 +29,7 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
         // 1. Unpack the DTO
         String ticker = addHoldingInputData.getTicker();
         double shares = addHoldingInputData.getShares();
-        double purchasePrice = addHoldingInputData.getAverageBuyPrice();
+        LocalDate purchaseDate = addHoldingInputData.getPurchaseDate();
 
         // 2. Basic validation
         if (ticker == null || ticker.trim().isEmpty()) {
@@ -63,11 +64,11 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
         }
 
         // 5. Record the purchase transaction using your StockHolding method
-        // (Using the overload that takes stock, quantity, and type, or passing a date if your input data includes it)
-        holding.makeTransaction(stock, shares, TransactionType.BUY);
+        // (Triggers the method that automatically looks up the closing price on that date)
+        holding.makeTransaction(stock, shares, purchaseDate, TransactionType.BUY);
 
         // 6. Package results and notify presenter
-        AddHoldingOutputData outputData = new AddHoldingOutputData(ticker, shares, purchasePrice, portfolio.getHoldings(), false);
+        AddHoldingOutputData outputData = new AddHoldingOutputData(ticker, shares, portfolio.getHoldings(), false);
         userPresenter.prepareSuccessView(outputData);
     }
 }
