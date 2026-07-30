@@ -4,6 +4,8 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.similar_search.SimilarSearchController;
 import interface_adapter.similar_search.SimilarSearchPresenter;
 import interface_adapter.similar_search.SimilarSearchViewModel;
+import interface_adapter.stock.StockController;
+import interface_adapter.stock.StockViewModel;
 import interface_adapter.ticker_search.TickerSearchController;
 import interface_adapter.ticker_search.TickerSearchPresenter;
 import interface_adapter.ticker_search.TickerSearchViewModel;
@@ -26,8 +28,10 @@ public class SearchUseCaseFactory {
             ViewManagerModel viewManagerModel,
             SimilarSearchViewModel similarSearchViewModel,
             TickerSearchViewModel tickerSearchViewModel,
+            StockViewModel stockViewModel,
             StockDailyDataAccessInterface stockDailyDataAccessObject,
-            SimilarSearchDataAccessInterface similarSearchDataAccessObject) {
+            SimilarSearchDataAccessInterface similarSearchDataAccessObject,
+            StockController stockController) {
 
         final SimilarSearchController similarSearchController =
                 createSimilarSearchController(viewManagerModel, similarSearchViewModel,
@@ -35,10 +39,15 @@ public class SearchUseCaseFactory {
         final TickerSearchController tickerSearchController =
                 createTickerSearchController(viewManagerModel, tickerSearchViewModel, stockDailyDataAccessObject);
 
-        return new SearchView(similarSearchController,
+        return new SearchView(
+                similarSearchController,
                 similarSearchViewModel,
                 tickerSearchController,
-                tickerSearchViewModel);
+                tickerSearchViewModel,
+                stockController,
+                viewManagerModel,
+                stockViewModel
+        );
 
     }
 
