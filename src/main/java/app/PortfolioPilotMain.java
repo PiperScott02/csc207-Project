@@ -6,9 +6,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import entity.Portfolio;
+
 import data_access.InMemoryUserDataAccessObject;
 import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
+
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
@@ -16,8 +19,11 @@ import interface_adapter.news.NewsViewModel;
 import interface_adapter.signup.SignupViewModel;
 import interface_adapter.similar_search.SimilarSearchViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
+import interface_adapter.add_holding.AddHoldingViewModel;
+
 import use_case.StockDailyDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
+
 import view.LoggedInView;
 import view.LoginView;
 import view.NewsView;
@@ -25,6 +31,7 @@ import view.RiskPreferenceView;
 import view.SearchView;
 import view.SignupView;
 import view.ViewManager;
+import view.AddHoldingView;
 
 /**
  * Starts PortfolioPilot with signup and login functionality.
@@ -159,6 +166,27 @@ public final class PortfolioPilotMain {
                 searchView,
                 searchView.getViewName()
         );
+
+        // --- ADD HOLDING VIEW SETUP ---
+        final AddHoldingViewModel addHoldingViewModel =
+                new AddHoldingViewModel();
+
+        final Portfolio portfolio = new Portfolio();
+
+        final AddHoldingView addHoldingView =
+                AddHoldingUseCaseFactory.create(
+                        viewManagerModel,
+                        addHoldingViewModel,
+                        loggedInViewModel,
+                        stockDailyDataAccessObject,
+                        portfolio
+                );
+
+        views.add(
+                addHoldingView,
+                addHoldingView.getViewName()
+        );
+        // ------------------------------
 
         final RiskPreferenceView riskPreferenceView =
                 new RiskPreferenceView(viewManagerModel);

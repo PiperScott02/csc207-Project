@@ -32,6 +32,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             "risk preference";
     private static final String NEWS_VIEW_NAME = "news";
 
+    private static final String ADD_HOLDING_VIEW_NAME = "add holding";
+
     private final String viewName = "logged in";
     private final ViewManagerModel viewManagerModel;
 
@@ -178,7 +180,16 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private JPanel createButtonPanel() {
         final JPanel buttonPanel = new JPanel(new GridLayout(1, 7, 8, 0));
 
-        buttonPanel.add(createFeatureButton("Add Holding"));
+
+        final JButton addHoldingButton = new JButton("Add Holding");
+
+        addHoldingButton.addActionListener(event -> {
+            viewManagerModel.setState(ADD_HOLDING_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        });
+        buttonPanel.add(addHoldingButton);
+
+
         buttonPanel.add(createFeatureButton("Watchlist"));
 
         final JButton newsButton = new JButton("News");

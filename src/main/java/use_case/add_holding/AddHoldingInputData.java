@@ -6,17 +6,17 @@ package use_case.add_holding;
 public class AddHoldingInputData {
     private final String ticker;
     private final double shares;
-    private final double purchasePrice;
+    private final double averageBuyPrice;
 
-    public AddHoldingInputData(String ticker, double shares, double purchasePrice) {
+    public AddHoldingInputData(String ticker, double shares, double averageBuyPrice) {
         this.ticker = ticker;
         this.shares = shares;
-        this.purchasePrice = purchasePrice;
+        this.averageBuyPrice = averageBuyPrice;
     }
 
     public String getTicker() { return ticker; }
 
     public double getShares() { return shares; }
 
-    public double getPurchasePrice() { return purchasePrice; }
+    public double getAverageBuyPrice() { return averageBuyPrice; }
 }
