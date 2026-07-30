@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
         public static void main(String[] args) throws IOException, InterruptedException {
 
-            String apiKey = "1BPENK5QMO8ULOU1";
+            String apiKey = "";
 
             String url =
                     "https://www.alphavantage.co/query" +

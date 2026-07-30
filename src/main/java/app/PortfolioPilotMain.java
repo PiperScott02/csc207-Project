@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import data_access.FileStockDataAccessObject;
 import data_access.InMemoryUserDataAccessObject;
 import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
@@ -15,15 +16,21 @@ import interface_adapter.login.LoginViewModel;
 import interface_adapter.news.NewsViewModel;
 import interface_adapter.signup.SignupViewModel;
 import interface_adapter.similar_search.SimilarSearchViewModel;
+import interface_adapter.stock.StockController;
+import interface_adapter.stock.StockPresenter;
+import interface_adapter.stock.StockViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import use_case.StockDailyDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
+import use_case.stock.StockDataAccessInterface;
+import use_case.stock.StockInteractor;
 import view.LoggedInView;
 import view.LoginView;
 import view.NewsView;
 import view.RiskPreferenceView;
 import view.SearchView;
 import view.SignupView;
+import view.StockView;
 import view.ViewManager;
 
 /**
@@ -62,6 +69,7 @@ public final class PortfolioPilotMain {
                 viewManagerModel
         );
 
+        // View Models
         final LoginViewModel loginViewModel =
                 new LoginViewModel();
 
@@ -80,15 +88,39 @@ public final class PortfolioPilotMain {
         final TickerSearchViewModel tickerSearchViewModel =
                 new TickerSearchViewModel();
 
+        final StockViewModel stockViewModel =
+                new StockViewModel();
+
         /*
          * Read the Alpha Vantage API key once.
          */
         final String apiKey =
-                "ALPHA_VANTAGE_API_KEY";
+                "";
 
+        // Data Access Objects
         final InMemoryUserDataAccessObject userDataAccessObject =
                 new InMemoryUserDataAccessObject();
 
+        final StockDailyDataAccessInterface stockDailyDataAccessObject =
+                new StockService(apiKey);
+
+        final SimilarSearchDataAccessInterface similarSearchDataAccessObject =
+                new SimilarSearchDataAccessObject(apiKey);
+
+        final StockDataAccessInterface stockDataAccessObject =
+                new FileStockDataAccessObject();
+
+        // Stock Use Case Setup (Presenter -> Interactor -> Controller)
+        final StockPresenter stockPresenter =
+                new StockPresenter(viewManagerModel, stockViewModel);
+
+        final StockInteractor stockInteractor =
+                new StockInteractor(stockDataAccessObject, stockPresenter);
+
+        final StockController stockController =
+                new StockController(stockInteractor);
+
+        // 1. Signup View
         final SignupView signupView =
                 SignupUseCaseFactory.create(
                         viewManagerModel,
@@ -102,6 +134,7 @@ public final class PortfolioPilotMain {
                 signupView.getViewName()
         );
 
+        // 2. Login View
         final LoginView loginView =
                 LoginUseCaseFactory.create(
                         viewManagerModel,
@@ -115,6 +148,7 @@ public final class PortfolioPilotMain {
                 loginView.getViewName()
         );
 
+        // 3. Logged In View
         final LoggedInView loggedInView =
                 new LoggedInView(
                         loggedInViewModel,
@@ -126,6 +160,7 @@ public final class PortfolioPilotMain {
                 loggedInView.getViewName()
         );
 
+        // 4. News View
         final NewsView newsView =
                 NewsUseCaseFactory.create(
                         newsViewModel,
@@ -138,21 +173,16 @@ public final class PortfolioPilotMain {
                 newsView.getViewName()
         );
 
-        final StockDailyDataAccessInterface
-                stockDailyDataAccessObject =
-                new StockService(apiKey);
-
-        final SimilarSearchDataAccessInterface
-                similarSearchDataAccessObject =
-                new SimilarSearchDataAccessObject(apiKey);
-
+        // 5. Search View
         final SearchView searchView =
                 SearchUseCaseFactory.create(
                         viewManagerModel,
                         similarSearchViewModel,
                         tickerSearchViewModel,
+                        stockViewModel,
                         stockDailyDataAccessObject,
-                        similarSearchDataAccessObject
+                        similarSearchDataAccessObject,
+                        stockController
                 );
 
         views.add(
@@ -160,6 +190,20 @@ public final class PortfolioPilotMain {
                 searchView.getViewName()
         );
 
+        // 6. Stock View
+        final StockView stockView =
+                new StockView(
+                        stockViewModel,
+                        viewManagerModel,
+                        loggedInViewModel
+                );
+
+        views.add(
+                stockView,
+                stockView.getViewName()
+        );
+
+        // 7. Risk Preference View
         final RiskPreferenceView riskPreferenceView =
                 new RiskPreferenceView(viewManagerModel);
 
@@ -168,6 +212,7 @@ public final class PortfolioPilotMain {
                 riskPreferenceView.getViewName()
         );
 
+        // Initial View Set
         viewManagerModel.setState(
                 signupView.getViewName()
         );
