@@ -1,5 +1,6 @@
 package use_case.ticker_search;
 
+import data_access.stock_daily.StockService;
 import entity.Stock;
 import use_case.StockDailyDataAccessInterface;
 
@@ -22,12 +23,8 @@ public class TickerSearchInteractor implements TickerSearchInputBoundary {
     @Override
     public void execute(TickerSearchInputData tickerSearchInputData) throws IOException, InterruptedException {
         final String tickerSymbol = tickerSearchInputData.getTickerSymbol();
-        final Stock tickerStock = stockDailyDataAccessObject.createStockAndHistory(tickerSymbol);
-
-        if (tickerStock == null) { // TODO: this is meant to check if the tickerSymbol was actually valid
-            tickerSearchOutputPresenter.prepareFailView("No Exact Match for Ticker Symbol");
-        }
-        else {
+        try {
+            final Stock tickerStock = stockDailyDataAccessObject.createStockAndHistory(tickerSymbol);
             final TickerSearchOutputData tickerSearchOutputData =
                     new TickerSearchOutputData(tickerStock.getTickerSymbol(),
                             tickerStock.getCompanyName(),
@@ -36,6 +33,8 @@ public class TickerSearchInteractor implements TickerSearchInputBoundary {
                             tickerStock.getPreviousClose(),
                             false);
             tickerSearchOutputPresenter.prepareSuccessView(tickerSearchOutputData);
+        } catch (StockService.InvalidInputToAPI e) {
+            tickerSearchOutputPresenter.prepareFailView("Invalid Input To API");
         }
     }
 }

@@ -193,17 +193,27 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         if (evt.getPropertyName().equals("ticker search")) {
             TickerSearchState tickerSearchState = (TickerSearchState) evt.getNewValue();
 
-            tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol().toUpperCase());
-            tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
-            tickerSearchCountry.setText(tickerSearchState.getCountry());
-            tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());
-            tickerSearchIndustry.setText(tickerSearchState.getIndustry());
+            if (tickerSearchState.isUseCaseFailed()) {
+                tickerSearchSymbol.setText("No Match");
+                tickerSearchCompanyName.setText("No Match");
+                tickerSearchCountry.setText("No Match");
+                tickerSearchPreviousClose.setText("No Match");
+                tickerSearchIndustry.setText("No Match");
+            } else {
+                tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol().toUpperCase());
+                tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
+                tickerSearchCountry.setText(tickerSearchState.getCountry());
+                tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());
+                tickerSearchIndustry.setText(tickerSearchState.getIndustry());
+            }
 
         } else if (evt.getPropertyName().equals("similar search")) {
             SimilarSearchState similarSearchState = (SimilarSearchState) evt.getNewValue();
             removeSimilarSearchResults(similarSearchResultsPanel);
-            addSimilarSearchResults(similarSearchResultsPanel,
-                    similarSearchState.getSimilarSearchOutputData());
+            if (!similarSearchState.isUseCaseFailed()) {
+                addSimilarSearchResults(similarSearchResultsPanel,
+                        similarSearchState.getSimilarSearchOutputData());
+            }
         }
     }
 

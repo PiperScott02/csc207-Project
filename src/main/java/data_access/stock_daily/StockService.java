@@ -43,7 +43,18 @@ public class StockService implements StockDailyDataAccessInterface {
         this.objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
     }
 
-    public Stock createStockAndHistory(String tickerSymbol) throws IOException, InterruptedException {
+    public static class InvalidInputToAPI extends RuntimeException {
+        public InvalidInputToAPI(String errorMessage) {
+            super(errorMessage);
+        }
+    }
+
+    public Stock createStockAndHistory(String tickerSymbol) throws IOException,
+            InterruptedException, InvalidInputToAPI {
+        if (tickerSymbol.contains(" ")) {
+            throw new InvalidInputToAPI("Ticker Symbol Contains a Space");
+        }
+
         String url =
                 "https://www.alphavantage.co/query" +
                         "?function=TIME_SERIES_DAILY" +
@@ -57,6 +68,10 @@ public class StockService implements StockDailyDataAccessInterface {
 
         AlphaVantageResponse apiResponse = objectMapper.readValue(response.body(), AlphaVantageResponse.class);
         Map<LocalDate, DailyPriceData> timeSeries = apiResponse.getTimeSeries();
+
+        if (timeSeries == null) {
+            throw new InvalidInputToAPI("Invalid Input To API");
+        }
 
         List<DailyPriceData> timeline = new ArrayList<>(timeSeries.values());
         timeline.sort(Comparator.comparing(DailyPriceData::getDate));

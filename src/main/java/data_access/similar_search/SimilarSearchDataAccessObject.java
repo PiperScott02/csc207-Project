@@ -25,6 +25,10 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
 
     @Override
     public String[] similarNames(String keywords) throws IOException, InterruptedException {
+        if (keywords.contains(" ")) {
+            return null;
+        }
+
         final String query = "?function=" + function +
                 "&keywords=" + keywords +
                 "&apikey=" + api_key;
@@ -36,12 +40,6 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
                         .build();
         TimeUnit.SECONDS.sleep(1);
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != 200) {
-            // TODO: make this throw specific error
-            // specific info for different error codes found here:
-            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
-        }
 
         return parseJSON(response.body());
     }

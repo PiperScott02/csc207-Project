@@ -31,10 +31,10 @@ public class SimilarSearchPresenter implements SimilarSearchOutputBoundary {
         final SimilarSearchState state = similarSearchViewModel.getState();
         state.setUseCaseFailed(true);
         this.similarSearchViewModel.setState(state);
-        similarSearchViewModel.firePropertyChanged();
+        similarSearchViewModel.firePropertyChanged("similar search");
 
         viewManagerModel.setState(similarSearchViewModel.getViewName());
-        viewManagerModel.firePropertyChanged();
+        viewManagerModel.firePropertyChanged("similar search");
     }
 
 }
