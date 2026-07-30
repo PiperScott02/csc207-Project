@@ -141,6 +141,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         });
         buttonPanel.add(newsButton);
 
+        // Portfolio Health Button
         final JButton portfolioHealthButton = new JButton("Portfolio Health");
         portfolioHealthButton.addActionListener(event -> {
             LoggedInState state = loggedInViewModel.getState();

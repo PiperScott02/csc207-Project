@@ -82,7 +82,7 @@
             /*
              * Alpha Vantage API key
              */
-            final String apiKey = "placeholderkey";
+            final String apiKey = "NKH8SNZW8I690AJQ";
 
             // ==========================================
             // 2. Data Access Objects
@@ -154,10 +154,10 @@
             final PortfolioHealthView portfolioHealthView =
                     PortfolioHealthUseCaseFactory.create(
                             viewManagerModel,
-                            portfolioHealthViewModel
+                            portfolioHealthViewModel,
+                            loggedInViewModel
                     );
             views.add(portfolioHealthView, portfolioHealthView.viewName);
-
             // 5. News View
             final NewsView newsView =
                     NewsUseCaseFactory.create(
