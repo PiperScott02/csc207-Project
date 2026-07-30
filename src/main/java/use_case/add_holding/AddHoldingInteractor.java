@@ -6,6 +6,7 @@ import entity.Portfolio;
 import entity.Stock;
 import entity.StockHolding;
 import entity.TransactionType;
+import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.StockDailyDataAccessInterface;
 
 /**
@@ -14,14 +15,14 @@ import use_case.StockDailyDataAccessInterface;
 public class AddHoldingInteractor implements AddHoldingInputBoundary {
     private final StockDailyDataAccessInterface stockDataAccessObject;
     private final AddHoldingOutputBoundary userPresenter;
-    private final Portfolio portfolio;
+    private final LoggedInViewModel loggedInViewModel;
 
     public AddHoldingInteractor(StockDailyDataAccessInterface stockDataAccessObject,
                                 AddHoldingOutputBoundary userPresenter,
-                                Portfolio portfolio) {
+                                LoggedInViewModel loggedInViewModel) {
         this.stockDataAccessObject = stockDataAccessObject;
         this.userPresenter = userPresenter;
-        this.portfolio = portfolio;
+        this.loggedInViewModel = loggedInViewModel;
     }
 
     @Override
@@ -40,6 +41,13 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             userPresenter.prepareFailView("Number of shares must be greater than zero.");
             return;
         }
+
+        // Retrieve the current user's portfolio dynamically
+        if (loggedInViewModel.getState() == null || loggedInViewModel.getState().getUser() == null) {
+            userPresenter.prepareFailView("No active user session found.");
+            return;
+        }
+        Portfolio portfolio = loggedInViewModel.getState().getUser().getPortfolio();
 
         // 3. Fetch the Stock from your Data Access Object
         Stock stock = null;
@@ -66,7 +74,6 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
         System.out.println("Price on " + purchaseDate + ": " + stock.getCloseOnDate(purchaseDate)); //TEST PRINT
 
         // 5. Record the purchase transaction using your StockHolding method
-        // (Triggers the method that automatically looks up the closing price on that date)
         holding.makeTransaction(stock, shares, purchaseDate, TransactionType.BUY);
 
         // 6. Package results and notify presenter
