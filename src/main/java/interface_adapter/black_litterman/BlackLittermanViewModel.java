@@ -9,7 +9,7 @@ public class BlackLittermanViewModel extends ViewModel<BlackLittermanState> {
      * Constructs a new BlackLittermanViewModel with the default view name and initial state.
      */
     public BlackLittermanViewModel() {
-        super("blackLitterman view");
+        super("Black-Litterman view");
         setState(new BlackLittermanState());
     }
 }
