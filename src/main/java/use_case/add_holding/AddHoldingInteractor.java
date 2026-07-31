@@ -27,12 +27,12 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
 
     @Override
     public void execute(AddHoldingInputData addHoldingInputData) {
-        // 1. Unpack the DTO
+        // Unpack the DTO carried over from the Add Holding Controller
         String ticker = addHoldingInputData.getTicker();
         double shares = addHoldingInputData.getShares();
         LocalDate purchaseDate = addHoldingInputData.getPurchaseDate();
 
-        // 2. Basic validation
+        // Basic Validation & Semantics Checks
         if (ticker == null || ticker.trim().isEmpty()) {
             userPresenter.prepareFailView("Ticker symbol cannot be empty.");
             return;
@@ -41,15 +41,23 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             userPresenter.prepareFailView("Number of shares must be greater than zero.");
             return;
         }
-
-        // Retrieve the current user's portfolio dynamically
+        if (purchaseDate == null) {
+            userPresenter.prepareFailView("Purchase date cannot be null.");
+            return;
+        }
+        if (purchaseDate.isAfter(LocalDate.now())) {
+            userPresenter.prepareFailView("Purchase date cannot be in the future.");
+            return;
+        }
         if (loggedInViewModel.getState() == null || loggedInViewModel.getState().getUser() == null) {
             userPresenter.prepareFailView("No active user session found.");
             return;
         }
+
+        // Access the current user's portfolio so holdings can be added
         Portfolio portfolio = loggedInViewModel.getState().getUser().getPortfolio();
 
-        // 3. Fetch the Stock from your Data Access Object
+        // Fetch the Stock from Data Access Object (talk to external API)
         Stock stock = null;
         try {
             stock = stockDataAccessObject.createStockAndHistory(ticker);
@@ -57,13 +65,12 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             userPresenter.prepareFailView("Error fetching stock data: " + e.getMessage());
             return;
         }
-
         if (stock == null) {
             userPresenter.prepareFailView("Stock ticker not found.");
             return;
         }
 
-        // 4. Check if the portfolio already contains a holding for this stock, or create a new one
+        // Check if the portfolio already contains a holding for this stock, or create a new one
         StockHolding holding = portfolio.getHoldingByTicker(ticker);
         if (holding == null) {
             holding = new StockHolding();
@@ -71,12 +78,10 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             portfolio.addHolding(holding);
         }
 
-        System.out.println("Price on " + purchaseDate + ": " + stock.getCloseOnDate(purchaseDate)); //TEST PRINT
-
-        // 5. Record the purchase transaction using your StockHolding method
+        // Record the purchase transaction using StockHolding method
         holding.makeTransaction(stock, shares, purchaseDate, TransactionType.BUY);
 
-        // 6. Package results and notify presenter
+        // Package results and notify presenter
         AddHoldingOutputData outputData = new AddHoldingOutputData(ticker, shares, portfolio.getHoldings(), false);
         userPresenter.prepareSuccessView(outputData);
     }
