@@ -99,7 +99,7 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
 
                     // Valid Ticker symbol check
                     String tickerText = tickerInputField.getText().trim();
-                    if (tickerText.isEmpty()) {
+                    if (tickerText.isEmpty() || !tickerText.matches("^[a-zA-Z]+$")) {
                         JOptionPane.showMessageDialog(AddHoldingView.this, "Please enter a valid ticker symbol.");
                         return;
                     }
