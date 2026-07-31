@@ -81,7 +81,7 @@ public class StockHolding {
         Transaction transaction = new Transaction();
 
         transaction.setDate(date);
-        transaction.setPricePerShare(stock.getCloseOnDate(date));
+        transaction.setPricePerShare(stock.getClosestPrice(date)); // Returns closest closing price even on non-trading days
         transaction.setNumberOfShares(quantity);
         transaction.setType(transactionType);
 

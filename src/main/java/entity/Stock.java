@@ -173,6 +173,22 @@ public class Stock {
         return null;
     }
 
+    /** Returns the closing price on the closest available trading day to a given date.
+     * Handles non-trading days such as weekends and holidays by searching backward up to a week.
+     * @param targetDate the target date to look up.
+     * @return the closing price on the closest trading day, or null if none found within a week.
+     */
+    public BigDecimal getClosestPrice(LocalDate targetDate) {
+        LocalDate currentDate = targetDate;
+        for (int i = 0; i < 7; i++) {
+            if (timeSeries != null && timeSeries.containsKey(currentDate)) {
+                return timeSeries.get(currentDate).getClose();
+            }
+            currentDate = currentDate.minusDays(1);
+        }
+        return null;
+    }
+
     /** Returns the daily change in price.
      * @return the daily change.
      */
