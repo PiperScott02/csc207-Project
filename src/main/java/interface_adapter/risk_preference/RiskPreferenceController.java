@@ -46,4 +46,11 @@ public class RiskPreferenceController {
 
         interactor.execute(inputData);
     }
+
+    /**
+     * Loads the current user's saved risk preferences.
+     */
+    public void load() {
+        interactor.load();
+    }
 }
