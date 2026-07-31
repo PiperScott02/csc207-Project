@@ -48,6 +48,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JLabel welcomeLabel = new JLabel("Welcome");
     private DefaultTableModel tableModel;
     private JLabel lastUpdatedLabel;
+    private JLabel totalHoldingsLabel;
     private boolean hasAddedHolding = false;
 
     /**
@@ -249,9 +250,10 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         final JScrollPane scrollPane = new JScrollPane(holdingsTable);
         final JPanel statusPanel = new JPanel(new BorderLayout());
 
+        totalHoldingsLabel = new JLabel("Total Holdings: 0");
         lastUpdatedLabel = new JLabel("Last updated: --");
 
-        statusPanel.add(new JLabel("Total Holdings: " ), BorderLayout.WEST);
+        statusPanel.add(totalHoldingsLabel, BorderLayout.WEST);
         statusPanel.add(lastUpdatedLabel, BorderLayout.EAST);
 
         holdingsPanel.add(scrollPane, BorderLayout.CENTER);
@@ -292,6 +294,13 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                             "-"
                     });
                 }
+
+                // Only update "Total Holdings:" count when a Holding is added
+                if (totalHoldingsLabel != null) {
+                    int uniqueHoldingCount = state.getHoldings().size();
+                    totalHoldingsLabel.setText("Total Holdings: " + uniqueHoldingCount);
+                }
+
                 // Check if user has any Holdings
                 if (!state.getHoldings().isEmpty()) {
                     hasAddedHolding = true;
