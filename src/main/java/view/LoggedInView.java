@@ -47,6 +47,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
     private DefaultTableModel tableModel;
+    private JLabel lastUpdatedLabel;
+    private boolean hasAddedHolding = false;
 
     /**
      * Creates the home screen.
@@ -247,8 +249,10 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         final JScrollPane scrollPane = new JScrollPane(holdingsTable);
         final JPanel statusPanel = new JPanel(new BorderLayout());
 
-        statusPanel.add(new JLabel("Total Holdings: 0"), BorderLayout.WEST);
-        statusPanel.add(new JLabel("Last updated: --"), BorderLayout.EAST);
+        lastUpdatedLabel = new JLabel("Last updated: --");
+
+        statusPanel.add(new JLabel("Total Holdings: " ), BorderLayout.WEST);
+        statusPanel.add(lastUpdatedLabel, BorderLayout.EAST);
 
         holdingsPanel.add(scrollPane, BorderLayout.CENTER);
         holdingsPanel.add(statusPanel, BorderLayout.SOUTH);
@@ -288,12 +292,24 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                             "-"
                     });
                 }
+                // Check if user has any Holdings
+                if (!state.getHoldings().isEmpty()) {
+                    hasAddedHolding = true;
+                }
+            }
+            // Only update "Last updated:" timestamp when a Holding is added
+            if (lastUpdatedLabel != null) {
+                if (hasAddedHolding) {
+                    String currentTime = java.time.LocalDateTime.now()
+                            .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd:mm:ss"));
+                    lastUpdatedLabel.setText("Last updated: " + currentTime);
+                } else {
+                    lastUpdatedLabel.setText("Last updated: --");
+                }
             }
         }
     }
-
     public String getViewName() {
         return viewName;
     }
-
 }

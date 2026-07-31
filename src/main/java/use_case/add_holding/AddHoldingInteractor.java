@@ -27,8 +27,8 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
 
     @Override
     public void execute(AddHoldingInputData addHoldingInputData) {
-        // Unpack the DTO carried over from the Add Holding Controller
-        String ticker = addHoldingInputData.getTicker();
+        // Unpack the DTO carried over from the Add Holding Controller AND force uppercase ticker
+        String ticker = addHoldingInputData.getTicker().toUpperCase();
         double shares = addHoldingInputData.getShares();
         LocalDate purchaseDate = addHoldingInputData.getPurchaseDate();
 
