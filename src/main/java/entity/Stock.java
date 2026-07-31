@@ -173,19 +173,38 @@ public class Stock {
         return null;
     }
 
-    /** Returns the closing price on the closest available trading day to a given date.
-     * Handles non-trading days such as weekends and holidays by searching backward up to a week.
+    /** Returns the closing price on the closest available trading day to a given date,
+     * searching through all history if necessary to handle random or unlisted dates (non-trading days or perhaps
+     * the company had not been publicly traded yet at that specified date etc.)
      * @param targetDate the target date to look up.
-     * @return the closing price on the closest trading day, or null if none found within a week.
+     * @return the closing price on the closest trading day, or null if time series is empty.
      */
     public BigDecimal getClosestPrice(LocalDate targetDate) {
-        LocalDate currentDate = targetDate;
-        for (int i = 0; i < 7; i++) {
-            if (timeSeries != null && timeSeries.containsKey(currentDate)) {
-                return timeSeries.get(currentDate).getClose();
-            }
-            currentDate = currentDate.minusDays(1);
+        if (timeSeries == null || timeSeries.isEmpty()) {
+            return null;
         }
+
+        // If exact date exists, return it immediately
+        if (timeSeries.containsKey(targetDate)) {
+            return timeSeries.get(targetDate).getClose();
+        }
+
+        LocalDate closestDate = null;
+        long minDaysDifference = Long.MAX_VALUE;
+
+        // Scan through all available dates in the time series to find the closest one
+        for (LocalDate date : timeSeries.keySet()) {
+            long diff = Math.abs(java.time.temporal.ChronoUnit.DAYS.between(date, targetDate));
+            if (diff < minDaysDifference) {
+                minDaysDifference = diff;
+                closestDate = date;
+            }
+        }
+
+        if (closestDate != null) {
+            return timeSeries.get(closestDate).getClose();
+        }
+
         return null;
     }
 
