@@ -44,13 +44,16 @@ public class StatisticsService {
         Double mean1 = calculateMean(ratios1);
         Double mean2 = calculateMean(ratios2);
         Double sumofdifferencesmultiplied = 0.0;
-        for (int i = 0; i < ratios1.size(); i++) {
+
+        int n = Math.min(ratios1.size(), ratios2.size());
+        for (int i = 0; i < n; i++) {
             Double differences1 = ratios1.get(i) - mean1;
             Double differences2 = ratios2.get(i) - mean2;
-            Double productofdifferences = differences1*differences2;
+            Double productofdifferences = differences1 * differences2;
             sumofdifferencesmultiplied = sumofdifferencesmultiplied + productofdifferences;
         }
-        Double covariance = sumofdifferencesmultiplied/(ratios1.size() - 1);
+
+        Double covariance = sumofdifferencesmultiplied / (n - 1);
         return covariance;
     }
 

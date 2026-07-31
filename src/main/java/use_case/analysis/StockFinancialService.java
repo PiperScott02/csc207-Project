@@ -155,6 +155,7 @@ public class StockFinancialService {
                 double covariance = StatisticsService.calculateCovariance(returnRatios(stockList.get(i)),
                         returnRatios(stockList.get(j)));
                 covariancesArray[i][j] = covariance;
+                covariancesArray[j][i] = covariance; // Mirror the value across the diagonal
             }
         }
         return covariancesArray;
