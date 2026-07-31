@@ -175,7 +175,8 @@ public class Stock {
 
     /** Returns the closing price on the closest available trading day to a given date,
      * searching through all history if necessary to handle random or unlisted dates (non-trading days or perhaps
-     * the company had not been publicly traded yet at that specified date etc.)
+     * the company had not been publicly traded yet at that specified time, in this case, the closest closing price
+     * is returned which would be on the day of the company's IPO).
      * @param targetDate the target date to look up.
      * @return the closing price on the closest trading day, or null if time series is empty.
      */
