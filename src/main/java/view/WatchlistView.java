@@ -32,13 +32,27 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new EmptyBorder(20, 20, 20, 20));
 
+        // Top Navigation / Action Panel
+        JPanel topButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        topButtonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         // Back Button setup
         JButton backButton = new JButton("← Back to Profile");
-        backButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         backButton.addActionListener(e -> {
             this.viewManagerModel.setState(this.loggedInViewModel.getViewName());
             this.viewManagerModel.firePropertyChanged();
         });
+
+        // Add Watchlist Item Button setup
+        JButton addWatchlistButton = new JButton("+ Add Watchlist Item");
+        addWatchlistButton.addActionListener(e -> {
+            this.viewManagerModel.setState("add watchlist");
+            this.viewManagerModel.firePropertyChanged();
+        });
+
+        topButtonPanel.add(backButton);
+        topButtonPanel.add(Box.createHorizontalStrut(10));
+        topButtonPanel.add(addWatchlistButton);
 
         // Title setup
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16f));
@@ -50,7 +64,7 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Build the panel
-        add(backButton);
+        add(topButtonPanel);
         add(Box.createVerticalStrut(15));
         add(titleLabel);
         add(Box.createVerticalStrut(15));

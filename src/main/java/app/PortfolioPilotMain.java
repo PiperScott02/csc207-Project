@@ -14,6 +14,7 @@ import data_access.stock_daily.StockService;
 import entity.Portfolio;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_holding.AddHoldingViewModel;
+import interface_adapter.add_watchlist.AddWatchlistViewModel; // Added import
 import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.black_litterman.BlackLittermanViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -87,6 +88,7 @@ public final class PortfolioPilotMain {
         final WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
         final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel();
         final AddHoldingViewModel addHoldingViewModel = new AddHoldingViewModel();
+        final AddWatchlistViewModel addWatchlistViewModel = new AddWatchlistViewModel(); // Added ViewModel
 
         /*
          * Alpha Vantage API key
@@ -247,7 +249,6 @@ public final class PortfolioPilotMain {
                 );
         views.add(blackLittermanView, blackLittermanView.getViewName());
 
-        // ========================================================
         // 11. Add Holding View
         final AddHoldingView addHoldingView =
                 AddHoldingUseCaseFactory.create(
@@ -258,8 +259,20 @@ public final class PortfolioPilotMain {
                 );
         views.add(addHoldingView, addHoldingView.getViewName());
 
+        // ========================================================
+        // 12. Add Watchlist View
+        // ========================================================
+        final AddWatchlistView addWatchlistView =
+                AddWatchlistPilotMain.create(
+                        viewManagerModel,
+                        loggedInViewModel,
+                        addWatchlistViewModel,
+                        stockDailyDataAccessObject
+                );
+        views.add(addWatchlistView, addWatchlistView.viewName);
+
         // ==========================================
-        // 12. Startup Configuration
+        // 13. Startup Configuration
         // ==========================================
         viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChanged();
