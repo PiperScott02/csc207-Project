@@ -10,6 +10,7 @@ import data_access.FileStockDataAccessObject;
 import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
 
+import data_access.ticker_search.TickerSearchDataAccessObject;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_holding.AddHoldingViewModel;
 import interface_adapter.black_litterman.BlackLittermanController;
@@ -31,6 +32,7 @@ import interface_adapter.currency_conversion.CurrencyConversionController;
 import interface_adapter.currency_conversion.CurrencyConversionViewModel;
 
 import use_case.StockDailyDataAccessInterface;
+import use_case.TickerSearchDataAccessInterface;
 import use_case.analysis.BlackLittermanService;
 import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
@@ -126,6 +128,9 @@ public final class PortfolioPilotMain {
 
         final SimilarSearchDataAccessInterface similarSearchDataAccessObject =
                 new SimilarSearchDataAccessObject(apiKey);
+
+        final TickerSearchDataAccessInterface tickerSearchDataAccessObject =
+                new TickerSearchDataAccessObject(apiKey);
 
         final StockDataAccessInterface stockDataAccessObject =
                 new FileStockDataAccessObject();
@@ -232,7 +237,7 @@ public final class PortfolioPilotMain {
                         similarSearchViewModel,
                         tickerSearchViewModel,
                         stockViewModel,
-                        stockDailyDataAccessObject,
+                        tickerSearchDataAccessObject,
                         similarSearchDataAccessObject,
                         stockController,
                         loggedInViewModel

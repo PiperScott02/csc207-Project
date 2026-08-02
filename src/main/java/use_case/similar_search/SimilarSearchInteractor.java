@@ -1,10 +1,9 @@
 package use_case.similar_search;
 
 import entity.Stock;
-import use_case.StockDailyDataAccessInterface;
+import use_case.TickerSearchDataAccessInterface;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * The Similar Search Interactor.
@@ -12,14 +11,14 @@ import java.util.List;
 public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
 
     private final SimilarSearchDataAccessInterface similarSearchDataAccessObject;
-    private final StockDailyDataAccessInterface stockDailyDataAccessObject;
+    private final TickerSearchDataAccessInterface tickerSearchDataAccessObject;
     private final SimilarSearchOutputBoundary similarSearchPresenter;
 
     public SimilarSearchInteractor(SimilarSearchDataAccessInterface similarSearchAccessInterface,
-                                   StockDailyDataAccessInterface stockDailyDataAccessInterface,
+                                   TickerSearchDataAccessInterface tickerSearchDataAccessObject,
                                    SimilarSearchOutputBoundary similarSearchOutputBoundary) {
         this.similarSearchDataAccessObject = similarSearchAccessInterface;
-        this.stockDailyDataAccessObject = stockDailyDataAccessInterface;
+        this.tickerSearchDataAccessObject = tickerSearchDataAccessObject;
         this.similarSearchPresenter = similarSearchOutputBoundary;
     }
 
@@ -37,7 +36,7 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
         else {
             Stock[] similarStocks = new Stock[similarCompanyNames.length];
             for (int i = 0; i < similarCompanyNames.length; i++) {
-                similarStocks[i] = stockDailyDataAccessObject.createStockAndHistory(similarCompanyNames[i]);
+                similarStocks[i] = tickerSearchDataAccessObject.createBasicStock(similarCompanyNames[i]);
             }
 
             SimilarSearchOutputData[] similarSearchOutputList =
@@ -47,8 +46,8 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
                         new SimilarSearchOutputData(
                                 similarStocks[i].getTickerSymbol(),
                                 similarStocks[i].getCompanyName(),
-                                null,
-                                null,
+                                similarStocks[i].getCountry(),
+                                similarStocks[i].getIndustry(),
                                 similarStocks[i].getPreviousClose(),
                                 false);
             }

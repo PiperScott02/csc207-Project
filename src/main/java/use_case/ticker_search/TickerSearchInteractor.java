@@ -1,7 +1,7 @@
 package use_case.ticker_search;
 
 import entity.Stock;
-import use_case.StockDailyDataAccessInterface;
+import use_case.TickerSearchDataAccessInterface;
 
 import java.io.IOException;
 
@@ -10,19 +10,19 @@ import java.io.IOException;
  */
 public class TickerSearchInteractor implements TickerSearchInputBoundary {
 
-    private final StockDailyDataAccessInterface stockDailyDataAccessObject;
+    private final TickerSearchDataAccessInterface tickerSearchDataAccessObject;
     private final TickerSearchOutputBoundary tickerSearchOutputPresenter;
 
-    public TickerSearchInteractor(StockDailyDataAccessInterface stockDailyDataAccessObject,
+    public TickerSearchInteractor(TickerSearchDataAccessInterface tickerSearchDataAccessObject,
                                   TickerSearchOutputBoundary tickerSearchOutputBoundary) {
-        this.stockDailyDataAccessObject = stockDailyDataAccessObject;
+        this.tickerSearchDataAccessObject = tickerSearchDataAccessObject;
         this.tickerSearchOutputPresenter = tickerSearchOutputBoundary;
     }
 
     @Override
     public void execute(TickerSearchInputData tickerSearchInputData) throws IOException, InterruptedException {
         final String tickerSymbol = tickerSearchInputData.getTickerSymbol();
-        final Stock tickerStock = stockDailyDataAccessObject.createStockAndHistory(tickerSymbol);
+        final Stock tickerStock = tickerSearchDataAccessObject.createBasicStock(tickerSymbol);
 
         if (tickerStock == null) { // TODO: this is meant to check if the tickerSymbol was actually valid
             tickerSearchOutputPresenter.prepareFailView("No Exact Match for Ticker Symbol");
@@ -31,8 +31,8 @@ public class TickerSearchInteractor implements TickerSearchInputBoundary {
             final TickerSearchOutputData tickerSearchOutputData =
                     new TickerSearchOutputData(tickerStock.getTickerSymbol(),
                             tickerStock.getCompanyName(),
-                            null,
-                            null,
+                            tickerStock.getCountry(),
+                            tickerStock.getIndustry(),
                             tickerStock.getPreviousClose(),
                             false);
             tickerSearchOutputPresenter.prepareSuccessView(tickerSearchOutputData);
