@@ -69,9 +69,23 @@ public class FileUserDataAccessObject
 
                 String row;
                 while ((row = reader.readLine()) != null) {
-                    final String[] col = row.split(",");
-                    final String username = String.valueOf(col[headers.get("username")]);
-                    final String password = String.valueOf(col[headers.get("password")]);
+                    if (row.isBlank()) {
+                        continue;
+                    }
+
+                    final String[] col = row.split(",", -1);
+
+                    if (col.length < headers.size()) {
+                        continue;
+                    }
+
+                    final String username = col[headers.get("username")].trim();
+                    final String password = col[headers.get("password")];
+
+                    if (username.isEmpty()) {
+                        continue;
+                    }
+
                     final User user = userFactory.create(username, password);
                     accounts.put(username, user);
                 }
