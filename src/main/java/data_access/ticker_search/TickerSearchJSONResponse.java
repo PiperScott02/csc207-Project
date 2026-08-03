@@ -40,13 +40,14 @@ public class TickerSearchJSONResponse {
     }
 
     public BigDecimal getStockPrice() {
-        try {
-            final BigDecimal PERationAsBigDecimal = new BigDecimal(this.PERatio);
-            final BigDecimal EPSAsBigDecimal = new BigDecimal(this.EPS);
-            return PERationAsBigDecimal.multiply(EPSAsBigDecimal);
-        } catch (NullPointerException e) {
-            System.out.println("NullPointerException (Temporary)"); // TODO: properly handle getting no response
-            return new BigDecimal("0");
+        if (this.PERatio.equals("None")
+                || this.PERatio.equals("NONE")
+                || this.EPS.equals("None")
+                || this.EPS.equals("NONE")) {
+            return null;
         }
+        final BigDecimal PERationAsBigDecimal = new BigDecimal(this.PERatio);
+        final BigDecimal EPSAsBigDecimal = new BigDecimal(this.EPS);
+        return PERationAsBigDecimal.multiply(EPSAsBigDecimal);
     }
 }

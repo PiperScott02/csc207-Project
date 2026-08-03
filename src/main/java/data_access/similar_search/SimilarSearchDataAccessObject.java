@@ -24,7 +24,7 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
     }
 
     @Override
-    public String[] similarNames(String keywords) throws IOException, InterruptedException {
+    public String[][] similarStockInfo(String keywords) throws IOException, InterruptedException {
         final String query = "?function=" + function +
                 "&keywords=" + keywords +
                 "&apikey=" + api_key;
@@ -37,12 +37,6 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
         TimeUnit.SECONDS.sleep(1);
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() != 200) {
-            // TODO: make this throw specific error
-            // specific info for different error codes found here:
-            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
-        }
-
         return parseJSON(response.body());
     }
 
@@ -50,16 +44,18 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
             .setPrettyPrinting()
             .create();
 
-    private String[] parseJSON(String responseBody) {
+    private String[][] parseJSON(String responseBody) {
         SimilarSearchJSONResponse javaResponse =
                 GSON.fromJson(responseBody, SimilarSearchJSONResponse.class);
 
-        String[] similarStockTickerSymbols = new String[javaResponse.bestMatches.length];
+        String[][] similarStocks = new String[javaResponse.bestMatches.length][3];
 
         for (int i = 0; i < javaResponse.bestMatches.length; i++) {
-            similarStockTickerSymbols[i] = javaResponse.bestMatches[i].tickerSymbol;
+            similarStocks[i][0] = javaResponse.bestMatches[i].tickerSymbol;
+            similarStocks[i][1] = javaResponse.bestMatches[i].companyName;
+            similarStocks[i][2] = javaResponse.bestMatches[i].region;
         }
 
-        return similarStockTickerSymbols;
+        return similarStocks;
     }
 }
