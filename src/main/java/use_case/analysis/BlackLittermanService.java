@@ -17,9 +17,20 @@ import java.util.*;
  */
 public class BlackLittermanService {
 
+    /** The coefficient of risk aversion ($\delta$) used in equilibrium return calculations. */
     public final double RISK_AVERSION_COEFFICIENT = 2.5;
+
+    /** The scaling factor ($\tau$) representing the uncertainty of the prior market estimate. */
     public final double DEFAULT_TAU = 0.05;
 
+    /**
+     * Computes the market weight caps (market capitalization proportions) for each asset
+     * within the asset universe derived from the given holdings.
+     *
+     * @experimental
+     * @param holdings the list of stock holdings comprising the portfolio universe
+     * @return a map matching each ticker symbol to its proportional market capitalization weight
+     */
     public Map<String, Double> computeMarketWeightCaps(List<StockHolding> holdings) {
         Map<String, Double> marketWeightCaps = new HashMap<>();
         AssetUniverseService universe = new AssetUniverseService(holdings);
@@ -57,6 +68,13 @@ public class BlackLittermanService {
         return marketWeightCaps;
     }
 
+    /**
+     * Computes the implied equilibrium expected return vector ($\Pi$) based on market weights
+     * and the asset covariance matrix.
+     *
+     * @param holdings the list of stock holdings defining the asset universe
+     * @return a RealMatrix representing the daily implied equilibrium expected returns
+     */
     public RealMatrix impliedEquilibriumExpectedReturn(List<StockHolding> holdings) {
         Map<String, Double> marketWeightCaps = computeMarketWeightCaps(holdings);
 
@@ -77,6 +95,13 @@ public class BlackLittermanService {
         return covarianceMatrix.multiply(weightsMatrix).scalarMultiply(RISK_AVERSION_COEFFICIENT);
     }
 
+    /**
+     * Constructs the pick matrix ($P$) that maps the user's views to the assets in the universe.
+     *
+     * @param holdings the list of stock holdings defining the asset universe
+     * @param viewTickers the list of ticker symbols that have active user views
+     * @return a RealMatrix linking individual views to their respective stock indices
+     */
     public RealMatrix pickMatrix(List<StockHolding> holdings, List<String> viewTickers) {
         AssetUniverseService universe = new AssetUniverseService(holdings);
         int numViews = viewTickers.size();
@@ -95,6 +120,16 @@ public class BlackLittermanService {
         return new Array2DRowRealMatrix(pArray);
     }
 
+    /**
+     * Constructs the diagonal uncertainty matrix ($\Omega$) for the user views based on
+     * specified confidence levels and asset variances.
+     *
+     * @param holdings the list of stock holdings defining the asset universe
+     * @param viewTickers the list of ticker symbols with active views
+     * @param confidenceLevels a map of ticker symbols to qualitative confidence levels (e.g., "Low", "Medium", "High")
+     * @param covarianceMatrix the aligned covariance matrix of asset returns
+     * @return a diagonal RealMatrix representing the variance of the error terms in the user views
+     */
     public RealMatrix omegaMatrix(List<StockHolding> holdings,
                                   List<String> viewTickers,
                                   Map<String, String> confidenceLevels,
@@ -126,6 +161,13 @@ public class BlackLittermanService {
         return new Array2DRowRealMatrix(omegaArray);
     }
 
+    /**
+     * Converts annual percentage user views into daily compounding decimal rate expectations ($Q$).
+     *
+     * @param userViews a map of ticker symbols to expected annual percentage returns
+     * @param viewTickers the list of ordered ticker symbols corresponding to the views
+     * @return a RealMatrix containing the daily expected return values for each view
+     */
     public RealMatrix userViews(Map<String, Double> userViews, List<String> viewTickers) {
         int numViews = viewTickers.size();
         double[][] qArray = new double[numViews][1];
@@ -142,10 +184,22 @@ public class BlackLittermanService {
         return new Array2DRowRealMatrix(qArray);
     }
 
+    /**
+     * Placeholder method to compute market estimate returns for a given user.
+     *
+     * @param user the user context for estimation
+     * @return an empty map reserved for future implementation
+     */
     public Map<String, Double> computeMarketEstimateReturns(User user) {
         return new HashMap<>();
     }
 
+    /**
+     * Builds and aligns the covariance matrix for all stocks in the portfolio universe.
+     *
+     * @param holdings the list of stock holdings defining the asset universe
+     * @return a RealMatrix containing the covariance values across all universe assets
+     */
     public RealMatrix buildAlignedCovarianceMatrix(List<StockHolding> holdings) {
         AssetUniverseService universe = new AssetUniverseService(holdings);
         List<Stock> orderedStocks = universe.getStocks();
@@ -154,6 +208,15 @@ public class BlackLittermanService {
         return StockFinancialService.buildCovarianceMatrix(covariancesArray);
     }
 
+    /**
+     * Computes the final Black-Litterman adjusted expected annual returns by blending
+     * market equilibrium priors with active user views and confidence weights.
+     *
+     * @param holdings the list of stock holdings defining the asset universe
+     * @param userViewsMap a map of ticker symbols to expected annual percentage returns
+     * @param confidenceLevels a map of ticker symbols to confidence designations
+     * @return a map of ticker symbols to their newly blended, annualized expected returns
+     */
     public Map<String, Double> computeAdjustedReturns(List<StockHolding> holdings,
                                                       Map<String, Double> userViewsMap,
                                                       Map<String, String> confidenceLevels) {
