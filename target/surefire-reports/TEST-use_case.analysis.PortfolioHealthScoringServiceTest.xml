@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="use_case.analysis.StockFinancialServiceTest" time="0.545" tests="6" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="use_case.analysis.PortfolioHealthScoringServiceTest" time="0.049" tests="5" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="26"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -61,31 +61,9 @@
     <property name="maven.repo.local" value="/h/u4/c6/05/scotta26/.m2/repository"/>
     <property name="java.class.version" value="70.0"/>
   </properties>
-  <testcase name="buildCovariancesArray" classname="use_case.analysis.StockFinancialServiceTest" time="0.513">
-    <system-out><![CDATA[Calculated Variance A: 0.005000000000000001
-Calculated Covariance 0,1: 0.0025000000000000005
-]]></system-out>
-    <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (/h/u4/c6/05/scotta26/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.12/byte-buddy-agent-1.14.12.jar)
-WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
-WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
-WARNING: Dynamic loading of agents will be disallowed by default in a future release
-]]></system-err>
-  </testcase>
-  <testcase name="calculateBetaZeroMarketVariance" classname="use_case.analysis.StockFinancialServiceTest" time="0.004"/>
-  <testcase name="calculateAlpha" classname="use_case.analysis.StockFinancialServiceTest" time="0.004">
-    <system-out><![CDATA[Calculated Alpha: 1.4762772522214362E-4
-]]></system-out>
-  </testcase>
-  <testcase name="calculateBeta" classname="use_case.analysis.StockFinancialServiceTest" time="0.003">
-    <system-out><![CDATA[Calculated Beta: 88.49999994262522
-]]></system-out>
-  </testcase>
-  <testcase name="calculateSharpeRatio" classname="use_case.analysis.StockFinancialServiceTest" time="0.001">
-    <system-out><![CDATA[Calculated Sharpe Ratio: 2.119232572247728
-]]></system-out>
-  </testcase>
-  <testcase name="returnRatios" classname="use_case.analysis.StockFinancialServiceTest" time="0.001">
-    <system-out><![CDATA[[0.02, -0.014705882353]
-]]></system-out>
-  </testcase>
+  <testcase name="calculateNewsScore" classname="use_case.analysis.PortfolioHealthScoringServiceTest" time="0.041"/>
+  <testcase name="calculatePortfolioHealthScore" classname="use_case.analysis.PortfolioHealthScoringServiceTest" time="0.001"/>
+  <testcase name="calculateSharpeScore" classname="use_case.analysis.PortfolioHealthScoringServiceTest" time="0.001"/>
+  <testcase name="calculateRiskAlignmentScore" classname="use_case.analysis.PortfolioHealthScoringServiceTest" time="0.002"/>
+  <testcase name="calculateDiversificationScore" classname="use_case.analysis.PortfolioHealthScoringServiceTest" time="0.001"/>
 </testsuite>

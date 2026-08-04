@@ -73,6 +73,8 @@
                 double deviation = Math.abs(beta - comparisonScore);
                 if (deviation > 0.2) {
                     difference = deviation - 0.2;
+                } else {
+                    difference = 0.0;
                 }
             } else if (level == RiskLevel.AGGRESSIVE) {
                 comparisonScore = 1.2;
@@ -81,15 +83,17 @@
                 }
             }
 
+
+            final double EPSILON = 1e-8;
+
             // Scoring tiers based on the calculated penalty difference
             if (difference <= 0.0) return 25.0;
-            if (difference <= 0.15) return 20.0;
-            if (difference <= 0.3) return 15.0;
-            if (difference <= 0.45) return 10.0;
-            if (difference <= 0.6) return 5.0;
+            if (difference <= 0.15 + EPSILON) return 20.0;
+            if (difference <= 0.3 + EPSILON) return 15.0;
+            if (difference <= 0.45 + EPSILON) return 10.0;
+            if (difference <= 0.6 + EPSILON) return 5.0;
             return 0.0;
         }
-
         /**
          * Calculates the Diversification sub-score (out of 25.0 points) using
          * Choueifat's Diversification Ratio (CDR).

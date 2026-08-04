@@ -3,7 +3,6 @@
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/BlackLittermanPilotMain.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/BlackLittermanUseCaseFactory.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/ChangePasswordUseCaseFactory.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/CurrencyConversionUseCaseFactory.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/LoginUseCaseFactory.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/Main.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/MainWithDB.java
@@ -21,7 +20,6 @@
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/WatchlistPilotMain.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/app/WatchlistUseCaseFactory.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/AlphaVantageNewsDataAccessObject.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/CurrencyConversionDataAccessObject.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/DBUserDataAccessObject.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/FileStockDataAccessObject.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/FileUserDataAccessObject.java
@@ -32,10 +30,6 @@
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/stock_daily/AlphaVantageOverviewResponse.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/stock_daily/AlphaVantageResponse.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/stock_daily/StockService.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/ticker_search/TickerSearchDailyDataAccessObject.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/ticker_search/TickerSearchDailyJSONResponse.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/ticker_search/TickerSearchDataAccessObject.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/data_access/ticker_search/TickerSearchJSONResponse.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/entity/CommonUser.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/entity/CommonUserFactory.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/entity/DailyPriceData.java
@@ -63,10 +57,6 @@
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/black_litterman/BlackLittermanPresenter.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/black_litterman/BlackLittermanState.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/black_litterman/BlackLittermanViewModel.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/currency_conversion/CurrencyConversionController.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/currency_conversion/CurrencyConversionPresenter.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/currency_conversion/CurrencyConversionState.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/currency_conversion/CurrencyConversionViewModel.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/logged_in/ChangePasswordController.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/logged_in/LoggedInPresenter.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/logged_in/LoggedInState.java
@@ -108,7 +98,6 @@
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/watchlist/WatchlistState.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/interface_adapter/watchlist/WatchlistViewModel.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/StockDailyDataAccessInterface.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/TickerSearchDataAccessInterface.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/add_holding/AddHoldingInputBoundary.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/add_holding/AddHoldingInputData.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/add_holding/AddHoldingInteractor.java
@@ -133,12 +122,6 @@
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/change_password/ChangePasswordOutputBoundary.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/change_password/ChangePasswordOutputData.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/change_password/ChangePasswordUserDataAccessInterface.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/currency_conversion/CurrencyConversionDataAccessInterface.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/currency_conversion/CurrencyConversionInputBoundary.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/currency_conversion/CurrencyConversionInputData.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/currency_conversion/CurrencyConversionInteractor.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/currency_conversion/CurrencyConversionOutputBoundary.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/currency_conversion/CurrencyConversionOutputData.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/login/LoginInputBoundary.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/login/LoginInputData.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/login/LoginInteractor.java
@@ -194,7 +177,6 @@
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/use_case/watchlist/WatchlistOutputData.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/view/AddHoldingView.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/view/BlackLittermanView.java
-/h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/view/CurrencyConversionView.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/view/LabelTextPanel.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/view/LoggedInView.java
 /h/u4/c6/05/scotta26/IdeaProjects/csc207-Project/src/main/java/view/LoginView.java

@@ -1,1 +1,3 @@
+use_case/analysis/StatisticsServiceTest.class
 use_case/analysis/StockFinancialServiceTest.class
+use_case/analysis/PortfolioHealthScoringServiceTest.class
