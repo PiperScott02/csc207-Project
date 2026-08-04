@@ -1,7 +1,6 @@
 package use_case.similar_search;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * DAO for the Similar Search Use Case.
@@ -15,6 +14,6 @@ public interface SimilarSearchDataAccessInterface {
      * @throws IOException
      * @throws InterruptedException
      */
-    String[] similarNames(String tickerSymbol) throws IOException, InterruptedException;
+    String[][] similarStockInfo(String tickerSymbol) throws IOException, InterruptedException;
 
 }

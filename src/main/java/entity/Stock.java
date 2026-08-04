@@ -25,6 +25,8 @@ public class Stock {
 
     private String currency;
 
+    private String industry;
+
     private BigDecimal dailyChange;
 
     private BigDecimal dividendYield;
@@ -320,5 +322,13 @@ public class Stock {
         return beta != null
                 && alpha != null
                 && sharpeRatio != null;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public String getIndustry() {
+        return industry;
     }
 }

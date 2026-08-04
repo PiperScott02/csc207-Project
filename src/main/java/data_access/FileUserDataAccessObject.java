@@ -15,14 +15,18 @@ import entity.UserFactory;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
+import use_case.risk_preference.RiskPreferenceUserDataAccessInterface;
 
 /**
  * DAO for user data implemented using a File to persist the data.
  */
-public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
-                                                 LoginUserDataAccessInterface,
-                                                 ChangePasswordUserDataAccessInterface {
+public class FileUserDataAccessObject
+        implements SignupUserDataAccessInterface,
+        LoginUserDataAccessInterface,
+        ChangePasswordUserDataAccessInterface,
+        RiskPreferenceUserDataAccessInterface {
 
+    private String currentUser;
     private static final String HEADER = "username,password";
 
     private final File csvFile;
@@ -32,6 +36,16 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     public FileUserDataAccessObject(String csvPath, UserFactory userFactory) throws IOException {
 
         csvFile = new File(csvPath);
+        final File parentFolder = csvFile.getParentFile();
+
+        if (parentFolder != null && !parentFolder.exists()) {
+            parentFolder.mkdirs();
+        }
+
+        if (!csvFile.exists()) {
+            csvFile.createNewFile();
+        }
+
         headers.put("username", 0);
         headers.put("password", 1);
 
@@ -44,14 +58,34 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                 final String header = reader.readLine();
 
                 if (!header.equals(HEADER)) {
-                    throw new RuntimeException(String.format("header should be%n: %s%but was:%n%s", HEADER, header));
+                    throw new RuntimeException(
+                            String.format(
+                                    "Header should be:%n%s%nBut was:%n%s",
+                                    HEADER,
+                                    header
+                            )
+                    );
                 }
 
                 String row;
                 while ((row = reader.readLine()) != null) {
-                    final String[] col = row.split(",");
-                    final String username = String.valueOf(col[headers.get("username")]);
-                    final String password = String.valueOf(col[headers.get("password")]);
+                    if (row.isBlank()) {
+                        continue;
+                    }
+
+                    final String[] col = row.split(",", -1);
+
+                    if (col.length < headers.size()) {
+                        continue;
+                    }
+
+                    final String username = col[headers.get("username")].trim();
+                    final String password = col[headers.get("password")];
+
+                    if (username.isEmpty()) {
+                        continue;
+                    }
+
                     final User user = userFactory.create(username, password);
                     accounts.put(username, user);
                 }
@@ -94,7 +128,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
 
     @Override
     public void setCurrentUser(String name) {
-        // Not implemented for this assignment
+        currentUser = name;
     }
 
     @Override
@@ -111,7 +145,6 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
 
     @Override
     public String getCurrentUser() {
-        // Not implemented for this assignment
-        return null;
+        return currentUser;
     }
 }

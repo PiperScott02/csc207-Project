@@ -1,10 +1,9 @@
 package use_case.similar_search;
 
 import entity.Stock;
-import use_case.StockDailyDataAccessInterface;
+import use_case.TickerSearchDataAccessInterface;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * The Similar Search Interactor.
@@ -12,14 +11,14 @@ import java.util.List;
 public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
 
     private final SimilarSearchDataAccessInterface similarSearchDataAccessObject;
-    private final StockDailyDataAccessInterface stockDailyDataAccessObject;
+    private final TickerSearchDataAccessInterface tickerSearchDataAccessObject;
     private final SimilarSearchOutputBoundary similarSearchPresenter;
 
     public SimilarSearchInteractor(SimilarSearchDataAccessInterface similarSearchAccessInterface,
-                                   StockDailyDataAccessInterface stockDailyDataAccessInterface,
+                                   TickerSearchDataAccessInterface tickerSearchDataAccessObject,
                                    SimilarSearchOutputBoundary similarSearchOutputBoundary) {
         this.similarSearchDataAccessObject = similarSearchAccessInterface;
-        this.stockDailyDataAccessObject = stockDailyDataAccessInterface;
+        this.tickerSearchDataAccessObject = tickerSearchDataAccessObject;
         this.similarSearchPresenter = similarSearchOutputBoundary;
     }
 
@@ -29,26 +28,26 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
     @Override
     public void execute(SimilarSearchInputData similarSearchInputData) throws IOException, InterruptedException {
         final String tickerSymbol = similarSearchInputData.getTickerSymbol();
-        final String[] similarCompanyNames = similarSearchDataAccessObject.similarNames(tickerSymbol);
+        final String[][] similarStockInfo = similarSearchDataAccessObject.similarStockInfo(tickerSymbol);
 
-        if (similarCompanyNames == null || similarCompanyNames.length == 0) {
+        if (similarStockInfo == null || similarStockInfo.length == 0) {
             similarSearchPresenter.prepareFailView("No Similar Items.");
         }
         else {
-            Stock[] similarStocks = new Stock[similarCompanyNames.length];
-            for (int i = 0; i < similarCompanyNames.length; i++) {
-                similarStocks[i] = stockDailyDataAccessObject.createStockAndHistory(similarCompanyNames[i]);
+            Stock[] similarStocks = new Stock[similarStockInfo.length];
+            for (int i = 0; i < similarStockInfo.length; i++) {
+                similarStocks[i] = tickerSearchDataAccessObject.createBasicStock(similarStockInfo[i][0]);
             }
 
             SimilarSearchOutputData[] similarSearchOutputList =
-                    new SimilarSearchOutputData[similarCompanyNames.length];
-            for (int i = 0; i < similarCompanyNames.length; i++) {
+                    new SimilarSearchOutputData[similarStockInfo.length];
+            for (int i = 0; i < similarStockInfo.length; i++) {
                 similarSearchOutputList[i] =
                         new SimilarSearchOutputData(
-                                similarStocks[i].getTickerSymbol(),
-                                similarStocks[i].getCompanyName(),
-                                null,
-                                null,
+                                similarStockInfo[i][0],
+                                similarStockInfo[i][1],
+                                similarStockInfo[i][2],
+                                similarStocks[i].getIndustry(),
                                 similarStocks[i].getPreviousClose(),
                                 false);
             }
