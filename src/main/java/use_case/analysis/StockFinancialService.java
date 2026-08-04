@@ -44,7 +44,7 @@ public class StockFinancialService {
         List<LocalDate> dates = stock.getDatesSorted();
         for (int i = 1; i < dates.size(); i += 1) {
             LocalDate today = dates.get(i);
-            ratiosList.add(returnRatioOnDate(stock, today));
+            ratiosList.add(Double.valueOf(returnRatioOnDate(stock, today)));
         }
         return ratiosList;
     }
@@ -54,8 +54,8 @@ public class StockFinancialService {
         List<LocalDate> dates = stock.getDatesSorted();
         for (int i = 1; i < dates.size(); i += 1) {
             LocalDate today = dates.get(i);
-            Double returnToday = returnRatioOnDate(stock, today);
-            dateRatiosList.put(today, returnToday);
+            double returnToday = returnRatioOnDate(stock, today);
+            dateRatiosList.put(today, Double.valueOf(returnToday));
         }
         return dateRatiosList;
     }
@@ -86,8 +86,8 @@ public class StockFinancialService {
         List<Double> stockRatios = returnRatios(stock);
         List<Double> marketRatios = returnRatios(market);
 
-        Double stockMean = StatisticsService.calculateMean(stockRatios);
-        Double marketMean = StatisticsService.calculateMean(marketRatios);
+        double stockMean = StatisticsService.calculateMean(stockRatios);
+        double marketMean = StatisticsService.calculateMean(marketRatios);
 
         double beta = calculateBeta(stock, market);
 
@@ -101,7 +101,7 @@ public class StockFinancialService {
     public static double calculateSharpeRatio(Stock stock) {
         List<Double> stockRatios = returnRatios(stock);
 
-        Double stockMean = StatisticsService.calculateMean(stockRatios);
+        double stockMean = StatisticsService.calculateMean(stockRatios);
 
         double variance = StatisticsService.calculateVariance(stockRatios);
         if (variance == 0) {

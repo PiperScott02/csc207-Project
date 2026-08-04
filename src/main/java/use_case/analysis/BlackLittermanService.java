@@ -51,7 +51,7 @@ public class BlackLittermanService {
                     .divide(totalMarketCap, 12, RoundingMode.HALF_UP)
                     .doubleValue();
 
-            marketWeightCaps.put(ticker, marketWeight);
+            marketWeightCaps.put(ticker, Double.valueOf(marketWeight));
         }
 
         return marketWeightCaps;
@@ -69,7 +69,7 @@ public class BlackLittermanService {
         List<Stock> orderedStocks = universe.getStocks();
         for (int i = 0; i < n; i++) {
             String ticker = orderedStocks.get(i).getTickerSymbol();
-            Double weight = marketWeightCaps.getOrDefault(ticker, 0.0);
+            Double weight = marketWeightCaps.getOrDefault(ticker, Double.valueOf(0.0));
             weightsArray[i][0] = weight;
         }
 
@@ -115,7 +115,7 @@ public class BlackLittermanService {
             String ticker = viewTickers.get(i);
             String level = confidenceLevels.getOrDefault(ticker, "Medium");
 
-            double confidence = confidenceMap.getOrDefault(level, 0.50);
+            double confidence = confidenceMap.getOrDefault(level, Double.valueOf(0.50));
 
             int stockIndex = universe.indexOf(ticker);
             double assetVariance = covarianceMatrix.getEntry(stockIndex, stockIndex);
@@ -133,7 +133,7 @@ public class BlackLittermanService {
         for (int i = 0; i < numViews; i++) {
             String ticker = viewTickers.get(i);
 
-            double annualReturnDecimal = userViews.getOrDefault(ticker, 0.0) / 100.0;
+            double annualReturnDecimal = userViews.getOrDefault(ticker, Double.valueOf(0.0)) / 100.0;
             double dailyReturnDecimal = Math.pow(1.0 + annualReturnDecimal, 1.0 / 252.0) - 1.0;
 
             qArray[i][0] = dailyReturnDecimal;
@@ -180,7 +180,7 @@ public class BlackLittermanService {
                 String ticker = orderedStocks.get(i).getTickerSymbol();
                 double dailyReturn = pi.getEntry(i, 0);
                 double annualReturn = Math.pow(1.0 + dailyReturn, 252.0) - 1.0;
-                adjustedReturns.put(ticker, annualReturn);
+                adjustedReturns.put(ticker, Double.valueOf(annualReturn));
             }
             return adjustedReturns;
         }
@@ -213,7 +213,7 @@ public class BlackLittermanService {
             double dailyReturn = blReturnsDaily.getEntry(i, 0);
 
             double annualReturn = Math.pow(1.0 + dailyReturn, 252.0) - 1.0;
-            adjustedReturns.put(ticker, annualReturn);
+            adjustedReturns.put(ticker, Double.valueOf(annualReturn));
         }
 
         return adjustedReturns;
