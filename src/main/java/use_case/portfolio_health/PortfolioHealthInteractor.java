@@ -24,8 +24,9 @@ public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
             User user = portfolioHealthInputData.getUser();
             Portfolio portfolio = user.getPortfolio();
 
-            // Check if the portfolio has any holdings to prevent matrix errors
-            if (portfolio.getHoldings() == null || portfolio.getHoldings().isEmpty()) {
+            // Check if holdings list is null, empty, or contains invalid stock holdings
+            if (portfolio == null || portfolio.getHoldings() == null || portfolio.getHoldings().isEmpty()
+                    || portfolio.getHoldings().stream().allMatch(h -> h == null || h.getStock() == null)) {
                 portfolioHealthPresenter.prepareFailView("Your portfolio has no holdings. Please add a holding first.");
                 return;
             }
