@@ -80,6 +80,7 @@ public class BlackLittermanService {
 
         AssetUniverseService universe = new AssetUniverseService(holdings);
         RealMatrix covarianceMatrix = buildAlignedCovarianceMatrix(holdings);
+        System.out.println(Arrays.deepToString(covarianceMatrix.getData()));
 
         int n = universe.size();
         double[][] weightsArray = new double[n][1];
@@ -236,6 +237,7 @@ public class BlackLittermanService {
         Collections.sort(activeViewTickers);
 
         RealMatrix pi = impliedEquilibriumExpectedReturn(holdings);
+        System.out.println(Arrays.toString(pi.getData()));
 
         // If no active views exist (all are "None"), return the market equilibrium returns as adjusted returns
         if (activeViewTickers.isEmpty()) {

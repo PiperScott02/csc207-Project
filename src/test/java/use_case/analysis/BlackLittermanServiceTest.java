@@ -203,8 +203,8 @@ class BlackLittermanServiceTest {
         System.out.println("Adjusted Returns Apple: " + adjustedReturns.get("AAPL"));
         System.out.println("Adjusted Returns Microsoft: " + adjustedReturns.get("MSFT"));
 
-        assertTrue(Double.isFinite(adjustedReturns.get("AAPL")), "Adjusted return for AAPL must be finite");
-        assertTrue(Double.isFinite(adjustedReturns.get("MSFT")), "Adjusted return for MSFT must be finite");
+        assertEquals(0.158443, adjustedReturns.get("AAPL"), 1e-4);
+        assertEquals(-0.054066, adjustedReturns.get("MSFT"), 1e-4);
 
         // 2. Test Fallback Branch (All views set to "None" or empty confidence)
         Map<String, String> noneConfidence = Map.of("AAPL", "None");
@@ -217,6 +217,7 @@ class BlackLittermanServiceTest {
 
         assertTrue(fallbackReturns.containsKey("AAPL"));
         assertTrue(fallbackReturns.containsKey("MSFT"));
-        assertTrue(Double.isFinite(fallbackReturns.get("AAPL")), "Fallback return for AAPL must be finite");
-    }
+
+        assertEquals(0.192838, fallbackReturns.get("AAPL"), 1e-4);
+        assertEquals(-0.070356, fallbackReturns.get("MSFT"), 1e-4);    }
 }
