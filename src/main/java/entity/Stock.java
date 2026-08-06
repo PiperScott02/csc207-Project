@@ -243,13 +243,6 @@ public class Stock {
         return null;
     }
 
-    /** Returns the daily change in price.
-     * @return the daily change.
-     */
-    public BigDecimal getDailyPriceChange() {
-        return dailyChange;
-    }
-
     /** Calculates the daily price change on a specific date.
      * @param date the date to calculate change for.
      * @return the price difference between the date and the previous trading day, or null if data is missing.
