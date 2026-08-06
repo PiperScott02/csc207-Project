@@ -2,12 +2,11 @@ package use_case.add_holding;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import entity.Portfolio;
-import entity.Stock;
-import entity.StockHolding;
-import entity.TransactionType;
+
+import entity.*;
 import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.StockDailyDataAccessInterface;
+import data_access.FileUserDataAccessObject;
 
 /**
  * The Interactor for the Add Holding Use Case.
@@ -16,17 +15,24 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
     private final StockDailyDataAccessInterface stockDataAccessObject;
     private final AddHoldingOutputBoundary userPresenter;
     private final LoggedInViewModel loggedInViewModel;
+    private final FileUserDataAccessObject userDataAccessObject;
 
     public AddHoldingInteractor(StockDailyDataAccessInterface stockDataAccessObject,
                                 AddHoldingOutputBoundary userPresenter,
-                                LoggedInViewModel loggedInViewModel) {
+                                LoggedInViewModel loggedInViewModel,
+                                FileUserDataAccessObject userDataAccessObject) {
         this.stockDataAccessObject = stockDataAccessObject;
         this.userPresenter = userPresenter;
         this.loggedInViewModel = loggedInViewModel;
+        this.userDataAccessObject = userDataAccessObject;
     }
 
     @Override
     public void execute(AddHoldingInputData addHoldingInputData) {
+        // Declare currentUser here so Java knows what it is
+        User currentUser = loggedInViewModel.getState().getUser();
+        Portfolio portfolio = currentUser.getPortfolio();
+
         // Unpack the DTO carried over from the Add Holding Controller AND force uppercase ticker
         String ticker = addHoldingInputData.getTicker().toUpperCase();
         double shares = addHoldingInputData.getShares();
@@ -54,9 +60,6 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             return;
         }
 
-        // Access the current user's portfolio so holdings can be added
-        Portfolio portfolio = loggedInViewModel.getState().getUser().getPortfolio();
-
         // Fetch the Stock from Data Access Object (talk to external API)
         Stock stock = null;
         try {
@@ -80,6 +83,9 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
 
         // Record the purchase transaction using StockHolding method
         holding.makeTransaction(stock, shares, purchaseDate, TransactionType.BUY);
+
+        // Save the changes to disk/database
+        userDataAccessObject.save(currentUser);
 
         // Package results and notify presenter
         AddHoldingOutputData outputData = new AddHoldingOutputData(ticker, shares, portfolio.getHoldings(), false);

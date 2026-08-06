@@ -8,10 +8,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
 
-import entity.User;
-import entity.UserFactory;
+import entity.*;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
@@ -27,7 +28,7 @@ public class FileUserDataAccessObject
         RiskPreferenceUserDataAccessInterface {
 
     private String currentUser;
-    private static final String HEADER = "username,password";
+    private static final String HEADER = "username,password,holdings";
 
     private final File csvFile;
     private final Map<String, Integer> headers = new LinkedHashMap<>();
@@ -48,6 +49,7 @@ public class FileUserDataAccessObject
 
         headers.put("username", 0);
         headers.put("password", 1);
+        headers.put("holdings", 2);
 
         if (csvFile.length() == 0) {
             save();
@@ -81,12 +83,14 @@ public class FileUserDataAccessObject
 
                     final String username = col[headers.get("username")].trim();
                     final String password = col[headers.get("password")];
+                    final String holdingsString = col.length > headers.get("holdings") ? col[headers.get("holdings")] : "";
 
                     if (username.isEmpty()) {
                         continue;
                     }
 
                     final User user = userFactory.create(username, password);
+                    parseAndRestoreHoldings(user, holdingsString);
                     accounts.put(username, user);
                 }
             }
@@ -101,8 +105,10 @@ public class FileUserDataAccessObject
             writer.newLine();
 
             for (User user : accounts.values()) {
-                final String line = String.format("%s,%s",
-                        user.getName(), user.getPassword());
+                List<StockHolding> holdings = (user.getPortfolio() != null) ? user.getPortfolio().getHoldings() : null;
+                final String holdingsString = formatHoldingsToString(holdings);
+                final String line = String.format("%s,%s,%s",
+                        user.getName(), user.getPassword(), holdingsString);
                 writer.write(line);
                 writer.newLine();
             }
@@ -112,6 +118,86 @@ public class FileUserDataAccessObject
         }
         catch (IOException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    private String formatHoldingsToString(List<StockHolding> holdings) {
+        if (holdings == null || holdings.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < holdings.size(); i++) {
+            StockHolding h = holdings.get(i);
+            if (h.getStock() != null) {
+                Stock s = h.getStock();
+                String ticker = s.getTickerSymbol() != null ? s.getTickerSymbol() : "";
+                double shares = h.getNumberOfShares();
+                double purchasePrice = h.getAveragePrice();
+                double currentPrice = s.getClose() != null ? s.getClose().doubleValue() : purchasePrice;
+                String company = s.getCompanyName() != null ? s.getCompanyName() : "";
+                double dailyChange = s.getDailyPriceChange() != null ? s.getDailyPriceChange().doubleValue() : 0.0;
+
+                // Format: Ticker : Shares : PurchasePrice : CurrentPrice : CompanyName : DailyChange
+                sb.append(ticker)
+                        .append(":")
+                        .append(shares)
+                        .append(":")
+                        .append(purchasePrice)
+                        .append(":")
+                        .append(currentPrice)
+                        .append(":")
+                        .append(company)
+                        .append(":")
+                        .append(dailyChange);
+
+                if (i < holdings.size() - 1) {
+                    sb.append(";");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    private void parseAndRestoreHoldings(User user, String holdingsString) {
+        if (holdingsString == null || holdingsString.isBlank()) {
+            return;
+        }
+        if (user.getPortfolio() == null) {
+            return;
+        }
+        String[] items = holdingsString.split(";");
+        for (String item : items) {
+            String[] details = item.split(":");
+            if (details.length >= 2) {
+                String ticker = details[0];
+                try {
+                    double shares = Double.parseDouble(details[1]);
+                    double purchasePrice = details.length >= 3 ? Double.parseDouble(details[2]) : 0.0;
+                    double currentPrice = details.length >= 4 ? Double.parseDouble(details[3]) : purchasePrice;
+                    String company = details.length >= 5 ? details[4] : "";
+                    double dailyChange = details.length >= 6 ? Double.parseDouble(details[5]) : 0.0;
+
+                    Stock stock = new Stock();
+                    stock.setTickerSymbol(ticker);
+                    stock.setClose(java.math.BigDecimal.valueOf(currentPrice));
+                    stock.setCompanyName(company);
+                    stock.setDailyChange(java.math.BigDecimal.valueOf(dailyChange));
+
+                    StockHolding holding = new StockHolding();
+                    holding.setStock(stock);
+
+                    Transaction transaction = new Transaction();
+                    transaction.setDate(LocalDate.now());
+                    transaction.setPricePerShare(java.math.BigDecimal.valueOf(purchasePrice));
+                    transaction.setNumberOfShares(shares);
+                    transaction.setType(TransactionType.BUY);
+
+                    holding.getTransactions().add(transaction);
+                    user.getPortfolio().addHolding(holding);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
