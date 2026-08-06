@@ -91,9 +91,13 @@ public class AlphaVantageNewsDataAccessObject
                  * sentiment information specifically for this ticker.
                  */
                 if (!Double.isNaN(sentimentScore)) {
+                    final double relevanceScore =
+                            findTickerRelevanceScore(articleJson, ticker);
+
                     final NewsArticle article = createNewsArticle(
                             articleJson,
-                            sentimentScore
+                            sentimentScore,
+                            relevanceScore
                     );
 
                     articles.add(article);
@@ -161,15 +165,59 @@ public class AlphaVantageNewsDataAccessObject
     }
 
     /**
+     * Finds how relevant an article is to the requested ticker.
+     *
+     * @param articleJson the JSON for one news article
+     * @param ticker the requested stock ticker
+     * @return the ticker's relevance score, or 0.0 when not found
+     */
+    private double findTickerRelevanceScore(
+            JSONObject articleJson,
+            String ticker) {
+
+        final JSONArray tickerSentiments =
+                articleJson.optJSONArray("ticker_sentiment");
+
+        if (tickerSentiments == null) {
+            return 0.0;
+        }
+
+        for (int index = 0;
+             index < tickerSentiments.length();
+             index++) {
+
+            final JSONObject tickerData =
+                    tickerSentiments.getJSONObject(index);
+
+            final String articleTicker =
+                    tickerData.optString("ticker");
+
+            if (articleTicker.equalsIgnoreCase(ticker)) {
+                final String relevanceText =
+                        tickerData.optString(
+                                "relevance_score",
+                                "0.0"
+                        );
+
+                return Double.parseDouble(relevanceText);
+            }
+        }
+
+        return 0.0;
+    }
+
+    /**
      * Converts article JSON into a NewsArticle entity.
      *
      * @param articleJson the JSON for one article
      * @param sentimentScore the sentiment score for the requested ticker
+     * @param relevanceScore how relevant the article is to the requested ticker
      * @return the completed NewsArticle
      */
     private NewsArticle createNewsArticle(
             JSONObject articleJson,
-            double sentimentScore) {
+            double sentimentScore,
+            double relevanceScore) {
 
         final String title =
                 articleJson.optString("title", "No title");
@@ -192,6 +240,7 @@ public class AlphaVantageNewsDataAccessObject
                 url,
                 source,
                 sentimentScore,
+                relevanceScore,
                 sentiment
         );
     }

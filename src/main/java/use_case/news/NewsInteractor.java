@@ -2,6 +2,7 @@ package use_case.news;
 
 import entity.NewsArticle;
 import entity.NewsSentiment;
+import entity.NewsSentimentCalculator;
 
 import java.util.List;
 
@@ -26,19 +27,18 @@ public class NewsInteractor implements NewsInputBoundary {
 
     @Override
     public void execute(NewsInputData newsInputData) {
-        String ticker = newsInputData.getTicker();
+        final String ticker = newsInputData.getTicker();
 
         if (ticker == null || ticker.trim().isEmpty()) {
             newsPresenter.prepareFailView("Please enter a stock ticker.");
             return;
         }
 
-        List<NewsArticle> articles;
+        final String cleanedTicker = ticker.trim().toUpperCase();
+        final List<NewsArticle> articles;
 
         try {
-            articles = newsDataAccessObject.getNews(
-                    ticker.trim().toUpperCase()
-            );
+            articles = newsDataAccessObject.getNews(cleanedTicker);
         }
         catch (RuntimeException exception) {
             newsPresenter.prepareFailView(
@@ -49,16 +49,17 @@ public class NewsInteractor implements NewsInputBoundary {
 
         if (articles == null || articles.isEmpty()) {
             newsPresenter.prepareFailView(
-                    "No news articles were found for " + ticker.toUpperCase() + "."
+                    "No news articles were found for "
+                            + cleanedTicker + "."
             );
             return;
         }
 
-        NewsSentiment overallSentiment =
+        final NewsSentiment overallSentiment =
                 calculateOverallSentiment(articles);
 
-        NewsOutputData outputData = new NewsOutputData(
-                ticker.trim().toUpperCase(),
+        final NewsOutputData outputData = new NewsOutputData(
+                cleanedTicker,
                 articles,
                 overallSentiment
         );
@@ -66,16 +67,16 @@ public class NewsInteractor implements NewsInputBoundary {
         newsPresenter.prepareSuccessView(outputData);
     }
 
+    /**
+     * Calculates overall sentiment using relevance as each article's weight.
+     *
+     * @param articles the articles returned by the news data access object
+     * @return the overall sentiment category
+     */
     private NewsSentiment calculateOverallSentiment(
             List<NewsArticle> articles) {
 
-        double totalScore = 0.0;
-
-        for (NewsArticle article : articles) {
-            totalScore += article.getSentimentScore();
-        }
-
-        double averageScore = totalScore / articles.size();
+        double averageScore = NewsSentimentCalculator.calculateRawSentiment(articles);
 
         if (averageScore >= BULLISH_THRESHOLD) {
             return NewsSentiment.BULLISH;
@@ -86,5 +87,21 @@ public class NewsInteractor implements NewsInputBoundary {
         else {
             return NewsSentiment.NEUTRAL;
         }
+    }
+
+    /**
+     * Calculates a normal average when no relevance scores are available.
+     *
+     * @param articles the news articles
+     * @return the simple average sentiment score
+     */
+    private double calculateSimpleAverage(List<NewsArticle> articles) {
+        double totalScore = 0.0;
+
+        for (NewsArticle article : articles) {
+            totalScore += article.getSentimentScore();
+        }
+
+        return totalScore / articles.size();
     }
 }

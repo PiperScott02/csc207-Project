@@ -25,6 +25,8 @@ public class Stock {
 
     private String currency;
 
+    private String industry;
+
     private BigDecimal dailyChange;
 
     private BigDecimal dividendYield;
@@ -248,6 +250,9 @@ public class Stock {
      */
     public LocalDate getLastTradingDay() {
         List<LocalDate> dates = getDatesSorted();
+        if (dates.isEmpty()) {
+            return null;
+        }
         int listLength = dates.size();
         return dates.get(listLength - 1);
     }
@@ -356,5 +361,13 @@ public class Stock {
         return beta != null
                 && alpha != null
                 && sharpeRatio != null;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public String getIndustry() {
+        return industry;
     }
 }

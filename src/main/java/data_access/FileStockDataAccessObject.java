@@ -2,16 +2,18 @@ package data_access;
 
 import data_access.stock_daily.StockService;
 import entity.Stock;
-import use_case.analysis.StockFinancialService;
 import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class FileStockDataAccessObject implements StockDataAccessInterface, BlackLittermanDataAccessInterface {
-    /** Checks whether a stock with the ticker identifier exists in the APIs' data by trying to create a stock obect
-     * with it and seeing if it is successfully created.
+public class FileStockDataAccessObject implements
+        StockDataAccessInterface,
+        BlackLittermanDataAccessInterface {
+
+    /**
+     * Checks whether a stock with the ticker identifier exists in the APIs' data.
      * @param ticker the stock ticker symbol.
      * @return bool whether the stock ticker is found or not in the API.
      */
@@ -27,9 +29,10 @@ public class FileStockDataAccessObject implements StockDataAccessInterface, Blac
         }
     }
 
-    /** Tries to create a stock object for the given ticker.
+    /**
+     * Tries to create a stock object for the given ticker.
      * @param ticker the stock ticker symbol.
-     * @return
+     * @return the Stock object populated with historical data.
      */
     @Override
     public Stock get(String ticker) {
