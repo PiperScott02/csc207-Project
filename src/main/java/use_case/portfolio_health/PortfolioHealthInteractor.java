@@ -43,12 +43,13 @@ public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
             PortfolioFinancialService.calculateAndAssignMetrics(portfolio, marketStock);
 
             // Calculate quantitative sub-scores using the scoring service
-            Double sharpeScore = PortfolioHealthScoringService.calculateSharpeScore(portfolio.getSharpeRatio());
+            Double sharpeScore = PortfolioHealthScoringService.calculateSharpeScore(portfolio.getAnnualizedSharpeRatio());
             Double riskScore = PortfolioHealthScoringService.calculateRiskAlignmentScore(portfolio.getTrueBeta(), riskProfile);
             Double cdr = PortfolioFinancialService.calculateCdr(portfolio);
             Double divScore = PortfolioHealthScoringService.calculateDiversificationScore(cdr);
             Double newsScore = PortfolioHealthScoringService.calculateNewsScore(portfolio, newsDataAccessObject);
 
+            System.out.println("CDR " + cdr);
             Double portfolioHealthScore = sharpeScore + riskScore + divScore + newsScore;
             String portfolioHealthScoreString = portfolioHealthScore.toString();
 
@@ -62,8 +63,8 @@ public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
                     riskPreference,
                     portfolioHealthScoreString,
                     portfolio.getTrueBeta() != null ? portfolio.getTrueBeta().toString() : "0.0",
-                    portfolio.getAlpha() != null ? portfolio.getAlpha().toString() : "0.0",
-                    portfolio.getSharpeRatio() != null ? portfolio.getSharpeRatio().toString() : "0.0",
+                    portfolio.getAnnualizedAlpha() != null ? portfolio.getAnnualizedAlpha().toString() : "0.0",
+                    portfolio.getAnnualizedSharpeRatio() != null ? portfolio.getAnnualizedSharpeRatio().toString() : "0.0",
                     sharpeAdvice,
                     riskAlignmentAdvice,
                     diversificationAdvice,

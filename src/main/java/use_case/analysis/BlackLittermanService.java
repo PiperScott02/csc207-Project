@@ -27,7 +27,6 @@ public class BlackLittermanService {
      * Computes the market weight caps (market capitalization proportions) for each asset
      * within the asset universe derived from the given holdings.
      *
-     * @experimental
      * @param holdings the list of stock holdings comprising the portfolio universe
      * @return a map matching each ticker symbol to its proportional market capitalization weight
      */
@@ -40,7 +39,7 @@ public class BlackLittermanService {
         BigDecimal totalMarketCap = BigDecimal.ZERO;
 
         for (Stock stock : universe.getStocks()) {
-            if (stock != null && stock.getClose() != null) {
+            if (stock != null && stock.getClose() != null && stock.getSharesOutstanding() != null) {
                 BigDecimal shares = BigDecimal.valueOf(stock.getSharesOutstanding());
                 BigDecimal marketCap = stock.getClose().multiply(shares);
 
@@ -62,7 +61,7 @@ public class BlackLittermanService {
                     .divide(totalMarketCap, 12, RoundingMode.HALF_UP)
                     .doubleValue();
 
-            marketWeightCaps.put(ticker, Double.valueOf(marketWeight));
+            marketWeightCaps.put(ticker, marketWeight);
         }
 
         return marketWeightCaps;
@@ -80,7 +79,6 @@ public class BlackLittermanService {
 
         AssetUniverseService universe = new AssetUniverseService(holdings);
         RealMatrix covarianceMatrix = buildAlignedCovarianceMatrix(holdings);
-        System.out.println(Arrays.deepToString(covarianceMatrix.getData()));
 
         int n = universe.size();
         double[][] weightsArray = new double[n][1];
@@ -88,7 +86,7 @@ public class BlackLittermanService {
         List<Stock> orderedStocks = universe.getStocks();
         for (int i = 0; i < n; i++) {
             String ticker = orderedStocks.get(i).getTickerSymbol();
-            Double weight = marketWeightCaps.getOrDefault(ticker, Double.valueOf(0.0));
+            Double weight = marketWeightCaps.getOrDefault(ticker, 0.0);
             weightsArray[i][0] = weight;
         }
 
@@ -151,12 +149,15 @@ public class BlackLittermanService {
             String ticker = viewTickers.get(i);
             String level = confidenceLevels.getOrDefault(ticker, "Medium");
 
-            double confidence = confidenceMap.getOrDefault(level, Double.valueOf(0.50));
+            double confidence = confidenceMap.getOrDefault(level, 0.50);
 
             int stockIndex = universe.indexOf(ticker);
             double assetVariance = covarianceMatrix.getEntry(stockIndex, stockIndex);
 
-            omegaArray[i][i] = (1.0 - confidence) * DEFAULT_TAU * assetVariance;
+            double calculatedOmega = (1.0 - confidence) * DEFAULT_TAU * assetVariance;
+
+            // Enforce a minimum uncertainty floor to prevent division-by-zero / extreme weighting
+            omegaArray[i][i] = Math.max(calculatedOmega, 1e-6);
         }
 
         return new Array2DRowRealMatrix(omegaArray);
@@ -176,7 +177,7 @@ public class BlackLittermanService {
         for (int i = 0; i < numViews; i++) {
             String ticker = viewTickers.get(i);
 
-            double annualReturnDecimal = userViews.getOrDefault(ticker, Double.valueOf(0.0)) / 100.0;
+            double annualReturnDecimal = userViews.getOrDefault(ticker, 0.0) / 100.0;
             double dailyReturnDecimal = Math.pow(1.0 + annualReturnDecimal, 1.0 / 252.0) - 1.0;
 
             qArray[i][0] = dailyReturnDecimal;
@@ -226,7 +227,7 @@ public class BlackLittermanService {
         AssetUniverseService universe = new AssetUniverseService(holdings);
         List<Stock> orderedStocks = universe.getStocks();
 
-        // FIX: Filter out any ticker that has "None" or missing confidence
+        // Filter out any ticker that has "None" or missing confidence
         List<String> activeViewTickers = new ArrayList<>();
         for (String ticker : userViewsMap.keySet()) {
             String confidence = confidenceLevels.getOrDefault(ticker, "None");
@@ -237,7 +238,6 @@ public class BlackLittermanService {
         Collections.sort(activeViewTickers);
 
         RealMatrix pi = impliedEquilibriumExpectedReturn(holdings);
-        System.out.println(Arrays.toString(pi.getData()));
 
         // If no active views exist (all are "None"), return the market equilibrium returns as adjusted returns
         if (activeViewTickers.isEmpty()) {
@@ -245,7 +245,7 @@ public class BlackLittermanService {
                 String ticker = orderedStocks.get(i).getTickerSymbol();
                 double dailyReturn = pi.getEntry(i, 0);
                 double annualReturn = Math.pow(1.0 + dailyReturn, 252.0) - 1.0;
-                adjustedReturns.put(ticker, Double.valueOf(annualReturn));
+                adjustedReturns.put(ticker, annualReturn);
             }
             return adjustedReturns;
         }
@@ -272,13 +272,13 @@ public class BlackLittermanService {
 
         RealMatrix blReturnsDaily = mainInverse.multiply(bracketRight);
 
-        // Annualize final expected returns for each stock in universe
+        // Annualize final expected returns for each stock in universe using daily compounding
         for (int i = 0; i < orderedStocks.size(); i++) {
             String ticker = orderedStocks.get(i).getTickerSymbol();
             double dailyReturn = blReturnsDaily.getEntry(i, 0);
 
             double annualReturn = Math.pow(1.0 + dailyReturn, 252.0) - 1.0;
-            adjustedReturns.put(ticker, Double.valueOf(annualReturn));
+            adjustedReturns.put(ticker, annualReturn);
         }
 
         return adjustedReturns;

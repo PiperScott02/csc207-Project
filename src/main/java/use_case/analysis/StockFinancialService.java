@@ -9,6 +9,8 @@ import entity.Stock;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import static use_case.analysis.PortfolioFinancialService.getAlignedReturns;
+
 /** Service class for calculating financial analytics and risk metrics for stocks. */
 public class StockFinancialService {
 
@@ -117,7 +119,26 @@ public class StockFinancialService {
         return sharpeRatio;
     }
 
-    /** Computes and assigns metrics (beta, alpha, Sharpe ratio) to a stock.
+    /** Calculates the annualized alpha of a stock relative to a market stock.
+     * @param stock the target Stock.
+     * @param market the market benchmark Stock.
+     * @return the calculated annualized alpha as a double.
+     */
+    public static double calculateAnnualizedAlpha(Stock stock, Stock market) {
+        double dailyAlpha = calculateAlpha(stock, market);
+        return dailyAlpha * 252.0;
+    }
+
+    /** Calculates the annualized Sharpe ratio of a stock.
+     * @param stock the target Stock.
+     * @return the calculated annualized Sharpe ratio as a double.
+     */
+    public static double calculateAnnualizedSharpeRatio(Stock stock) {
+        double dailySharpe = calculateSharpeRatio(stock);
+        return dailySharpe * Math.sqrt(252.0);
+    }
+
+    /** Computes and assigns metrics (beta, alpha, Sharpe ratio, annualized alpha, annualized Sharpe ratio) to a stock.
      * @param stock the target Stock to update.
      * @param market the market benchmark Stock.
      */
@@ -128,11 +149,19 @@ public class StockFinancialService {
 
         double sharpeRatio = calculateSharpeRatio(stock);
 
+        double annualizedAlpha = calculateAnnualizedAlpha(stock, market);
+
+        double annualizedSharpeRatio = calculateAnnualizedSharpeRatio(stock);
+
         stock.setBeta(beta);
 
         stock.setAlpha(alpha);
 
         stock.setSharpeRatio(sharpeRatio);
+
+        stock.setAnnualizedAlpha(annualizedAlpha);
+
+        stock.setAnnualizedSharpeRatio(annualizedSharpeRatio);
     }
 
     /** Converts a covariance 2D array into a RealMatrix.
@@ -152,8 +181,21 @@ public class StockFinancialService {
         double [][] covariancesArray = new double[numberOfStocks][numberOfStocks];
         for (int i = 0; i < numberOfStocks; i++) {
             for (int j = i; j < numberOfStocks; j++) {
-                double covariance = StatisticsService.calculateCovariance(returnRatios(stockList.get(i)),
-                        returnRatios(stockList.get(j)));
+                Map<LocalDate, Double> r1 = StockFinancialService.returnDateRatiosMap(stockList.get(i));
+                Map<LocalDate, Double> r2 = StockFinancialService.returnDateRatiosMap(stockList.get(j));
+
+                List<List<Double>> aligned = getAlignedReturns(r1, r2);
+
+                double covariance = StatisticsService.calculateCovariance(
+                        aligned.get(0),
+                        aligned.get(1)
+                );
+                double std_i = Math.sqrt(StatisticsService.calculateVariance(aligned.get(0)));
+                double std_j = Math.sqrt(StatisticsService.calculateVariance(aligned.get(1)));
+
+                double corr = covariance / (std_i * std_j);
+
+                System.out.println("Corr(" + i + "," + j + ") = " + corr);
                 covariancesArray[i][j] = covariance;
                 covariancesArray[j][i] = covariance; // Mirror the value across the diagonal
             }

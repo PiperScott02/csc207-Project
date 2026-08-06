@@ -3,6 +3,7 @@ package interface_adapter.logged_in;
 import java.util.List;
 import entity.StockHolding;
 import entity.User;
+import entity.WatchlistStockItem;
 
 /**
  * The State information representing the logged-in user.
@@ -14,6 +15,7 @@ public class LoggedInState {
     private String password = "";
     private String passwordError;
     private List<StockHolding> holdings;
+    private List<WatchlistStockItem> watchlist;
 
     public LoggedInState(LoggedInState copy) {
         username = copy.username;
@@ -21,6 +23,7 @@ public class LoggedInState {
         password = copy.password;
         passwordError = copy.passwordError;
         holdings = copy.holdings;
+        watchlist = copy.watchlist;
     }
 
     // Because of the previous copy constructor, the default constructor must be explicit.
@@ -63,5 +66,14 @@ public class LoggedInState {
 
     public void setHoldings(List<StockHolding> holdings) {
         this.holdings = holdings;
+    }
+
+    // Getters and setters for watchlist
+    public List<WatchlistStockItem> getWatchlist() {
+        return watchlist;
+    }
+
+    public void setWatchlist(List<WatchlistStockItem> watchlist) {
+        this.watchlist = watchlist;
     }
 }

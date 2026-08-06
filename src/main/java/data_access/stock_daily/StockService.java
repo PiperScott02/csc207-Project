@@ -44,6 +44,7 @@ public class StockService implements StockDailyDataAccessInterface {
     }
 
     public Stock createStockAndHistory(String tickerSymbol) throws IOException, InterruptedException {
+        TimeUnit.SECONDS.sleep(1);
         String url =
                 "https://www.alphavantage.co/query" +
                         "?function=TIME_SERIES_DAILY" +
@@ -51,7 +52,6 @@ public class StockService implements StockDailyDataAccessInterface {
                         "&apikey=" + apiKey;
 
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
-        TimeUnit.SECONDS.sleep(1);
         HttpResponse<String> response =
                 httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -70,6 +70,7 @@ public class StockService implements StockDailyDataAccessInterface {
         stock.setPreviousClose(timeline.get(size - 2).getClose());
         stock.setDailyChange(stock.getClose().subtract(stock.getPreviousClose()));
 
+        TimeUnit.SECONDS.sleep(1);
         String overviewUrl =
                 "https://www.alphavantage.co/query" +
                         "?function=OVERVIEW" +
@@ -77,7 +78,6 @@ public class StockService implements StockDailyDataAccessInterface {
                         "&apikey=" + apiKey;
 
         HttpRequest overviewRequest = HttpRequest.newBuilder().uri(URI.create(overviewUrl)).build();
-        TimeUnit.SECONDS.sleep(1);
         HttpResponse<String> overviewResponse =
                 httpClient.send(overviewRequest, HttpResponse.BodyHandlers.ofString());
 
@@ -97,7 +97,6 @@ public class StockService implements StockDailyDataAccessInterface {
             } else {
                 stock.setSharesOutstanding(0.0);
             }
-
 
             stock.setCountry(overview.getCountry());
             stock.setCurrency(overview.getCurrency());

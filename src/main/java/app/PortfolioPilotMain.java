@@ -17,6 +17,7 @@ import entity.CommonUserFactory;
 
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_holding.AddHoldingViewModel;
+import interface_adapter.add_watchlist.AddWatchlistViewModel;
 import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.black_litterman.BlackLittermanViewModel;
 import interface_adapter.currency_conversion.CurrencyConversionController;
@@ -96,6 +97,7 @@ public final class PortfolioPilotMain {
         final WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
         final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel();
         final AddHoldingViewModel addHoldingViewModel = new AddHoldingViewModel();
+        final AddWatchlistViewModel addWatchlistViewModel = new AddWatchlistViewModel();
         final CurrencyConversionViewModel currencyConversionViewModel =
                 new CurrencyConversionViewModel();
 
@@ -206,7 +208,7 @@ public final class PortfolioPilotMain {
                 );
         views.add(loginView, loginView.getViewName());
 
-        // 3. Logged In View (Updated to receive BlackLittermanController)
+        // 3. Logged In View
         final LoggedInView loggedInView =
                 new LoggedInView(
                         loggedInViewModel,
@@ -277,7 +279,7 @@ public final class PortfolioPilotMain {
                 );
         views.add(watchlistView, watchlistView.getViewName());
 
-        // 10. Black-Litterman View (Added to CardLayout)
+        // 10. Black-Litterman View
         final BlackLittermanView blackLittermanView =
                 BlackLittermanUseCaseFactory.create(
                         viewManagerModel,
@@ -287,7 +289,6 @@ public final class PortfolioPilotMain {
                 );
         views.add(blackLittermanView, blackLittermanView.getViewName());
 
-        // ========================================================
         // 11. Add Holding View
         final AddHoldingView addHoldingView =
                 AddHoldingUseCaseFactory.create(
@@ -298,10 +299,18 @@ public final class PortfolioPilotMain {
                 );
         views.add(addHoldingView, addHoldingView.getViewName());
 
-        // ==========================================
-        // 12. Startup Configuration
-        // ==========================================
-        // Currency Conversion View
+        // 12. Add Watchlist View
+        final AddWatchlistView addWatchlistView =
+                AddWatchlistUseCaseFactory.create(
+                        viewManagerModel,
+                        addWatchlistViewModel,
+                        watchlistViewModel,
+                        loggedInViewModel,
+                        stockDailyDataAccessObject
+                );
+        views.add(addWatchlistView, addWatchlistView.viewName);
+
+        // 13. Currency Conversion View
         final CurrencyConversionView currencyConversionView =
                 new CurrencyConversionView(
                         viewManagerModel,
@@ -309,11 +318,14 @@ public final class PortfolioPilotMain {
                         currencyConversionViewModel,
                         loggedInViewModel
                 );
-
         views.add(
                 currencyConversionView,
                 currencyConversionView.getViewName()
         );
+
+        // ==========================================
+        // 14. Startup Configuration
+        // ==========================================
         viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChanged();
 
