@@ -19,7 +19,7 @@ public class PortfolioFinancialService {
 
     /** Given two Maps of Local Dates and Doubles, it returns a list containing a list of the doubles with the
      * same corresponding Local Date aligned.*/
-    private static List<List<Double>> getAlignedReturns(
+    static List<List<Double>> getAlignedReturns(
             Map<LocalDate, Double> first,
             Map<LocalDate, Double> second) {
 
@@ -28,6 +28,8 @@ public class PortfolioFinancialService {
                         .stream()
                         .filter(second::containsKey)
                         .collect(Collectors.toCollection(TreeSet::new));
+
+        System.out.println("Common dates count between stocks: " + commonDates.size());
 
         List<Double> firstReturns = new ArrayList<>();
         List<Double> secondReturns = new ArrayList<>();
@@ -158,7 +160,36 @@ public class PortfolioFinancialService {
         }
     }
 
-    /** Computes and assigns financial metrics (weighted beta, alpha, true beta, Sharpe ratio) to the portfolio.
+    /** Calculates the annualized alpha of the portfolio relative to a market stock.
+     * @param portfolio the Portfolio to evaluate.
+     * @param market the market Stock benchmark.
+     * @return the calculated annualized alpha as a double.
+     */
+    public static double calculateAnnualizedPortfolioAlpha(Portfolio portfolio, Stock market) {
+        double dailyAlpha = calculatePortfolioAlpha(portfolio, market);
+        return dailyAlpha * 252.0;
+    }
+
+    /** Calculates the annualized Sharpe ratio of the portfolio.
+     * @param portfolio the Portfolio to evaluate.
+     * @return the annualized Sharpe ratio as a double.
+     */
+    public static double calculateAnnualizedSharpeRatio(Portfolio portfolio) {
+        if (Boolean.TRUE.equals(portfolio.hasCustomViews())) {
+            double portfolioDailyVolatility = Math.sqrt(calculatePortfolioVariance(portfolio));
+            double portfolioAnnualVolatility = portfolioDailyVolatility * Math.sqrt(252.0);
+
+            double annualPortfolioReturn = calculateCustomPortfolioReturnsNumber(portfolio, portfolio.getCustomViews());
+            double annualizedRiskFreeRate = Math.pow(1.0 + RISK_FREE_RATE, 252.0) - 1.0;
+
+            return (portfolioAnnualVolatility == 0) ? 0.0 : (annualPortfolioReturn - annualizedRiskFreeRate) / portfolioAnnualVolatility;
+        } else {
+            double dailySharpe = calculateSharpeRatio(portfolio);
+            return dailySharpe * Math.sqrt(252.0);
+        }
+    }
+
+    /** Computes and assigns financial metrics (weighted beta, alpha, true beta, Sharpe ratio, annualized alpha, annualized Sharpe ratio) to the portfolio.
      * Automatically branches to custom expected returns if the portfolio has active custom views.
      * @param portfolio the Portfolio to update.
      * @param market the market Stock benchmark.
@@ -180,10 +211,15 @@ public class PortfolioFinancialService {
             sharpeRatio = calculateSharpeRatio(portfolio);
         }
 
+        double annualizedAlpha = calculateAnnualizedPortfolioAlpha(portfolio, market);
+        double annualizedSharpeRatio = calculateAnnualizedSharpeRatio(portfolio);
+
         portfolio.setWeightedBeta(weightedBeta);
         portfolio.setAlpha(alpha);
         portfolio.setTrueBeta(trueBeta);
         portfolio.setSharpeRatio(sharpeRatio);
+        portfolio.setAnnualizedAlpha(annualizedAlpha);
+        portfolio.setAnnualizedSharpeRatio(annualizedSharpeRatio);
     }
 
     /** Builds a 2D array of holding weights for the portfolio.
@@ -297,7 +333,9 @@ public class PortfolioFinancialService {
             List<Double> stockRatios = StockFinancialService.returnRatios(stock);
             double variance = StatisticsService.calculateVariance(stockRatios);
             Double standardDeviation = Math.sqrt(variance);
+            System.out.println("Standard Deviation " + standardDeviation);
             weightVolatilitySum += portfolio.getHoldingShare(holding) * standardDeviation;
+            System.out.println("Weight volatility Sum " + weightVolatilitySum);
         }
 
         if (portfolioStandardDeviation == 0) {

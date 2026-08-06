@@ -23,8 +23,8 @@ public class PortfolioHealthPresenter implements PortfolioHealthOutputBoundary {
         currentState.setRiskPreference(outputData.getRiskPreference());
         currentState.setPortfolioHealthScore(outputData.getPortfolioHealthScore());
         currentState.setBeta(outputData.getBeta());
-        currentState.setAlpha(outputData.getAlpha());
-        currentState.setSharpeRatio(outputData.getSharpeRatio());
+        currentState.setAlpha(outputData.getAnnualizedAlpha());
+        currentState.setSharpeRatio(outputData.getAnnualizedSharpeRatio());
         currentState.setSharpeAdvice(outputData.getSharpeAdvice());
         currentState.setRiskAlignmentAdvice(outputData.getRiskAlignmentAdvice());
         currentState.setDiversificationAdvice(outputData.getDiversificationAdvice());

@@ -24,12 +24,11 @@ import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthController;
-import interface_adapter.watchlist.WatchlistController;
 
 /**
  * The home screen displayed after a user successfully logs in.
  */
-public class LoggedInView extends JPanel implements PropertyChangeListener {
+public class    LoggedInView extends JPanel implements PropertyChangeListener {
 
     private static final String LOGIN_VIEW_NAME = "log in";
     private static final String SEARCH_VIEW_NAME = "search";
@@ -44,7 +43,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final LoggedInViewModel loggedInViewModel;
     private final PortfolioHealthController portfolioHealthController;
     private final BlackLittermanController blackLittermanController;
-
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
     private DefaultTableModel tableModel;
@@ -61,9 +59,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
      * @param loggedInViewModel contains information about the logged-in user
      * @param viewManagerModel controls which application screen is visible
      * @param portfolioHealthController triggers calculation of portfolio health
+     * @param blackLittermanController triggers Black-Litterman workflow
      */
-
-    // Update Constructor:
     public LoggedInView(LoggedInViewModel loggedInViewModel,
                         ViewManagerModel viewManagerModel,
                         PortfolioHealthController portfolioHealthController,
@@ -154,19 +151,20 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private JPanel createButtonPanel() {
         final JPanel buttonPanel = new JPanel(new GridLayout(1, 9, 8, 0));
+
         final JButton watchlistButton = new JButton("Watchlist");
         watchlistButton.addActionListener(event -> {
             viewManagerModel.setState(WATCHLIST_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
         });
         buttonPanel.add(watchlistButton);
+
         final JButton addHoldingButton = new JButton("Add Holding");
         addHoldingButton.addActionListener(event -> {
             viewManagerModel.setState(ADD_HOLDING_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
         });
         buttonPanel.add(addHoldingButton);
-
 
         // News Button
         final JButton newsButton = new JButton("News");
@@ -225,7 +223,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         stockViewsButton.addActionListener(event -> {
             LoggedInState state = loggedInViewModel.getState();
             if (state != null && state.getUser() != null) {
-                // Triggers the initial load to fetch market data and switch views, just like Portfolio Health
                 blackLittermanController.loadMarketData(state.getUser());
             } else {
                 JOptionPane.showMessageDialog(this, "No active user session found.");
@@ -234,14 +231,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         buttonPanel.add(stockViewsButton);
 
         return buttonPanel;
-    }
-
-    private JButton createFeatureButton(String buttonText) {
-        final JButton button = new JButton(buttonText);
-        button.addActionListener(event ->
-                JOptionPane.showMessageDialog(this, buttonText + " screen will be connected here.")
-        );
-        return button;
     }
 
     private JPanel createHoldingsPanel() {

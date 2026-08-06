@@ -24,8 +24,8 @@ class StockOutputDataTest {
         assertEquals("150.00", outputData.getClose());
         assertEquals("2.50", outputData.getDailyPriceChange());
         assertEquals("1.20", outputData.getBeta());
-        assertEquals("0.05", outputData.getAlpha());
-        assertEquals("1.85", outputData.getSharpeRatio());
+        assertEquals("0.05", outputData.getAnnualizedAlpha());
+        assertEquals("1.85", outputData.getAnnualizedSharpeRatio());
         assertFalse(outputData.isUseCaseFailed());
     }
 
@@ -56,8 +56,8 @@ class StockOutputDataTest {
         assertNull(outputData.getClose());
         assertNull(outputData.getDailyPriceChange());
         assertNull(outputData.getBeta());
-        assertNull(outputData.getAlpha());
-        assertNull(outputData.getSharpeRatio());
+        assertNull(outputData.getAnnualizedAlpha());
+        assertNull(outputData.getAnnualizedSharpeRatio());
         assertFalse(outputData.isUseCaseFailed());
     }
 }
