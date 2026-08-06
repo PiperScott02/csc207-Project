@@ -96,6 +96,14 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
             @Override
             public void actionPerformed(ActionEvent evt) {
                 if (evt.getSource().equals(addHoldingButton)) {
+
+                    // Valid Ticker symbol check
+                    String tickerText = tickerInputField.getText().trim();
+                    if (tickerText.isEmpty() || !tickerText.matches("^[a-zA-Z]+$")) {
+                        JOptionPane.showMessageDialog(AddHoldingView.this, "Please enter a valid ticker symbol.");
+                        return;
+                    }
+
                     AddHoldingState currentState = addHoldingViewModel.getState();
                     currentState.setTicker(tickerInputField.getText());
                     currentState.setShares(sharesInputField.getText());

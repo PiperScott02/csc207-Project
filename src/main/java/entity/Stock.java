@@ -207,8 +207,50 @@ public class Stock {
         return null;
     }
 
-    /**
-     * Calculates the daily price change on a specific date.
+    /** Returns the closing price on the closest available trading day to a given date,
+     * searching through all history if necessary to handle random or unlisted dates (non-trading days or perhaps
+     * the company had not been publicly traded yet at that specified time, in this case, the closest closing price
+     * is returned which would be on the day of the company's IPO).
+     * @param targetDate the target date to look up.
+     * @return the closing price on the closest trading day, or null if time series is empty.
+     */
+    public BigDecimal getClosestPrice(LocalDate targetDate) {
+        if (timeSeries == null || timeSeries.isEmpty()) {
+            return null;
+        }
+
+        // If exact date exists, return it immediately
+        if (timeSeries.containsKey(targetDate)) {
+            return timeSeries.get(targetDate).getClose();
+        }
+
+        LocalDate closestDate = null;
+        long minDaysDifference = Long.MAX_VALUE;
+
+        // Scan through all available dates in the time series to find the closest one
+        for (LocalDate date : timeSeries.keySet()) {
+            long diff = Math.abs(java.time.temporal.ChronoUnit.DAYS.between(date, targetDate));
+            if (diff < minDaysDifference) {
+                minDaysDifference = diff;
+                closestDate = date;
+            }
+        }
+
+        if (closestDate != null) {
+            return timeSeries.get(closestDate).getClose();
+        }
+
+        return null;
+    }
+
+    /** Returns the daily change in price.
+     * @return the daily change.
+     */
+    public BigDecimal getDailyPriceChange() {
+        return dailyChange;
+    }
+
+    /** Calculates the daily price change on a specific date.
      * @param date the date to calculate change for.
      * @return the price difference between the date and the previous trading day, or null if data is missing.
      */
