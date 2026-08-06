@@ -27,6 +27,10 @@ public class Portfolio {
 
     private double sharpeRatio;
 
+    private double annualizedSharpeRatio;
+
+    private double annualizedAlpha;
+
     private boolean hasCustomViews;
 
     private Map<String, Double> customViews;
@@ -339,4 +343,40 @@ public class Portfolio {
         this.watchlist = watchlist;
     }
 
+    /** Adds a watchlistItem to the users' watchlist.
+     * @param watchlistItem to be added to the watchlist. .
+     */
+    public void addWatchlist(WatchlistStockItem watchlistItem) {
+        this.watchlist.add(watchlistItem);
+    }
+
+
+    /** Sets the annualized Sharpe ratio for this portfolio.
+     * @param annualizedSharpeRatio the annualized Sharpe ratio to set.
+     */
+    public void setAnnualizedSharpeRatio(double annualizedSharpeRatio) {
+        this.annualizedSharpeRatio = annualizedSharpeRatio;
+    }
+
+    /** Sets the annualized alpha value for this portfolio.
+     * @param annualizedAlpha the annualized alpha to set.
+     */
+    public void setAnnualizedAlpha(double annualizedAlpha) {
+        this.annualizedAlpha = annualizedAlpha;
+    }
+
+    /** Returns the annualized Sharpe ratio of this portfolio.
+     * @return the annualized Sharpe ratio as a double.
+     */
+    public Double getAnnualizedSharpeRatio() {
+        return this.annualizedSharpeRatio;
+    }
+
+    /** Returns the annualized alpha value of this portfolio.
+     * @return the annualized alpha as a double.
+     */
+    public Double getAnnualizedAlpha() {
+        return this.annualizedAlpha;
+    }
 }
+

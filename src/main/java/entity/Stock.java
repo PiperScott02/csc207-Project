@@ -35,9 +35,14 @@ public class Stock {
 
     private Double alpha;
 
+    private Double annualizedSharpeRatio;
+
+    private Double annualizedAlpha;
+
     private List<DailyPriceData> historicalTimeline;
 
     private Map<LocalDate, DailyPriceData> timeSeries;
+
 
 
     /** Sets the ticker symbol for this stock.
@@ -320,5 +325,33 @@ public class Stock {
         return beta != null
                 && alpha != null
                 && sharpeRatio != null;
+    }
+
+    /** Returns the annualized Sharpe ratio of this stock.
+     * @return the annualized Sharpe ratio.
+     */
+    public Double getAnnualizedSharpeRatio() {
+        return annualizedSharpeRatio;
+    }
+
+    /** Sets the annualized Sharpe ratio for this stock.
+     * @param annualizedSharpeRatio the annualized Sharpe ratio to set.
+     */
+    public void setAnnualizedSharpeRatio(double annualizedSharpeRatio) {
+        this.annualizedSharpeRatio = annualizedSharpeRatio;
+    }
+
+    /** Returns the annualized alpha value of this stock.
+     * @return the annualized alpha value.
+     */
+    public Double getAnnualizedAlpha() {
+        return annualizedAlpha;
+    }
+
+    /** Sets the annualized alpha value for this stock.
+     * @param annualizedAlpha the annualized alpha value to set.
+     */
+    public void setAnnualizedAlpha(double annualizedAlpha) {
+        this.annualizedAlpha = annualizedAlpha;
     }
 }

@@ -10,8 +10,8 @@ public class PortfolioHealthOutputData {
     private final String riskPreference;
     private final String portfolioHealthScore;
     private final String beta;
-    private final String alpha;
-    private final String sharpeRatio;
+    private final String annualizedAlpha;
+    private final String annualizedSharpeRatio;
     private final String sharpeAdvice;
     private final String riskAlignmentAdvice;
     private final String diversificationAdvice;
@@ -22,8 +22,8 @@ public class PortfolioHealthOutputData {
      * @param riskPreference the user's risk preference.
      * @param portfolioHealthScore the portfolio health score.
      * @param beta the beta metric string.
-     * @param alpha the alpha metric string.
-     * @param sharpeRatio the Sharpe ratio metric string.
+     * @param annualizedAlpha the annualized alpha metric string.
+     * @param annualizedSharpeRatio the annualized Sharpe ratio metric string.
      * @param sharpeAdvice the advice string for Sharpe ratio performance.
      * @param riskAlignmentAdvice the advice string for risk alignment.
      * @param diversificationAdvice the advice string for portfolio diversification.
@@ -31,14 +31,14 @@ public class PortfolioHealthOutputData {
      * @param useCaseFailed boolean indicating whether the operation failed.
      */
     public PortfolioHealthOutputData(String riskPreference, String portfolioHealthScore,
-                                     String beta, String alpha, String sharpeRatio,
+                                     String beta, String annualizedAlpha, String annualizedSharpeRatio,
                                      String sharpeAdvice, String riskAlignmentAdvice,
                                      String diversificationAdvice, String newsAdvice, boolean useCaseFailed) {
         this.riskPreference = riskPreference;
         this.portfolioHealthScore = portfolioHealthScore;
         this.beta = beta;
-        this.alpha = alpha;
-        this.sharpeRatio = sharpeRatio;
+        this.annualizedAlpha = annualizedAlpha;
+        this.annualizedSharpeRatio = annualizedSharpeRatio;
         this.sharpeAdvice = sharpeAdvice;
         this.riskAlignmentAdvice = riskAlignmentAdvice;
         this.diversificationAdvice = diversificationAdvice;
@@ -67,18 +67,18 @@ public class PortfolioHealthOutputData {
         return beta;
     }
 
-    /** Returns the alpha value string.
-     * @return the alpha string.
+    /** Returns the annualized alpha value string.
+     * @return the annualized alpha string.
      */
-    public String getAlpha() {
-        return alpha;
+    public String getAnnualizedAlpha() {
+        return annualizedAlpha;
     }
 
-    /** Returns the Sharpe ratio value string.
-     * @return the Sharpe ratio string.
+    /** Returns the annualized Sharpe ratio value string.
+     * @return the annualized Sharpe ratio string.
      */
-    public String getSharpeRatio() {
-        return sharpeRatio;
+    public String getAnnualizedSharpeRatio() {
+        return annualizedSharpeRatio;
     }
 
     /** Returns the Sharpe advice string.

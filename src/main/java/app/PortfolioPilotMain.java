@@ -93,7 +93,7 @@ public final class PortfolioPilotMain {
         /*
          * Alpha Vantage API key
          */
-        final String apiKey = "API_KEY_HERE";
+        final String apiKey = "NKH8SNZW8I690AJQ";
 
         // ==========================================
         // 2. Data Access Objects
@@ -259,16 +259,18 @@ public final class PortfolioPilotMain {
                 );
         views.add(addHoldingView, addHoldingView.getViewName());
 
-        // ========================================================
+// ========================================================
         // 12. Add Watchlist View
         // ========================================================
         final AddWatchlistView addWatchlistView =
-                AddWatchlistPilotMain.create(
+                AddWatchlistUseCaseFactory.create(
                         viewManagerModel,
-                        loggedInViewModel,
                         addWatchlistViewModel,
+                        watchlistViewModel,
+                        loggedInViewModel,
                         stockDailyDataAccessObject
                 );
+        views.add(addWatchlistView, addWatchlistView.viewName);
         views.add(addWatchlistView, addWatchlistView.viewName);
 
         // ==========================================

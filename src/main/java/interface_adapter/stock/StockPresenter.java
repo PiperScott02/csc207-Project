@@ -22,8 +22,8 @@ public class StockPresenter implements StockOutputBoundary {
         currentState.setClose(outputData.getClose());
         currentState.setDailyPriceChange(outputData.getDailyPriceChange());
         currentState.setBeta(outputData.getBeta());
-        currentState.setAlpha(outputData.getAlpha());
-        currentState.setSharpeRatio(outputData.getSharpeRatio());
+        currentState.setAlpha(outputData.getAnnualizedAlpha());
+        currentState.setSharpeRatio(outputData.getAnnualizedSharpeRatio());
 
         stockViewModel.setState(currentState);
 

@@ -11,21 +11,41 @@ import use_case.add_watchlist.AddWatchlistInputBoundary;
 import use_case.add_watchlist.AddWatchlistInteractor;
 import use_case.add_watchlist.AddWatchlistOutputBoundary;
 import view.AddWatchlistView;
-import view.WatchlistView;
 
-import javax.swing.*;
-import java.awt.*;
+/**
+ * Factory class for the Add Watchlist use case, similar to AddHoldingUseCaseFactory.
+ */
+public class AddWatchlistUseCaseFactory {
 
-public class AddWatchlistPilotMain {
+    private AddWatchlistUseCaseFactory() {
+        // Prevent instantiation
+    }
 
     public static AddWatchlistView create(
             ViewManagerModel viewManagerModel,
-            LoggedInViewModel loggedInViewModel,
-            WatchlistViewModel watchlistViewModel,
             AddWatchlistViewModel addWatchlistViewModel,
-            StockDailyDataAccessInterface dataAccessObject) {
+            WatchlistViewModel watchlistViewModel, // Added parameter
+            LoggedInViewModel loggedInViewModel,
+            StockDailyDataAccessInterface stockDataAccessObject) {
 
-// 1. Create the Presenter
+        AddWatchlistController addWatchlistController = createWatchlistUseCase(
+                viewManagerModel,
+                addWatchlistViewModel,
+                watchlistViewModel, // Pass down
+                loggedInViewModel,
+                stockDataAccessObject
+        );
+
+        return new AddWatchlistView(addWatchlistViewModel, addWatchlistController, viewManagerModel);
+    }
+
+    private static AddWatchlistController createWatchlistUseCase(
+            ViewManagerModel viewManagerModel,
+            AddWatchlistViewModel addWatchlistViewModel,
+            WatchlistViewModel watchlistViewModel, // Added parameter
+            LoggedInViewModel loggedInViewModel,
+            StockDailyDataAccessInterface stockDataAccessObject) {
+
         AddWatchlistOutputBoundary addWatchlistOutputBoundary = new AddWatchlistPresenter(
                 addWatchlistViewModel,
                 watchlistViewModel,
@@ -33,19 +53,12 @@ public class AddWatchlistPilotMain {
                 viewManagerModel
         );
 
-        // 2. Create the Interactor
         AddWatchlistInputBoundary addWatchlistInteractor = new AddWatchlistInteractor(
-                dataAccessObject,
+                stockDataAccessObject,
                 addWatchlistOutputBoundary,
                 loggedInViewModel
         );
 
-        // 3. Create the Controller
-        AddWatchlistController addWatchlistController = new AddWatchlistController(
-                addWatchlistInteractor
-        );
-
-        // 4. Create and return the View (injecting ViewManagerModel so the Cancel button works)
-        return new AddWatchlistView(addWatchlistViewModel, addWatchlistController, viewManagerModel);
+        return new AddWatchlistController(addWatchlistInteractor);
     }
 }

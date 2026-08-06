@@ -120,7 +120,10 @@ public class BlackLittermanService {
             int stockIndex = universe.indexOf(ticker);
             double assetVariance = covarianceMatrix.getEntry(stockIndex, stockIndex);
 
-            omegaArray[i][i] = (1.0 - confidence) * DEFAULT_TAU * assetVariance;
+            double calculatedOmega = (1.0 - confidence) * DEFAULT_TAU * assetVariance;
+
+            // FIX: Enforce a minimum uncertainty floor to prevent division-by-zero / extreme weighting
+            omegaArray[i][i] = Math.max(calculatedOmega, 1e-6);
         }
 
         return new Array2DRowRealMatrix(omegaArray);
@@ -132,11 +135,9 @@ public class BlackLittermanService {
 
         for (int i = 0; i < numViews; i++) {
             String ticker = viewTickers.get(i);
-
+            // Simple linear daily conversion to match standard covariance scaling
             double annualReturnDecimal = userViews.getOrDefault(ticker, 0.0) / 100.0;
-            double dailyReturnDecimal = Math.pow(1.0 + annualReturnDecimal, 1.0 / 252.0) - 1.0;
-
-            qArray[i][0] = dailyReturnDecimal;
+            qArray[i][0] = annualReturnDecimal / 252.0;
         }
 
         return new Array2DRowRealMatrix(qArray);
@@ -212,7 +213,7 @@ public class BlackLittermanService {
             String ticker = orderedStocks.get(i).getTickerSymbol();
             double dailyReturn = blReturnsDaily.getEntry(i, 0);
 
-            double annualReturn = Math.pow(1.0 + dailyReturn, 252.0) - 1.0;
+            double annualReturn = dailyReturn * 252.0;
             adjustedReturns.put(ticker, annualReturn);
         }
 

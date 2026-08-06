@@ -61,7 +61,7 @@ public class AddWatchlistView extends JPanel implements ActionListener, Property
                 }
         );
 
-        // Make the cancel button switch back to the main dashboard
+        // Make the cancel button switch back to the watchlist view
         cancelButton.addActionListener(
                 new ActionListener() {
                     @Override
@@ -71,13 +71,12 @@ public class AddWatchlistView extends JPanel implements ActionListener, Property
                         currentState.setAddWatchlistError(null);
                         addWatchlistViewModel.setState(currentState);
 
-                        // Switch back to the main logged-in view
-                        viewManagerModel.setState("logged in");
+                        // Switch back to the watchlist view
+                        viewManagerModel.setState("watchlist");
                         viewManagerModel.firePropertyChanged();
                     }
                 }
         );
-
         tickerInputField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             private void updateState() {
                 AddWatchlistState currentState = addWatchlistViewModel.getState();

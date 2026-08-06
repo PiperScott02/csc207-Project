@@ -21,7 +21,7 @@
             if (portfolio == null) return 0.0;
 
             Double beta = portfolio.getTrueBeta();
-            Double sharpeRatio = portfolio.getSharpeRatio();
+            Double sharpeRatio = portfolio.getAnnualizedSharpeRatio();
             Double cdr = PortfolioFinancialService.calculateCdr(portfolio); // Or wherever your CDR is calculated
 
             double sharpeScore = calculateSharpeScore(sharpeRatio);

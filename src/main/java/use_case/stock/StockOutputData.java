@@ -7,8 +7,8 @@ public class StockOutputData {
     private final String close;
     private final String dailyPriceChange;
     private final String beta;
-    private final String alpha;
-    private final String sharpeRatio;
+    private final String annualizedAlpha;
+    private final String annualizedSharpeRatio;
     private final boolean useCaseFailed;
 
     /** Constructs a new StockOutputData object with stock details, financial metrics, and failure status.
@@ -17,19 +17,19 @@ public class StockOutputData {
      * @param close the closing price string.
      * @param dailyPriceChange the daily price change string.
      * @param beta the beta metric string.
-     * @param alpha the alpha metric string.
-     * @param sharpeRatio the Sharpe ratio metric string.
+     * @param annualizedAlpha the annualized alpha metric string.
+     * @param annualizedSharpeRatio the annualized Sharpe ratio metric string.
      * @param useCaseFailed boolean indicating whether the operation failed.
      */
     public StockOutputData(String ticker, String companyName, String close, String dailyPriceChange,
-                           String beta, String alpha, String sharpeRatio, boolean useCaseFailed) {
+                           String beta, String annualizedAlpha, String annualizedSharpeRatio, boolean useCaseFailed) {
         this.ticker = ticker;
         this.companyName = companyName;
         this.close = close;
         this.dailyPriceChange = dailyPriceChange;
         this.beta = beta;
-        this.alpha = alpha;
-        this.sharpeRatio = sharpeRatio;
+        this.annualizedAlpha = annualizedAlpha;
+        this.annualizedSharpeRatio = annualizedSharpeRatio;
         this.useCaseFailed = useCaseFailed;
     }
 
@@ -68,18 +68,18 @@ public class StockOutputData {
         return beta;
     }
 
-    /** Returns the alpha value string.
-     * @return the alpha string.
+    /** Returns the annualized alpha value string.
+     * @return the annualized alpha string.
      */
-    public String getAlpha() {
-        return alpha;
+    public String getAnnualizedAlpha() {
+        return annualizedAlpha;
     }
 
-    /** Returns the Sharpe ratio value string.
-     * @return the Sharpe ratio string.
+    /** Returns the annualized Sharpe ratio value string.
+     * @return the annualized Sharpe ratio string.
      */
-    public String getSharpeRatio() {
-        return sharpeRatio;
+    public String getAnnualizedSharpeRatio() {
+        return annualizedSharpeRatio;
     }
 
     /** Returns whether the use case failed.

@@ -78,7 +78,7 @@ public class AddWatchlistInteractor implements AddWatchlistInputBoundary {
                 dailyChange
         );
 
-        portfolio.getWatchlist().add(newItem);
+        portfolio.addWatchlist(newItem);
 
         // 6. Package results and notify presenter
         AddWatchlistOutputData outputData = new AddWatchlistOutputData(ticker, portfolio.getWatchlist(), false);

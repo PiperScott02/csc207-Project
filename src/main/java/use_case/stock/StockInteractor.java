@@ -34,8 +34,8 @@ public class StockInteractor implements StockInputBoundary {
                 stock.getClose().toString(),
                 stock.getDailyPriceChange().toString(),
                 stock.getBeta().toString(),
-                stock.getAlpha().toString(),
-                stock.getSharpeRatio().toString(),
+                stock.getAnnualizedAlpha().toString(),
+                stock.getAnnualizedSharpeRatio().toString(),
                 false
         );
         stockPresenter.prepareSuccessView(stockOutputData);
