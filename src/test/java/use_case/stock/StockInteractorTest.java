@@ -92,8 +92,8 @@ class StockInteractorTest {
         assertEquals("150.00", presenter.outputData.getClose());
         assertEquals("2.50", presenter.outputData.getDailyPriceChange());
         assertNotNull(presenter.outputData.getBeta());
-        assertNotNull(presenter.outputData.getAlpha());
-        assertNotNull(presenter.outputData.getSharpeRatio());
+        assertNotNull(presenter.outputData.getAnnualizedAlpha());
+        assertNotNull(presenter.outputData.getAnnualizedSharpeRatio());
         assertFalse(presenter.outputData.isUseCaseFailed());
     }
 

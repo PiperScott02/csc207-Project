@@ -22,11 +22,7 @@ public class StockService implements StockDailyDataAccessInterface {
     and produces a timeline of the last 100 entity.DailyPriceData objects sorted by date.
      */
 
-<<<<<<< HEAD
-    private static final String DEFAULT_API_KEY = "NKH8SNZW8I690AJQ";
-=======
     private static final String DEFAULT_API_KEY = "API_KEY_PLACEHOLDER";
->>>>>>> 2fb1cc19439d6cd24206014e914bed37f60145c5
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -48,6 +44,7 @@ public class StockService implements StockDailyDataAccessInterface {
     }
 
     public Stock createStockAndHistory(String tickerSymbol) throws IOException, InterruptedException {
+        TimeUnit.SECONDS.sleep(1);
         String url =
                 "https://www.alphavantage.co/query" +
                         "?function=TIME_SERIES_DAILY" +
@@ -55,7 +52,6 @@ public class StockService implements StockDailyDataAccessInterface {
                         "&apikey=" + apiKey;
 
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
-        TimeUnit.SECONDS.sleep(1);
         HttpResponse<String> response =
                 httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -74,6 +70,7 @@ public class StockService implements StockDailyDataAccessInterface {
         stock.setPreviousClose(timeline.get(size - 2).getClose());
         stock.setDailyChange(stock.getClose().subtract(stock.getPreviousClose()));
 
+        TimeUnit.SECONDS.sleep(1);
         String overviewUrl =
                 "https://www.alphavantage.co/query" +
                         "?function=OVERVIEW" +
@@ -81,7 +78,6 @@ public class StockService implements StockDailyDataAccessInterface {
                         "&apikey=" + apiKey;
 
         HttpRequest overviewRequest = HttpRequest.newBuilder().uri(URI.create(overviewUrl)).build();
-        TimeUnit.SECONDS.sleep(1);
         HttpResponse<String> overviewResponse =
                 httpClient.send(overviewRequest, HttpResponse.BodyHandlers.ofString());
 
@@ -101,7 +97,6 @@ public class StockService implements StockDailyDataAccessInterface {
             } else {
                 stock.setSharesOutstanding(0.0);
             }
-
 
             stock.setCountry(overview.getCountry());
             stock.setCurrency(overview.getCurrency());

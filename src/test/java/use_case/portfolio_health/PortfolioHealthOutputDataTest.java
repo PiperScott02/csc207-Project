@@ -24,8 +24,8 @@ class PortfolioHealthOutputDataTest {
         assertEquals("Moderate", outputData.getRiskPreference());
         assertEquals("85/100", outputData.getPortfolioHealthScore());
         assertEquals("1.10", outputData.getBeta());
-        assertEquals("0.03", outputData.getAlpha());
-        assertEquals("1.50", outputData.getSharpeRatio());
+        assertEquals("0.03", outputData.getAnnualizedAlpha());
+        assertEquals("1.50", outputData.getAnnualizedSharpeRatio());
         assertEquals("Good risk-adjusted return.", outputData.getSharpeAdvice());
         assertEquals("Portfolio risk aligns well with preference.", outputData.getRiskAlignmentAdvice());
         assertEquals("Well diversified across sectors.", outputData.getDiversificationAdvice());
@@ -60,8 +60,8 @@ class PortfolioHealthOutputDataTest {
         assertNull(outputData.getRiskPreference());
         assertNull(outputData.getPortfolioHealthScore());
         assertNull(outputData.getBeta());
-        assertNull(outputData.getAlpha());
-        assertNull(outputData.getSharpeRatio());
+        assertNull(outputData.getAnnualizedAlpha());
+        assertNull(outputData.getAnnualizedSharpeRatio());
         assertNull(outputData.getSharpeAdvice());
         assertNull(outputData.getRiskAlignmentAdvice());
         assertNull(outputData.getDiversificationAdvice());
