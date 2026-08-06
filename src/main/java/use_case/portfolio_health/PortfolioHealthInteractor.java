@@ -4,17 +4,21 @@ import entity.*;
 import use_case.analysis.PortfolioAdviceService;
 import use_case.analysis.PortfolioFinancialService;
 import use_case.analysis.PortfolioHealthScoringService;
+import use_case.news.NewsDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
 
 /** The Interactor for the Portfolio Health use case, handling the portfolio health score calculations. */
 public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
     private final StockDataAccessInterface stockDataAccessObject;
+    private final NewsDataAccessInterface newsDataAccessObject;
     private final PortfolioHealthOutputBoundary portfolioHealthPresenter;
 
     // Simplified constructor: Only requires stockDataAccessObject and presenter
     public PortfolioHealthInteractor(StockDataAccessInterface stockDataAccessObject,
+                                     NewsDataAccessInterface newsDataAccessObject,
                                      PortfolioHealthOutputBoundary portfolioHealthPresenter) {
         this.stockDataAccessObject = stockDataAccessObject;
+        this.newsDataAccessObject = newsDataAccessObject;
         this.portfolioHealthPresenter = portfolioHealthPresenter;
     }
 
@@ -43,7 +47,7 @@ public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
             Double riskScore = PortfolioHealthScoringService.calculateRiskAlignmentScore(portfolio.getTrueBeta(), riskProfile);
             Double cdr = PortfolioFinancialService.calculateCdr(portfolio);
             Double divScore = PortfolioHealthScoringService.calculateDiversificationScore(cdr);
-            Double newsScore = PortfolioHealthScoringService.calculateNewsScore();
+            Double newsScore = PortfolioHealthScoringService.calculateNewsScore(portfolio, newsDataAccessObject);
 
             Double portfolioHealthScore = sharpeScore + riskScore + divScore + newsScore;
             String portfolioHealthScoreString = portfolioHealthScore.toString();
@@ -52,7 +56,7 @@ public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
             String sharpeAdvice = PortfolioAdviceService.getSharpeAdvice(sharpeScore);
             String riskAlignmentAdvice = PortfolioAdviceService.getRiskAlignmentAdvice(riskScore, riskProfile);
             String diversificationAdvice = PortfolioAdviceService.getDiversificationAdvice(divScore);
-            String newsAdvice = PortfolioAdviceService.getNewsAdvice();
+            String newsAdvice = PortfolioAdviceService.getNewsAdvice(newsScore);
 
             PortfolioHealthOutputData portfolioHealthOutputData = new PortfolioHealthOutputData(
                     riskPreference,

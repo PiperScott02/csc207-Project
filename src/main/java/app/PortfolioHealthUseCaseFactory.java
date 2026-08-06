@@ -5,6 +5,7 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.portfolio_health.PortfolioHealthPresenter;
 import interface_adapter.portfolio_health.PortfolioHealthViewModel;
+import use_case.news.NewsDataAccessInterface;
 import use_case.portfolio_health.PortfolioHealthInputBoundary;
 import use_case.portfolio_health.PortfolioHealthInteractor;
 import use_case.portfolio_health.PortfolioHealthOutputBoundary;
@@ -28,7 +29,8 @@ public final class PortfolioHealthUseCaseFactory {
     public static PortfolioHealthController createPortfolioHealthUseCase(
             ViewManagerModel viewManagerModel,
             PortfolioHealthViewModel portfolioHealthViewModel,
-            StockDataAccessInterface stockDataAccessObject) {
+            StockDataAccessInterface stockDataAccessObject,
+            NewsDataAccessInterface newsDataAccessObject) {
 
         final PortfolioHealthOutputBoundary presenter =
                 new PortfolioHealthPresenter(viewManagerModel, portfolioHealthViewModel);
@@ -36,6 +38,7 @@ public final class PortfolioHealthUseCaseFactory {
         final PortfolioHealthInputBoundary interactor =
                 new PortfolioHealthInteractor(
                         stockDataAccessObject,
+                        newsDataAccessObject,
                         presenter
                 );
 

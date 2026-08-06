@@ -54,7 +54,33 @@ class PortfolioAdviceServiceTest {
     }
 
     @Test
-    void testGetNewsAdvice() {
-        assertNotNull(PortfolioAdviceService.getNewsAdvice());
+    void testGetNewsAdviceAllTiers() {
+        // Null safety check
+        assertNotNull(PortfolioAdviceService.getNewsAdvice(null));
+
+        // Strong Bullish (>= 20.0)
+        String bullish = PortfolioAdviceService.getNewsAdvice(22.5);
+        assertNotNull(bullish);
+        assertTrue(bullish.contains("Strong Bullish Sentiment"));
+
+        // Moderately Bullish (15.0 - 19.9)
+        String modBullish = PortfolioAdviceService.getNewsAdvice(17.0);
+        assertNotNull(modBullish);
+        assertTrue(modBullish.contains("Moderately Bullish Sentiment"));
+
+        // Neutral (10.0 - 14.9)
+        String neutral = PortfolioAdviceService.getNewsAdvice(12.5);
+        assertNotNull(neutral);
+        assertTrue(neutral.contains("Neutral Sentiment"));
+
+        // Cautious / Bearish (5.0 - 9.9)
+        String bearish = PortfolioAdviceService.getNewsAdvice(7.5);
+        assertNotNull(bearish);
+        assertTrue(bearish.contains("Cautious/Bearish Sentiment"));
+
+        // Strong Bearish (< 5.0)
+        String strongBearish = PortfolioAdviceService.getNewsAdvice(2.0);
+        assertNotNull(strongBearish);
+        assertTrue(strongBearish.contains("Strong Bearish Sentiment"));
     }
 }

@@ -214,6 +214,9 @@ public class Stock {
      */
     public LocalDate getLastTradingDay() {
         List<LocalDate> dates = getDatesSorted();
+        if (dates.isEmpty()) {
+            return null;
+        }
         int listLength = dates.size();
         return dates.get(listLength - 1);
     }
