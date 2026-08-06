@@ -28,11 +28,7 @@ public class AddHoldingOutputData {
         return shares;
     }
 
-    public List<StockHolding> getHoldings() {
-        return holdings;
-    }
+    public List<StockHolding> getHoldings() { return holdings; }
 
-    public boolean isUseCaseFailed() {
-        return useCaseFailed;
-    }
+    public boolean isUseCaseFailed() { return useCaseFailed; }
 }

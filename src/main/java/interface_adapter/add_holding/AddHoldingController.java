@@ -15,7 +15,7 @@ public class AddHoldingController {
     }
 
     /**
-     * Executes the Add Holding use case with user-specified ticker, shares, and average buy price.
+     * Executes the Add Holding use case with user-specified ticker, shares, and estimated purchase price.
      *
      * @param ticker          the stock ticker symbol entered by the user
      * @param shares          the number of shares owned

@@ -48,6 +48,12 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
     private DefaultTableModel tableModel;
+    private JLabel lastUpdatedLabel;
+    private JLabel totalHoldingsLabel;
+    private JLabel totalPortfolioValueValLabel;
+    private JLabel totalGainLossValLabel;
+    private JLabel dailyChangeValLabel;
+    private boolean hasAddedHolding = false;
 
     /**
      * Creates the home screen.
@@ -112,14 +118,23 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         final JPanel summaryPanel = new JPanel(new GridLayout(1, 3, 15, 0));
         summaryPanel.setBorder(BorderFactory.createTitledBorder("Portfolio Summary"));
 
-        summaryPanel.add(createSummaryBox("Total Portfolio Value", "$0.00"));
-        summaryPanel.add(createSummaryBox("Total Gain / Loss", "$0.00"));
-        summaryPanel.add(createSummaryBox("Daily Change", "$0.00 (0.00%)"));
+        totalPortfolioValueValLabel = new JLabel("$0.00", SwingConstants.CENTER);
+        totalPortfolioValueValLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
+
+        totalGainLossValLabel = new JLabel("$0.00", SwingConstants.CENTER);
+        totalGainLossValLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
+
+        dailyChangeValLabel = new JLabel("$0.00 (0.00%)", SwingConstants.CENTER);
+        dailyChangeValLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
+
+        summaryPanel.add(createSummaryBox("Total Portfolio Value", totalPortfolioValueValLabel));
+        summaryPanel.add(createSummaryBox("Total Gain / Loss", totalGainLossValLabel));
+        summaryPanel.add(createSummaryBox("Daily Change", dailyChangeValLabel));
 
         return summaryPanel;
     }
 
-    private JPanel createSummaryBox(String heading, String value) {
+    private JPanel createSummaryBox(String heading, JLabel valueLabel) {
         final JPanel panel = new JPanel(new GridLayout(2, 1, 0, 5));
         panel.setBorder(
                 BorderFactory.createCompoundBorder(
@@ -130,9 +145,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         final JLabel headingLabel = new JLabel(heading, SwingConstants.CENTER);
         headingLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-
-        final JLabel valueLabel = new JLabel(value, SwingConstants.CENTER);
-        valueLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
 
         panel.add(headingLabel);
         panel.add(valueLabel);
@@ -255,8 +267,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         final JScrollPane scrollPane = new JScrollPane(holdingsTable);
         final JPanel statusPanel = new JPanel(new BorderLayout());
 
-        statusPanel.add(new JLabel("Total Holdings: 0"), BorderLayout.WEST);
-        statusPanel.add(new JLabel("Last updated: --"), BorderLayout.EAST);
+        totalHoldingsLabel = new JLabel("Total Holdings: 0");
+        lastUpdatedLabel = new JLabel("Last updated: --");
+
+        statusPanel.add(totalHoldingsLabel, BorderLayout.WEST);
+        statusPanel.add(lastUpdatedLabel, BorderLayout.EAST);
 
         holdingsPanel.add(scrollPane, BorderLayout.CENTER);
         holdingsPanel.add(statusPanel, BorderLayout.SOUTH);
@@ -281,27 +296,75 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                 welcomeLabel.setText("Welcome, " + username);
             }
 
-            // Repopulate the holdings table whenever the state changes
+            // Repopulate the holdings table and calculate totals whenever the state changes
             if (tableModel != null && state.getHoldings() != null) {
                 tableModel.setRowCount(0); // Clear current rows
+
+                java.math.BigDecimal totalPortfolioValue = java.math.BigDecimal.ZERO;
+                java.math.BigDecimal totalGainLoss = java.math.BigDecimal.ZERO;
+                java.math.BigDecimal totalDailyChange = java.math.BigDecimal.ZERO;
+
                 for (StockHolding holding : state.getHoldings()) {
                     Stock stock = holding.getStock();
+
+                    // Accumulate portfolio-wide totals
+                    totalPortfolioValue = totalPortfolioValue.add(holding.calculateTotalValue());
+                    totalGainLoss = totalGainLoss.add(holding.calculateGainLoss());
+
+                    // Accumulate daily change if stock and price change data exist
+                    if (stock != null && stock.getDailyPriceChange() != null) {
+                        java.math.BigDecimal holdingDailyChange = stock.getDailyPriceChange()
+                                .multiply(java.math.BigDecimal.valueOf(holding.getNumberOfShares()));
+                        totalDailyChange = totalDailyChange.add(holdingDailyChange);
+                    }
+
+                    // Populate table rows
                     tableModel.addRow(new Object[]{
                             stock != null ? stock.getTickerSymbol() : "",
                             stock != null ? stock.getCompanyName() : "",
                             holding.getNumberOfShares(),
-                            (!holding.getTransactions().isEmpty()) ? holding.getTransactions().get(0).getPricePerShare() : "",
-                            stock != null ? stock.getClose() : "",
-                            "-",
-                            "-"
+                            String.format("$%.2f", holding.getAveragePrice()),
+                            stock != null ? String.format("$%.2f", stock.getClose()) : "",
+                            String.format("$%.2f", holding.calculateGainLoss()),
+                            String.format("%.2f%%", holding.calculateGainLossPercentage())
                     });
+                }
+
+                // Update the top summary boxes
+                if (totalPortfolioValueValLabel != null) {
+                    totalPortfolioValueValLabel.setText(String.format("$%.2f", totalPortfolioValue));
+                }
+                if (totalGainLossValLabel != null) {
+                    totalGainLossValLabel.setText(String.format("$%.2f", totalGainLoss));
+                }
+                if (dailyChangeValLabel != null) {
+                    dailyChangeValLabel.setText(String.format("$%.2f", totalDailyChange));
+                }
+
+                // Only update "Total Holdings:" count when a Holding is added
+                if (totalHoldingsLabel != null) {
+                    int uniqueHoldingCount = state.getHoldings().size();
+                    totalHoldingsLabel.setText("Total Holdings: " + uniqueHoldingCount);
+                }
+
+                // Check if user has any Holdings
+                if (!state.getHoldings().isEmpty()) {
+                    hasAddedHolding = true;
+                }
+            }
+            // Only update "Last updated:" timestamp when a Holding is added
+            if (lastUpdatedLabel != null) {
+                if (hasAddedHolding) {
+                    String currentTime = java.time.LocalDateTime.now()
+                            .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    lastUpdatedLabel.setText("Last updated: " + currentTime);
+                } else {
+                    lastUpdatedLabel.setText("Last updated: --");
                 }
             }
         }
     }
-
     public String getViewName() {
         return viewName;
     }
-
 }

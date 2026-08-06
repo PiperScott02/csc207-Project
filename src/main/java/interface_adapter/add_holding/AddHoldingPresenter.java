@@ -25,13 +25,13 @@ public class AddHoldingPresenter implements AddHoldingOutputBoundary {
 
     @Override
     public void prepareSuccessView(AddHoldingOutputData outputData) {
-        // 1. Update the LoggedInState with the new holdings list
+        // Update the LoggedInState with the new holdings list
         LoggedInState loggedInState = loggedInViewModel.getState();
         loggedInState.setHoldings(outputData.getHoldings());
         loggedInViewModel.setState(loggedInState);
         loggedInViewModel.firePropertyChanged();
 
-        // 2. Tell the ViewManager to switch back to the main dashboard ("logged in") view
+        // Tell the ViewManager to switch back to the main dashboard ("logged in") view
         viewManagerModel.setState("logged in");
         viewManagerModel.firePropertyChanged();
     }
