@@ -16,13 +16,14 @@ public class StockHolding {
     private LocalDate date;
 
 
-    /** Calculates the total current value of this holding.
+    /** Calculates the total current value of this holding based on current market price.
      * @return the total value as a BigDecimal.
      */
     public BigDecimal calculateTotalValue() {
-        BigDecimal price = stock.getClose();
-        BigDecimal shares = BigDecimal.valueOf(getNumberOfShares());
-        return price.multiply(shares);
+        if (stock == null || stock.getClose() == null) {
+            return BigDecimal.ZERO;
+        }
+        return stock.getClose().multiply(BigDecimal.valueOf(getNumberOfShares()));
     }
 
     /** Calculates the quantity of shares held on a specific date.
@@ -124,12 +125,18 @@ public class StockHolding {
      */
     public BigDecimal calculateTotalCost() {
         BigDecimal totalCost = BigDecimal.ZERO;
+        if (transactions == null) {
+            return totalCost;
+        }
         for (Transaction t : transactions) {
-            BigDecimal txCost = t.getPricePerShare().multiply(BigDecimal.valueOf(t.getNumberOfShares()));
-            if (t.getType() == TransactionType.BUY) {
-                totalCost = totalCost.add(txCost);
-            } else if (t.getType() == TransactionType.SELL) {
-                totalCost = totalCost.subtract(txCost);
+            // Guard against null price per share from simplified CSV holdings
+            if (t != null && t.getPricePerShare() != null) {
+                BigDecimal txCost = t.getPricePerShare().multiply(BigDecimal.valueOf(t.getNumberOfShares()));
+                if (t.getType() == TransactionType.BUY) {
+                    totalCost = totalCost.add(txCost);
+                } else if (t.getType() == TransactionType.SELL) {
+                    totalCost = totalCost.subtract(txCost);
+                }
             }
         }
         return totalCost;
