@@ -2,6 +2,7 @@ package use_case.news;
 
 import entity.NewsArticle;
 import entity.NewsSentiment;
+import entity.NewsSentimentCalculator;
 
 import java.util.List;
 
@@ -75,27 +76,7 @@ public class NewsInteractor implements NewsInputBoundary {
     private NewsSentiment calculateOverallSentiment(
             List<NewsArticle> articles) {
 
-        double weightedScoreTotal = 0.0;
-        double totalRelevance = 0.0;
-
-        for (NewsArticle article : articles) {
-            final double relevance = article.getRelevanceScore();
-
-            if (relevance > 0.0) {
-                weightedScoreTotal +=
-                        article.getSentimentScore() * relevance;
-                totalRelevance += relevance;
-            }
-        }
-
-        final double averageScore;
-
-        if (totalRelevance > 0.0) {
-            averageScore = weightedScoreTotal / totalRelevance;
-        }
-        else {
-            averageScore = calculateSimpleAverage(articles);
-        }
+        double averageScore = NewsSentimentCalculator.calculateRawSentiment(articles);
 
         if (averageScore >= BULLISH_THRESHOLD) {
             return NewsSentiment.BULLISH;

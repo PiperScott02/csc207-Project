@@ -1,25 +1,32 @@
 package app;
 
 import java.awt.CardLayout;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import data_access.AlphaVantageNewsDataAccessObject;
 import data_access.FileStockDataAccessObject;
+import data_access.FileUserDataAccessObject;
 import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
-
 import data_access.ticker_search.TickerSearchDataAccessObject;
+import entity.CommonUserFactory;
+
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_holding.AddHoldingViewModel;
 import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.black_litterman.BlackLittermanViewModel;
+import interface_adapter.currency_conversion.CurrencyConversionController;
+import interface_adapter.currency_conversion.CurrencyConversionViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.news.NewsViewModel;
 import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.portfolio_health.PortfolioHealthViewModel;
+import interface_adapter.risk_preference.RiskPreferenceViewModel;
 import interface_adapter.signup.SignupViewModel;
 import interface_adapter.similar_search.SimilarSearchViewModel;
 import interface_adapter.stock.StockController;
@@ -27,23 +34,16 @@ import interface_adapter.stock.StockViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistViewModel;
-import interface_adapter.risk_preference.RiskPreferenceViewModel;
-import interface_adapter.currency_conversion.CurrencyConversionController;
-import interface_adapter.currency_conversion.CurrencyConversionViewModel;
 
 import use_case.StockDailyDataAccessInterface;
 import use_case.TickerSearchDataAccessInterface;
 import use_case.analysis.BlackLittermanService;
 import use_case.black_litterman.BlackLittermanDataAccessInterface;
+import use_case.news.NewsDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
 
 import view.*;
-
-import java.io.IOException;
-
-import data_access.FileUserDataAccessObject;
-import entity.CommonUserFactory;
 
 /**
  * Starts PortfolioPilot with signup and login functionality.
@@ -102,7 +102,7 @@ public final class PortfolioPilotMain {
         /*
          * Alpha Vantage API key
          */
-        final String apiKey = "API_KEY_HERE";
+        final String apiKey = "API_KEY_PLACEHOLDER";
 
         // ==========================================
         // 2. Data Access Objects
@@ -135,6 +135,9 @@ public final class PortfolioPilotMain {
         final StockDataAccessInterface stockDataAccessObject =
                 new FileStockDataAccessObject();
 
+        final NewsDataAccessInterface newsDataAccessObject =
+                new AlphaVantageNewsDataAccessObject(apiKey);
+
         // ==========================================
         // 3. Controllers
         // ==========================================
@@ -149,7 +152,8 @@ public final class PortfolioPilotMain {
                 PortfolioHealthUseCaseFactory.createPortfolioHealthUseCase(
                         viewManagerModel,
                         portfolioHealthViewModel,
-                        stockDataAccessObject
+                        stockDataAccessObject,
+                        newsDataAccessObject
                 );
 
         final WatchlistController watchlistController =

@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import data_access.AlphaVantageNewsDataAccessObject;
 import data_access.FileStockDataAccessObject;
 import entity.CommonUser;
 import entity.Portfolio;
@@ -23,6 +24,7 @@ import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.portfolio_health.PortfolioHealthPresenter;
 import interface_adapter.portfolio_health.PortfolioHealthViewModel;
 import use_case.analysis.StockFinancialService;
+import use_case.news.NewsDataAccessInterface;
 import use_case.portfolio_health.PortfolioHealthDataAccessInterface;
 import use_case.portfolio_health.PortfolioHealthInteractor;
 import use_case.stock.StockDataAccessInterface;
@@ -72,6 +74,8 @@ public final class PortfolioHealthPilotMain {
          * Instantiate the Data Access Objects.
          */
         final StockDataAccessInterface stockDataAccessObject = new FileStockDataAccessObject();
+        final NewsDataAccessInterface newsDataAccessObject =
+                new AlphaVantageNewsDataAccessObject("API_KEY_PLACEHOLDER");
 
         /*
          * Manually wire the Clean Architecture layers together.
@@ -79,8 +83,12 @@ public final class PortfolioHealthPilotMain {
         final PortfolioHealthPresenter portfolioHealthPresenter = new PortfolioHealthPresenter(
                 viewManagerModel, portfolioHealthViewModel
         );
+
+// Pass newsDataAccessObject directly (no casting needed!)
         final PortfolioHealthInteractor portfolioHealthInteractor = new PortfolioHealthInteractor(
-                stockDataAccessObject, portfolioHealthPresenter
+                stockDataAccessObject,
+                newsDataAccessObject,
+                portfolioHealthPresenter
         );
         final PortfolioHealthController portfolioHealthController = new PortfolioHealthController(
                 portfolioHealthInteractor

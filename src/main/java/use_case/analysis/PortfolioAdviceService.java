@@ -95,8 +95,27 @@ public class PortfolioAdviceService {
      *
      * @return a descriptive advice string
      */
-    public static String getNewsAdvice() {
-        /* Pending News Data Processing */
-        return "News sentiment analysis is currently pending. Market event monitoring will appear here once active.";
+    /**
+     * Generates bracket-specific advice based on the overall portfolio news sentiment score.
+     *
+     * @param newsScore the news sub-score (out of 25.0 points)
+     * @return actionable advice text explaining the current news sentiment status
+     */
+    public static String getNewsAdvice(Double newsScore) {
+        if (newsScore == null) {
+            return "News sentiment data is unavailable for your holdings.";
+        }
+
+        if (newsScore >= 20.0) {
+            return "Strong Bullish Sentiment: Recent news coverage across your holdings is overwhelmingly positive. Market tailwinds are currently in your favor.";
+        } else if (newsScore >= 15.0) {
+            return "Moderately Bullish Sentiment: Overall media sentiment is positive with favorable news coverage outweighs negative headlines.";
+        } else if (newsScore >= 10.0) {
+            return "Neutral Sentiment: Recent news stories are balanced or quiet across your holdings, showing no significant market-moving sentiment bias.";
+        } else if (newsScore >= 5.0) {
+            return "Cautious/Bearish Sentiment: Several of your holdings face negative news coverage or sector headwinds. Consider monitoring upcoming announcements.";
+        } else {
+            return "Strong Bearish Sentiment: Headline sentiment across your holdings is significantly negative. Review individual positions for potential risk exposure.";
+        }
     }
 }
