@@ -119,4 +119,49 @@ public class StockHolding {
         return this.transactions;
     }
 
+    /** Calculates the total cost of shares purchased minus sold.
+     * @return the total cost as a BigDecimal.
+     */
+    public BigDecimal calculateTotalCost() {
+        BigDecimal totalCost = BigDecimal.ZERO;
+        for (Transaction t : transactions) {
+            BigDecimal txCost = t.getPricePerShare().multiply(BigDecimal.valueOf(t.getNumberOfShares()));
+            if (t.getType() == TransactionType.BUY) {
+                totalCost = totalCost.add(txCost);
+            } else if (t.getType() == TransactionType.SELL) {
+                totalCost = totalCost.subtract(txCost);
+            }
+        }
+        return totalCost;
+    }
+
+    /** Calculates the dollar gain or loss for this holding.
+     * @return the gain or loss as a BigDecimal.
+     */
+    public BigDecimal calculateGainLoss() {
+        return calculateTotalValue().subtract(calculateTotalCost());
+    }
+
+    /** Calculates the percentage gain or loss for this holding.
+     * @return the gain or loss percentage as a BigDecimal.
+     */
+    public BigDecimal calculateGainLossPercentage() {
+        BigDecimal cost = calculateTotalCost();
+        if (cost.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        return calculateGainLoss()
+                .divide(cost, 4, java.math.RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+    }
+
+    /** Calculates the average price per share.
+     * @return the average price as a double.
+     */
+    public double getAveragePrice() {
+        double shares = getNumberOfShares();
+        if (shares == 0) return 0.0;
+        BigDecimal cost = calculateTotalCost();
+        return cost.divide(BigDecimal.valueOf(shares), 4, java.math.RoundingMode.HALF_UP).doubleValue();
+    }
 }
