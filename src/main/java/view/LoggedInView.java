@@ -34,6 +34,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private static final String LOGIN_VIEW_NAME = "log in";
     private static final String SEARCH_VIEW_NAME = "search";
     private static final String RISK_PREFERENCE_VIEW_NAME = "risk preference";
+    private static final String CURRENCY_CONVERSION_VIEW_NAME = "currency conversion";
     private static final String NEWS_VIEW_NAME = "news";
     private static final String WATCHLIST_VIEW_NAME = "watchlist";
     private static final String ADD_HOLDING_VIEW_NAME = "add holding";
@@ -140,8 +141,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     }
 
     private JPanel createButtonPanel() {
-        final JPanel buttonPanel = new JPanel(new GridLayout(1, 8, 8, 0));
-
+        final JPanel buttonPanel = new JPanel(new GridLayout(1, 9, 8, 0));
         final JButton watchlistButton = new JButton("Watchlist");
         watchlistButton.addActionListener(event -> {
             viewManagerModel.setState(WATCHLIST_VIEW_NAME);
@@ -183,6 +183,14 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             viewManagerModel.firePropertyChanged();
         });
         buttonPanel.add(riskPreferenceButton);
+
+        // Currency Conversion Button
+        final JButton currencyConversionButton = new JButton("Currency Conversion");
+        currencyConversionButton.addActionListener(event -> {
+            viewManagerModel.setState(CURRENCY_CONVERSION_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        });
+        buttonPanel.add(currencyConversionButton);
 
         // Log Out Button
         final JButton logOutButton = new JButton("Log Out");

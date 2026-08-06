@@ -70,4 +70,38 @@ public class RiskPreferenceInteractor
 
         presenter.prepareSuccessView(outputData);
     }
+
+    @Override
+    public void load() {
+        final String username = userDataAccessObject.getCurrentUser();
+
+        if (username == null || username.isBlank()) {
+            presenter.prepareFailView("No logged-in user was found.");
+            return;
+        }
+
+        final User user = userDataAccessObject.get(username);
+
+        if (user == null) {
+            presenter.prepareFailView("User account was not found.");
+            return;
+        }
+
+        final RiskProfile riskProfile = user.getRiskProfile();
+
+        if (riskProfile == null) {
+            presenter.prepareFailView("No saved risk profile was found.");
+            return;
+        }
+
+        final RiskPreferenceOutputData outputData =
+                new RiskPreferenceOutputData(
+                        riskProfile.getRiskLevel(),
+                        riskProfile.getInvestmentGoals(),
+                        riskProfile.getTimeHorizon(),
+                        riskProfile.getLastUpdated()
+                );
+
+        presenter.prepareSuccessView(outputData);
+    }
 }

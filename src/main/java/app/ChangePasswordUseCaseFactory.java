@@ -1,5 +1,6 @@
 package app;
 
+import data_access.AlphaVantageNewsDataAccessObject;
 import data_access.FileStockDataAccessObject;
 import entity.CommonUserFactory;
 import entity.UserFactory;
@@ -18,6 +19,7 @@ import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
+import use_case.news.NewsDataAccessInterface;
 import use_case.portfolio_health.PortfolioHealthInteractor;
 import use_case.portfolio_health.PortfolioHealthOutputBoundary;
 import use_case.stock.StockDataAccessInterface;
@@ -28,8 +30,11 @@ import view.LoggedInView;
  */
 public final class ChangePasswordUseCaseFactory {
 
+    private static final String API_KEY = "API_KEY_PLACEHOLDER";
+
     /** Prevent instantiation. */
     private ChangePasswordUseCaseFactory() {
+
 
     }
 
@@ -48,10 +53,15 @@ public final class ChangePasswordUseCaseFactory {
         final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
         final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel();
         final StockDataAccessInterface stockDataAccessObject = new FileStockDataAccessObject();
+        final NewsDataAccessInterface newsDataAccessObject = new AlphaVantageNewsDataAccessObject(API_KEY);
 
         final PortfolioHealthController portfolioHealthController =
-                createPortfolioHealthController(viewManagerModel, portfolioHealthViewModel, stockDataAccessObject);
-
+                createPortfolioHealthController(
+                        viewManagerModel,
+                        portfolioHealthViewModel,
+                        stockDataAccessObject,
+                        newsDataAccessObject
+                );
         final BlackLittermanController blackLittermanController =
                 BlackLittermanUseCaseFactory.createBlackLittermanUseCase(
                         viewManagerModel,
@@ -67,12 +77,17 @@ public final class ChangePasswordUseCaseFactory {
     private static PortfolioHealthController createPortfolioHealthController(
             ViewManagerModel viewManagerModel,
             PortfolioHealthViewModel portfolioHealthViewModel,
-            StockDataAccessInterface stockDataAccessObject) {
+            StockDataAccessInterface stockDataAccessObject,
+            NewsDataAccessInterface newsDataAccessObject) {
 
         final PortfolioHealthOutputBoundary portfolioHealthPresenter =
                 new PortfolioHealthPresenter(viewManagerModel, portfolioHealthViewModel);
 
-        final PortfolioHealthInteractor portfolioHealthInteractor = new PortfolioHealthInteractor(stockDataAccessObject, portfolioHealthPresenter
+        // 2. Pass both DAOs directly into the interactor without casting
+        final PortfolioHealthInteractor portfolioHealthInteractor = new PortfolioHealthInteractor(
+                stockDataAccessObject,
+                newsDataAccessObject,
+                portfolioHealthPresenter
         );
 
         return new PortfolioHealthController(portfolioHealthInteractor);

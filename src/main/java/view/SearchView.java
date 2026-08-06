@@ -241,7 +241,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         if (evt.getPropertyName().equals("ticker search")) {
             TickerSearchState tickerSearchState = (TickerSearchState) evt.getNewValue();
 
-            tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol().toUpperCase());
+            tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol()); // TODO: add toUpperCase()
             tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
             tickerSearchCountry.setText(tickerSearchState.getCountry());
             tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());

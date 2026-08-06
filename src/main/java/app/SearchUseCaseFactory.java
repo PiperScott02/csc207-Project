@@ -11,6 +11,7 @@ import interface_adapter.ticker_search.TickerSearchController;
 import interface_adapter.ticker_search.TickerSearchPresenter;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import use_case.StockDailyDataAccessInterface;
+import use_case.TickerSearchDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
 import use_case.similar_search.SimilarSearchInteractor;
 import use_case.similar_search.SimilarSearchOutputBoundary;
@@ -30,16 +31,19 @@ public class SearchUseCaseFactory {
             SimilarSearchViewModel similarSearchViewModel,
             TickerSearchViewModel tickerSearchViewModel,
             StockViewModel stockViewModel,
-            StockDailyDataAccessInterface stockDailyDataAccessObject,
+            TickerSearchDataAccessInterface tickerSearchDataAccessObject,
             SimilarSearchDataAccessInterface similarSearchDataAccessObject,
             StockController stockController,
             LoggedInViewModel loggedInViewModel) {
 
         final SimilarSearchController similarSearchController =
-                createSimilarSearchController(viewManagerModel, similarSearchViewModel,
-                        stockDailyDataAccessObject, similarSearchDataAccessObject);
+                createSimilarSearchController(
+                        viewManagerModel,
+                        similarSearchViewModel,
+                        tickerSearchDataAccessObject,
+                        similarSearchDataAccessObject);
         final TickerSearchController tickerSearchController =
-                createTickerSearchController(viewManagerModel, tickerSearchViewModel, stockDailyDataAccessObject);
+                createTickerSearchController(viewManagerModel, tickerSearchViewModel, tickerSearchDataAccessObject);
 
         return new SearchView(
                 similarSearchController,
@@ -57,15 +61,17 @@ public class SearchUseCaseFactory {
     private static SimilarSearchController
     createSimilarSearchController(ViewManagerModel viewManagerModel,
                                   SimilarSearchViewModel similarSearchViewModel,
-                                  StockDailyDataAccessInterface stockDailyDataAccessObject,
+                                  TickerSearchDataAccessInterface tickerSearchDataAccessObject,
                                   SimilarSearchDataAccessInterface similarSearchDataAccessObject) {
 
         final SimilarSearchOutputBoundary similarSearchOutputBoundary =
                 new SimilarSearchPresenter(viewManagerModel, similarSearchViewModel);
 
         final SimilarSearchInteractor similarSearchInteractor =
-                new SimilarSearchInteractor(similarSearchDataAccessObject,
-                        stockDailyDataAccessObject, similarSearchOutputBoundary);
+                new SimilarSearchInteractor(
+                        similarSearchDataAccessObject,
+                        tickerSearchDataAccessObject,
+                        similarSearchOutputBoundary);
 
         return new SimilarSearchController(similarSearchInteractor);
     }
@@ -73,13 +79,13 @@ public class SearchUseCaseFactory {
     private static TickerSearchController
     createTickerSearchController(ViewManagerModel viewManagerModel,
                                  TickerSearchViewModel tickerSearchViewModel,
-                                 StockDailyDataAccessInterface stockDailyDataAccessObject) {
+                                 TickerSearchDataAccessInterface tickerSearchDataAccessObject) {
 
         final TickerSearchOutputBoundary tickerSearchOutputBoundary =
                 new TickerSearchPresenter(viewManagerModel, tickerSearchViewModel);
 
         final TickerSearchInteractor tickerSearchInteractor =
-                new TickerSearchInteractor(stockDailyDataAccessObject, tickerSearchOutputBoundary);
+                new TickerSearchInteractor(tickerSearchDataAccessObject, tickerSearchOutputBoundary);
 
         return new TickerSearchController(tickerSearchInteractor);
     }

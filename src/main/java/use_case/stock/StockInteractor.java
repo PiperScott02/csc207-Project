@@ -23,8 +23,18 @@ public class StockInteractor implements StockInputBoundary {
             return;
         }
 
+        if (!stockDataAccessObject.existsByName("SPY")) {
+            stockPresenter.prepareFailView("Benchmark stock (SPY) data not found.");
+            return;
+        }
+
         Stock stock = stockDataAccessObject.get(ticker);
         Stock market = stockDataAccessObject.get("SPY");
+
+        if (stock == null || market == null) {
+            stockPresenter.prepareFailView("Failed to retrieve stock or market benchmark data.");
+            return;
+        }
 
         StockFinancialService.calculateAndAssignMetrics(stock, market);
 

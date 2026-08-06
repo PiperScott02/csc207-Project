@@ -93,6 +93,7 @@ public class StockHolding {
         transaction.setPricePerShare(stock.getCloseOnDate(lastDay));
         transaction.setNumberOfShares(quantity);
         transaction.setType(type);
+        transaction.setDate(lastDay);
         this.transactions.add(transaction);
     }
 

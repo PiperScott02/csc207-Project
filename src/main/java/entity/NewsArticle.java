@@ -10,6 +10,7 @@ public class NewsArticle {
     private final String url;
     private final String source;
     private final double sentimentScore;
+    private final double relevanceScore;
     private final NewsSentiment sentiment;
 
     public NewsArticle(
@@ -18,6 +19,7 @@ public class NewsArticle {
             String url,
             String source,
             double sentimentScore,
+            double relevanceScore,
             NewsSentiment sentiment) {
 
         this.title = title;
@@ -25,6 +27,7 @@ public class NewsArticle {
         this.url = url;
         this.source = source;
         this.sentimentScore = sentimentScore;
+        this.relevanceScore = relevanceScore;
         this.sentiment = sentiment;
     }
 
@@ -46,6 +49,10 @@ public class NewsArticle {
 
     public double getSentimentScore() {
         return sentimentScore;
+    }
+
+    public double getRelevanceScore() {
+        return relevanceScore;
     }
 
     public NewsSentiment getSentiment() {
