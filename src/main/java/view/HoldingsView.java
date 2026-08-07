@@ -207,11 +207,35 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         holdingsTable.getTableHeader().setForeground(TEXT_MUTED);
         holdingsTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 10));
 
-        // === MAKE THE LAST COLUMN A CLICKABLE "×" BUTTON ===
+        // Set width for the delete column
         holdingsTable.getColumnModel().getColumn(6).setPreferredWidth(40);
         holdingsTable.getColumnModel().getColumn(6).setMaxWidth(50);
-        holdingsTable.getColumnModel().getColumn(6).setCellRenderer(new DeleteButtonRenderer());
-        holdingsTable.getColumnModel().getColumn(6).setCellEditor(new DeleteButtonEditor(new JCheckBox(), holdingsTable, deleteHoldingController));
+
+        // === SINGLE-CLICK MOUSE LISTENER FOR THE "×" COLUMN ===
+        holdingsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                int row = holdingsTable.rowAtPoint(e.getPoint());
+                int col = holdingsTable.columnAtPoint(e.getPoint());
+
+                // If column 6 ("×") is clicked
+                if (col == 6 && row >= 0) {
+                    String fullTickerString = (String) holdingsTable.getValueAt(row, 0);
+                    if (fullTickerString != null && !fullTickerString.isEmpty()) {
+                        String tickerToDelete;
+                        if (fullTickerString.contains(" - ")) {
+                            tickerToDelete = fullTickerString.split(" - ")[0].trim();
+                        } else {
+                            tickerToDelete = fullTickerString.trim();
+                        }
+
+                        if (deleteHoldingController != null) {
+                            deleteHoldingController.execute(tickerToDelete);
+                        }
+                    }
+                }
+            }
+        });
 
         final JScrollPane scrollPane = new JScrollPane(holdingsTable);
         scrollPane.getViewport().setBackground(CARD_BG);

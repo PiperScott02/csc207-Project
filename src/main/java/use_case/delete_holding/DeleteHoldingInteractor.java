@@ -1,6 +1,7 @@
 package use_case.delete_holding;
 
 import entity.User;
+import entity.Portfolio;
 
 public class DeleteHoldingInteractor implements DeleteHoldingInputBoundary {
     private final DeleteHoldingUserDataAccessInterface dataAccessObject;
@@ -14,22 +15,29 @@ public class DeleteHoldingInteractor implements DeleteHoldingInputBoundary {
 
     @Override
     public void execute(DeleteHoldingInputData inputData) {
+        String tickerToDelete = inputData.getTicker();
+
+        // Get current username, then fetch the User object using dataAccessObject.get(...)
         String username = dataAccessObject.getCurrentUser();
-        User user = dataAccessObject.get(username);
+        User currentUser = dataAccessObject.get(username);
 
-        if (user == null || user.getPortfolio() == null) {
-            outputBoundary.prepareFailView("User or portfolio not found.");
-            return;
-        }
+        if (currentUser != null && currentUser.getPortfolio() != null) {
+            Portfolio portfolio = currentUser.getPortfolio();
 
-        boolean removed = user.getPortfolio().removeHoldingByTicker(inputData.getTicker());
+            // Remove the holding matching the ticker symbol
+            portfolio.getHoldings().removeIf(holding ->
+                    holding.getStock() != null &&
+                            holding.getStock().getTickerSymbol().equalsIgnoreCase(tickerToDelete)
+            );
 
-        if (removed) {
-            dataAccessObject.save(user); // Persists changes to CSV via your DAO
-            DeleteHoldingOutputData outputData = new DeleteHoldingOutputData(user.getPortfolio(), "Holding deleted successfully.");
+            // Save the updated user data to persistent storage (CSV)
+            dataAccessObject.save(currentUser);
+
+            // Pass the updated portfolio to output data
+            DeleteHoldingOutputData outputData = new DeleteHoldingOutputData(portfolio, "Holding deleted successfully.");
             outputBoundary.prepareSuccessView(outputData);
         } else {
-            outputBoundary.prepareFailView("Could not find holding to delete.");
+            outputBoundary.prepareFailView("Could not find current user or portfolio.");
         }
     }
 }

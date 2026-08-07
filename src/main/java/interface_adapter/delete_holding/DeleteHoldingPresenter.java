@@ -1,12 +1,11 @@
 package interface_adapter.delete_holding;
 
-import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.logged_in.LoggedInState;
 import use_case.delete_holding.DeleteHoldingOutputBoundary;
 import use_case.delete_holding.DeleteHoldingOutputData;
 
 public class DeleteHoldingPresenter implements DeleteHoldingOutputBoundary {
-
     private final LoggedInViewModel loggedInViewModel;
 
     public DeleteHoldingPresenter(LoggedInViewModel loggedInViewModel) {
@@ -15,18 +14,17 @@ public class DeleteHoldingPresenter implements DeleteHoldingOutputBoundary {
 
     @Override
     public void prepareSuccessView(DeleteHoldingOutputData outputData) {
-        LoggedInState currentState = loggedInViewModel.getState();
+        // Update the state with the new holdings list
+        LoggedInState state = loggedInViewModel.getState();
+        state.setHoldings(outputData.getPortfolio().getHoldings());
+        loggedInViewModel.setState(state);
 
-        currentState.setHoldings(outputData.getPortfolio().getHoldings());
-
-        loggedInViewModel.setState(currentState);
+        // Fire property change so HoldingsView hears it and re-renders
         loggedInViewModel.firePropertyChanged("state");
-
-        System.out.println("Holding deleted successfully!");
     }
 
     @Override
-    public void prepareFailView(String errorMessage) {
-        System.err.println(errorMessage);
+    public void prepareFailView(String error) {
+        // Handle failure if needed
     }
 }
