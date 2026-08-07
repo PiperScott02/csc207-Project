@@ -35,6 +35,7 @@ import interface_adapter.stock.StockViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistViewModel;
+import interface_adapter.delete_holding.DeleteHoldingController;
 
 import use_case.StockDailyDataAccessInterface;
 import use_case.TickerSearchDataAccessInterface;
@@ -163,6 +164,12 @@ public final class PortfolioPilotMain {
                         viewManagerModel,
                         watchlistViewModel,
                         stockDataAccessObject
+                );
+
+        final DeleteHoldingController deleteHoldingController =
+                DeleteHoldingUseCaseFactory.create(
+                        loggedInViewModel,
+                        userDataAccessObject
                 );
 
         // Instantiate dependencies for Black-Litterman
@@ -327,7 +334,8 @@ public final class PortfolioPilotMain {
         // 14. Holdings View
         final HoldingsView holdingsView = new HoldingsView(
                 viewManagerModel,
-                loggedInViewModel
+                loggedInViewModel,
+                deleteHoldingController
         );
         views.add(holdingsView, holdingsView.getViewName());
 
