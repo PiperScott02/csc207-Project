@@ -4,6 +4,8 @@ import entity.NewsArticle;
 import entity.NewsSentiment;
 import entity.NewsSentimentCalculator;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -13,6 +15,7 @@ public class NewsInteractor implements NewsInputBoundary {
 
     private static final double BULLISH_THRESHOLD = 0.15;
     private static final double BEARISH_THRESHOLD = -0.15;
+    private static final int MAX_ARTICLES = 10;
 
     private final NewsDataAccessInterface newsDataAccessObject;
     private final NewsOutputBoundary newsPresenter;
@@ -35,10 +38,10 @@ public class NewsInteractor implements NewsInputBoundary {
         }
 
         final String cleanedTicker = ticker.trim().toUpperCase();
-        final List<NewsArticle> articles;
+        final List<NewsArticle> retrievedArticles;
 
         try {
-            articles = newsDataAccessObject.getNews(cleanedTicker);
+            retrievedArticles = newsDataAccessObject.getNews(cleanedTicker);
         }
         catch (RuntimeException exception) {
             newsPresenter.prepareFailView(
@@ -47,13 +50,16 @@ public class NewsInteractor implements NewsInputBoundary {
             return;
         }
 
-        if (articles == null || articles.isEmpty()) {
+        if (retrievedArticles == null || retrievedArticles.isEmpty()) {
             newsPresenter.prepareFailView(
                     "No news articles were found for "
                             + cleanedTicker + "."
             );
             return;
         }
+
+        final List<NewsArticle> articles =
+                selectMostRelevantArticles(retrievedArticles);
 
         final NewsSentiment overallSentiment =
                 calculateOverallSentiment(articles);
@@ -65,6 +71,31 @@ public class NewsInteractor implements NewsInputBoundary {
         );
 
         newsPresenter.prepareSuccessView(outputData);
+    }
+
+    /**
+     * Keeps at most ten articles, ordered from highest to lowest relevance.
+     * The overall sentiment is calculated from this same displayed set so
+     * that the result remains explainable to the user.
+     *
+     * @param articles all articles returned by the data access object
+     * @return the ten most relevant articles, or fewer when fewer exist
+     */
+    private List<NewsArticle> selectMostRelevantArticles(
+            List<NewsArticle> articles) {
+
+        final List<NewsArticle> sortedArticles =
+                new ArrayList<>(articles);
+
+        sortedArticles.sort(
+                Comparator.comparingDouble(NewsArticle::getRelevanceScore)
+                        .reversed()
+        );
+
+        final int resultSize =
+                Math.min(MAX_ARTICLES, sortedArticles.size());
+
+        return new ArrayList<>(sortedArticles.subList(0, resultSize));
     }
 
     /**
