@@ -5,6 +5,7 @@ import entity.StockHolding;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.delete_holding.DeleteHoldingController;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -32,6 +33,7 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
     private final String viewName = "holdings";
     private final ViewManagerModel viewManagerModel;
     private final LoggedInViewModel loggedInViewModel;
+    private final DeleteHoldingController deleteHoldingController;
 
     // Dynamic Summary Metric Labels
     private final JLabel portfolioValLabel = new JLabel("$0.00");
@@ -43,9 +45,10 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
 
     private DefaultTableModel detailedHoldingsTableModel;
 
-    public HoldingsView(ViewManagerModel viewManagerModel, LoggedInViewModel loggedInViewModel) {
+    public HoldingsView(ViewManagerModel viewManagerModel, LoggedInViewModel loggedInViewModel, DeleteHoldingController deleteHoldingController) {
         this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel = loggedInViewModel;
+        this.deleteHoldingController = deleteHoldingController;
         this.loggedInViewModel.addPropertyChangeListener(this);
 
         setBackground(BG_DARK);
@@ -54,7 +57,6 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         add(createSidebarPanel(), BorderLayout.WEST);
         add(createMainContentPanel(), BorderLayout.CENTER);
 
-        // Populate initial state if available
         if (loggedInViewModel.getState() != null) {
             updateViewFromState(loggedInViewModel.getState());
         }
