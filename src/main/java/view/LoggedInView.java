@@ -144,8 +144,14 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Highlight "Overview" as active since we are on the Overview screen
-        navLinksPanel.add(createSidebarNavLink("Overview", true, event -> {}));
-        navLinksPanel.add(createSidebarNavLink("Holdings", false, event -> {}));
+        navLinksPanel.add(createSidebarNavLink("Overview", false, e -> {
+            viewManagerModel.setState("logged in");
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Holdings", false, e -> {
+            viewManagerModel.setState("holdings");
+            viewManagerModel.firePropertyChanged();
+        }));
         navLinksPanel.add(createSidebarNavLink("Watchlist", false, event -> {
             viewManagerModel.setState(WATCHLIST_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
