@@ -107,9 +107,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         }
     }
 
-
-
-
     // === DARK MODE UI CHANGE ===: Builds the persistent left navigation sidebar matching your screenshot
     private JPanel createSidebarPanel() {
         final JPanel sidebar = new JPanel();
@@ -118,13 +115,11 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         sidebar.setLayout(new BorderLayout());
         sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
 
-
         // Top Brand Header inside Sidebar
         final JPanel brandPanel = new JPanel();
         brandPanel.setBackground(SIDEBAR_BG);
         brandPanel.setPreferredSize(new Dimension(240, 70));
         brandPanel.setLayout(null);
-
 
         final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
         logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -133,23 +128,19 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         logoBadge.setOpaque(true);
         logoBadge.setBounds(20, 20, 28, 28);
 
-
         final JLabel brandLabel = new JLabel("PortfolioPilot");
         brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
         brandLabel.setForeground(TEXT_MAIN);
         brandLabel.setBounds(58, 20, 150, 28);
 
-
         brandPanel.add(logoBadge);
         brandPanel.add(brandLabel);
-
 
         // Center Navigation Links List
         final JPanel navLinksPanel = new JPanel();
         navLinksPanel.setBackground(SIDEBAR_BG);
         navLinksPanel.setLayout(new GridLayout(9, 1, 0, 2));
         navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
 
         // Highlight "Overview" as active since we are on the Overview screen
         navLinksPanel.add(createSidebarNavLink("Overview", true, event -> {}));
@@ -191,7 +182,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
             }
         }));
 
-
         // Bottom User Profile & Log Out Section
         final JPanel userFooterPanel = new JPanel();
         userFooterPanel.setBackground(SIDEBAR_BG);
@@ -199,17 +189,14 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         userFooterPanel.setLayout(null);
         userFooterPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
         welcomeLabel.setForeground(TEXT_MUTED);
         welcomeLabel.setBounds(20, 15, 200, 15);
-
 
         dateLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
         dateLabel.setForeground(TEXT_MUTED);
         dateLabel.setBounds(20, 32, 200, 15);
         updateDateTimeDisplay();
-
 
         final JButton logOutLink = new JButton("↳ Log Out");
         logOutLink.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -224,20 +211,16 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
             viewManagerModel.firePropertyChanged();
         });
 
-
         userFooterPanel.add(welcomeLabel);
         userFooterPanel.add(dateLabel);
         userFooterPanel.add(logOutLink);
-
 
         sidebar.add(brandPanel, BorderLayout.NORTH);
         sidebar.add(navLinksPanel, BorderLayout.CENTER);
         sidebar.add(userFooterPanel, BorderLayout.SOUTH);
 
-
         return sidebar;
     }
-
 
     // Helper for styled sidebar links
     private JButton createSidebarNavLink(String text, boolean isActive, java.awt.event.ActionListener action) {
@@ -250,7 +233,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
         button.addActionListener(action);
-
 
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -269,196 +251,260 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         return button;
     }
 
+    // Right Main Content Area containing Overview Header, Metrics, and Preview Tables
+    private JPanel createMainContentPanel() {
+        final JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(BG_DARK);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
 
+        // Top Title "Overview"
+        final JLabel overviewTitle = new JLabel("Overview");
+        overviewTitle.setFont(new Font("Serif", Font.BOLD, 26));
+        overviewTitle.setForeground(TEXT_MAIN);
+        overviewTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
+        // Scrollable content wrapper for dashboard widgets (without redundant button row)
+        final JPanel contentBody = new JPanel();
+        contentBody.setBackground(BG_DARK);
+        contentBody.setLayout(new BoxLayout(contentBody, BoxLayout.Y_AXIS));
 
+        contentBody.add(createTopPortfolioValueCard());
+        contentBody.add(javax.swing.Box.createRigidArea(new Dimension(0, 15)));
+        contentBody.add(createMiddleMetricsRow());
+        contentBody.add(javax.swing.Box.createRigidArea(new Dimension(0, 15)));
+        contentBody.add(createHoldingsAndWatchlistPreviewPanel());
+        contentBody.add(javax.swing.Box.createRigidArea(new Dimension(0, 15)));
+        contentBody.add(createFooterStatusPanel());
 
-    private JPanel createTopPanel() {
-        final JPanel topPanel = new JPanel(new BorderLayout(0, 15));
+        final JScrollPane scrollPane = new JScrollPane(contentBody);
+        scrollPane.setBackground(BG_DARK);
+        scrollPane.getViewport().setBackground(BG_DARK);
+        scrollPane.setBorder(null);
 
-        topPanel.add(createHeaderPanel(), BorderLayout.NORTH);
-        topPanel.add(createSummaryPanel(), BorderLayout.CENTER);
-        topPanel.add(createButtonPanel(), BorderLayout.SOUTH);
+        mainPanel.add(overviewTitle, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        return topPanel;
+        return mainPanel;
     }
 
-    private JPanel createHeaderPanel() {
-        final JPanel headerPanel = new JPanel(new BorderLayout());
-        final JPanel titlePanel = new JPanel(new GridLayout(2, 1));
+    // Large top card for Total Portfolio Value
+    private JPanel createTopPortfolioValueCard() {
+        final JPanel card = new JPanel();
+        card.setBackground(CARD_BG);
+        card.setLayout(null);
+        card.setPreferredSize(new Dimension(0, 130));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 130));
+        card.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
-        final JLabel title = new JLabel("PortfolioPilot", SwingConstants.CENTER);
-        title.setFont(new Font("SansSerif", Font.BOLD, 28));
+        final JLabel titleLbl = new JLabel("TOTAL PORTFOLIO VALUE");
+        titleLbl.setFont(new Font("SansSerif", Font.BOLD, 10));
+        titleLbl.setForeground(TEXT_MUTED);
+        titleLbl.setBounds(25, 20, 200, 15);
 
-        final JLabel subtitle = new JLabel("Personal Investment Portfolio Tracker", SwingConstants.CENTER);
-        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        totalPortfolioValueValLabel = new JLabel("$0.00");
+        totalPortfolioValueValLabel.setFont(new Font("SansSerif", Font.BOLD, 32));
+        totalPortfolioValueValLabel.setForeground(TEXT_MAIN);
+        totalPortfolioValueValLabel.setBounds(23, 40, 250, 40);
 
-        titlePanel.add(title);
-        titlePanel.add(subtitle);
+        allTimePercentageBadge = new JLabel(" 0.00% ALL-TIME ", SwingConstants.CENTER);
+        allTimePercentageBadge.setFont(new Font("SansSerif", Font.BOLD, 11));
+        allTimePercentageBadge.setForeground(ACCENT_GREEN);
+        allTimePercentageBadge.setBackground(new Color(6, 78, 59));
+        allTimePercentageBadge.setOpaque(true);
+        allTimePercentageBadge.setBounds(235, 50, 140, 24);
 
-        welcomeLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        subTextLabel = new JLabel("Cost basis: $0.00");
+        subTextLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        subTextLabel.setForeground(TEXT_MUTED);
+        subTextLabel.setBounds(25, 90, 450, 20);
 
-        headerPanel.add(titlePanel, BorderLayout.CENTER);
-        headerPanel.add(welcomeLabel, BorderLayout.EAST);
+        card.add(titleLbl);
+        card.add(totalPortfolioValueValLabel);
+        card.add(allTimePercentageBadge);
+        card.add(subTextLabel);
 
-        return headerPanel;
+        return card;
     }
 
-    private JPanel createSummaryPanel() {
-        final JPanel summaryPanel = new JPanel(new GridLayout(1, 3, 15, 0));
-        summaryPanel.setBorder(BorderFactory.createTitledBorder("Portfolio Summary"));
+    // Middle row with 3 metrics cards (Gain/Loss, Daily Change, Total Holdings)
+    private JPanel createMiddleMetricsRow() {
+        final JPanel row = new JPanel(new GridLayout(1, 3, 15, 0));
+        row.setBackground(BG_DARK);
+        row.setPreferredSize(new Dimension(0, 95));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 95));
 
-        totalPortfolioValueValLabel = new JLabel("$0.00", SwingConstants.CENTER);
-        totalPortfolioValueValLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        // Card 1: Gain / Loss
+        final JPanel c1 = new JPanel();
+        c1.setBackground(CARD_BG);
+        c1.setLayout(null);
+        c1.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        final JLabel tLbl1 = new JLabel("TOTAL GAIN / LOSS");
+        tLbl1.setFont(new Font("SansSerif", Font.BOLD, 10));
+        tLbl1.setForeground(TEXT_MUTED);
+        tLbl1.setBounds(20, 15, 200, 15);
+        totalGainLossValLabel = new JLabel("$0.00");
+        totalGainLossValLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+        totalGainLossValLabel.setForeground(ACCENT_GREEN);
+        totalGainLossValLabel.setBounds(18, 35, 200, 30);
+        totalGainLossSubLabel = new JLabel("0.00%");
+        totalGainLossSubLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        totalGainLossSubLabel.setForeground(TEXT_MUTED);
+        totalGainLossSubLabel.setBounds(20, 65, 200, 15);
+        c1.add(tLbl1);
+        c1.add(totalGainLossValLabel);
+        c1.add(totalGainLossSubLabel);
 
-        totalGainLossValLabel = new JLabel("$0.00", SwingConstants.CENTER);
-        totalGainLossValLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        // Card 2: Daily Change
+        final JPanel c2 = new JPanel();
+        c2.setBackground(CARD_BG);
+        c2.setLayout(null);
+        c2.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        final JLabel tLbl2 = new JLabel("DAILY CHANGE");
+        tLbl2.setFont(new Font("SansSerif", Font.BOLD, 10));
+        tLbl2.setForeground(TEXT_MUTED);
+        tLbl2.setBounds(20, 15, 200, 15);
+        dailyChangeValLabel = new JLabel("$0.00");
+        dailyChangeValLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+        dailyChangeValLabel.setForeground(ACCENT_GREEN);
+        dailyChangeValLabel.setBounds(18, 35, 200, 30);
+        dailyChangeSubLabel = new JLabel("vs prev. close");
+        dailyChangeSubLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        dailyChangeSubLabel.setForeground(TEXT_MUTED);
+        dailyChangeSubLabel.setBounds(20, 65, 200, 15);
+        c2.add(tLbl2);
+        c2.add(dailyChangeValLabel);
+        c2.add(dailyChangeSubLabel);
 
-        dailyChangeValLabel = new JLabel("$0.00 (0.00%)", SwingConstants.CENTER);
-        dailyChangeValLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        // Card 3: Total Holdings
+        final JPanel c3 = new JPanel();
+        c3.setBackground(CARD_BG);
+        c3.setLayout(null);
+        c3.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        final JLabel tLbl3 = new JLabel("TOTAL HOLDINGS");
+        tLbl3.setFont(new Font("SansSerif", Font.BOLD, 10));
+        tLbl3.setForeground(TEXT_MUTED);
+        tLbl3.setBounds(20, 15, 200, 15);
+        totalHoldingsValLabel = new JLabel("0");
+        totalHoldingsValLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+        totalHoldingsValLabel.setForeground(TEXT_MAIN);
+        totalHoldingsValLabel.setBounds(18, 35, 200, 30);
+        final JLabel sLbl3 = new JLabel("active positions");
+        sLbl3.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        sLbl3.setForeground(TEXT_MUTED);
+        sLbl3.setBounds(20, 65, 200, 15);
+        c3.add(tLbl3);
+        c3.add(totalHoldingsValLabel);
+        c3.add(sLbl3);
 
-        summaryPanel.add(createSummaryBox("Total Portfolio Value", totalPortfolioValueValLabel));
-        summaryPanel.add(createSummaryBox("Total Gain / Loss", totalGainLossValLabel));
-        summaryPanel.add(createSummaryBox("Daily Change", dailyChangeValLabel));
+        row.add(c1);
+        row.add(c2);
+        row.add(c3);
 
-        return summaryPanel;
+        return row;
     }
 
-    private JPanel createSummaryBox(String heading, JLabel valueLabel) {
-        final JPanel panel = new JPanel(new GridLayout(2, 1, 0, 5));
-        panel.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createEtchedBorder(),
-                        BorderFactory.createEmptyBorder(15, 10, 15, 10)
-                )
-        );
 
-        final JLabel headingLabel = new JLabel(heading, SwingConstants.CENTER);
-        headingLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
+    // Holdings & Watchlist bottom cards preview populated dynamically from state
+    private JPanel createHoldingsAndWatchlistPreviewPanel() {
+        final JPanel panel = new JPanel(new GridLayout(1, 2, 15, 0));
+        panel.setBackground(BG_DARK);
+        panel.setPreferredSize(new Dimension(0, 180));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
 
-        panel.add(headingLabel);
-        panel.add(valueLabel);
+        final String[] cols = {"Ticker", "Company", "Price", "Change"};
+
+        // Holdings Preview Card
+        final JPanel holdingsCard = new JPanel(new BorderLayout());
+        holdingsCard.setBackground(CARD_BG);
+        holdingsCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+
+        final JLabel hTitle = new JLabel("YOUR HOLDINGS");
+        hTitle.setFont(new Font("SansSerif", Font.BOLD, 10));
+        hTitle.setForeground(TEXT_MUTED);
+
+        holdingsTableModel = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        final JTable holdingsTable = new JTable(holdingsTableModel);
+        holdingsTable.setBackground(CARD_BG);
+        holdingsTable.setForeground(TEXT_MAIN);
+        holdingsTable.setGridColor(BORDER_COLOR);
+        holdingsTable.setRowHeight(28);
+        holdingsTable.getTableHeader().setVisible(false);
+
+        final JScrollPane sp1 = new JScrollPane(holdingsTable);
+        sp1.getViewport().setBackground(CARD_BG);
+        sp1.setBorder(null);
+
+        holdingsCard.add(hTitle, BorderLayout.NORTH);
+        holdingsCard.add(sp1, BorderLayout.CENTER);
+
+        // Watchlist Preview Card
+        final JPanel watchlistCard = new JPanel(new BorderLayout());
+        watchlistCard.setBackground(CARD_BG);
+        watchlistCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+
+        final JLabel wTitle = new JLabel("WATCHLIST");
+        wTitle.setFont(new Font("SansSerif", Font.BOLD, 10));
+        wTitle.setForeground(TEXT_MUTED);
+
+        watchlistTableModel = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        final JTable watchTable = new JTable(watchlistTableModel);
+        watchTable.setBackground(CARD_BG);
+        watchTable.setForeground(TEXT_MAIN);
+        watchTable.setGridColor(BORDER_COLOR);
+        watchTable.setRowHeight(28);
+        watchTable.getTableHeader().setVisible(false);
+
+        final JScrollPane sp2 = new JScrollPane(watchTable);
+        sp2.getViewport().setBackground(CARD_BG);
+        sp2.setBorder(null);
+
+        watchlistCard.add(wTitle, BorderLayout.NORTH);
+        watchlistCard.add(sp2, BorderLayout.CENTER);
+
+        panel.add(holdingsCard);
+        panel.add(watchlistCard);
 
         return panel;
     }
 
-    private JPanel createButtonPanel() {
-        final JPanel buttonPanel = new JPanel(new GridLayout(1, 9, 8, 0));
+    private JPanel createFooterStatusPanel() {
+        final JPanel footer = new JPanel(new BorderLayout());
+        footer.setBackground(BG_DARK);
+        footer.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
-        final JButton watchlistButton = new JButton("Watchlist");
-        watchlistButton.addActionListener(event -> {
-            viewManagerModel.setState(WATCHLIST_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        });
-        buttonPanel.add(watchlistButton);
+        lastUpdatedLabel = new JLabel();
+        lastUpdatedLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        lastUpdatedLabel.setForeground(TEXT_MUTED);
+        updateLastUpdatedTime();
 
-        final JButton addHoldingButton = new JButton("Add Holding");
-        addHoldingButton.addActionListener(event -> {
-            viewManagerModel.setState(ADD_HOLDING_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        });
-        buttonPanel.add(addHoldingButton);
-
-        // News Button
-        final JButton newsButton = new JButton("News");
-        newsButton.addActionListener(event -> {
-            viewManagerModel.setState(NEWS_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        });
-        buttonPanel.add(newsButton);
-
-        // Portfolio Health Button
-        final JButton portfolioHealthButton = new JButton("Portfolio Health");
-        portfolioHealthButton.addActionListener(event -> {
-            LoggedInState state = loggedInViewModel.getState();
-            if (state != null && state.getUser() != null) {
-                portfolioHealthController.execute(state.getUser());
-            } else {
-                JOptionPane.showMessageDialog(this, "No active user session found.");
-            }
-        });
-        buttonPanel.add(portfolioHealthButton);
-
-        // Risk Preference Button
-        final JButton riskPreferenceButton = new JButton("Risk Preference");
-        riskPreferenceButton.addActionListener(event -> {
-            viewManagerModel.setState(RISK_PREFERENCE_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        });
-        buttonPanel.add(riskPreferenceButton);
-
-        // Currency Conversion Button
-        final JButton currencyConversionButton = new JButton("Currency Conversion");
-        currencyConversionButton.addActionListener(event -> {
-            viewManagerModel.setState(CURRENCY_CONVERSION_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        });
-        buttonPanel.add(currencyConversionButton);
-
-        // Log Out Button
-        final JButton logOutButton = new JButton("Log Out");
-        logOutButton.addActionListener(event -> {
-            viewManagerModel.setState(LOGIN_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        });
-        buttonPanel.add(logOutButton);
-
-        // Search Button
-        final JButton searchButton = new JButton("Search Stocks");
-        searchButton.addActionListener(event -> {
-            viewManagerModel.setState(SEARCH_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        });
-        buttonPanel.add(searchButton);
-
-        // Input Stock Views Button (Black-Litterman)
-        final JButton stockViewsButton = new JButton("Input Stock Views");
-        stockViewsButton.addActionListener(event -> {
-            LoggedInState state = loggedInViewModel.getState();
-            if (state != null && state.getUser() != null) {
-                blackLittermanController.loadMarketData(state.getUser());
-            } else {
-                JOptionPane.showMessageDialog(this, "No active user session found.");
-            }
-        });
-        buttonPanel.add(stockViewsButton);
-
-        return buttonPanel;
+        footer.add(lastUpdatedLabel, BorderLayout.WEST);
+        return footer;
     }
 
-    private JPanel createHoldingsPanel() {
-        final JPanel holdingsPanel = new JPanel(new BorderLayout(0, 10));
-        holdingsPanel.setBorder(BorderFactory.createTitledBorder("Your Holdings"));
+    private void updateDateTimeDisplay() {
+        final LocalDateTime now = LocalDateTime.now();
+        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+        dateLabel.setText(now.format(dateFormatter));
+    }
 
-        final String[] columnNames = {
-                "Ticker", "Company", "Shares", "Avg Price", "Current Price", "Gain / Loss", "Gain %"
-        };
-
-        // Assign to the class-level tableModel instance variable
-        tableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        final JTable holdingsTable = new JTable(tableModel);
-        holdingsTable.setRowHeight(28);
-        holdingsTable.setFillsViewportHeight(true);
-
-        final JScrollPane scrollPane = new JScrollPane(holdingsTable);
-        final JPanel statusPanel = new JPanel(new BorderLayout());
-
-        totalHoldingsLabel = new JLabel("Total Holdings: 0");
-        lastUpdatedLabel = new JLabel("Last updated: --");
-
-        statusPanel.add(totalHoldingsLabel, BorderLayout.WEST);
-        statusPanel.add(lastUpdatedLabel, BorderLayout.EAST);
-
-        holdingsPanel.add(scrollPane, BorderLayout.CENTER);
-        holdingsPanel.add(statusPanel, BorderLayout.SOUTH);
-
-        return holdingsPanel;
+    private void updateLastUpdatedTime() {
+        final LocalDateTime now = LocalDateTime.now();
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy, h:mm:ss a");
+        lastUpdatedLabel.setText("Last updated: " + now.format(formatter));
     }
 
     /**
