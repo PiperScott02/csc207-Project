@@ -189,7 +189,7 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         tablePanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
         final String[] columnNames = {
-                "TICKER / NAME", "SHARES", "AVG COST", "CURR. PRICE", "GAIN / LOSS", "GAIN %", "PURCHASED"
+                "TICKER / NAME", "SHARES", "AVG COST", "CURR. PRICE", "GAIN / LOSS", "GAIN %", ""
         };
         detailedHoldingsTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -206,6 +206,12 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         holdingsTable.getTableHeader().setBackground(CARD_BG);
         holdingsTable.getTableHeader().setForeground(TEXT_MUTED);
         holdingsTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 10));
+
+        // === MAKE THE LAST COLUMN A CLICKABLE "×" BUTTON ===
+        holdingsTable.getColumnModel().getColumn(6).setPreferredWidth(40);
+        holdingsTable.getColumnModel().getColumn(6).setMaxWidth(50);
+        holdingsTable.getColumnModel().getColumn(6).setCellRenderer(new DeleteButtonRenderer());
+        holdingsTable.getColumnModel().getColumn(6).setCellEditor(new DeleteButtonEditor(new JCheckBox(), holdingsTable, deleteHoldingController));
 
         final JScrollPane scrollPane = new JScrollPane(holdingsTable);
         scrollPane.getViewport().setBackground(CARD_BG);
@@ -298,7 +304,7 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
                             String.format("$%.2f", holding.calculateTotalValue().doubleValue() / holding.getNumberOfShares()), // or use average price if current price isn't a getter
                             String.format("$%.2f", holdingGain.doubleValue()),
                             String.format("%+.2f%%", holding.calculateGainLossPercentage().doubleValue()),
-                            "N/A" // replace purchase date with a placeholder since getPurchaseDate() doesn't exist
+                            "x" // The delete button symbol
                     });
                 }
             }
@@ -330,6 +336,67 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
             holdingsCountLabel.setText(state.getHoldings().size() + " positions");
         }
         updateLastUpdatedTime();
+    }
+
+    // Renders the "×" text styled like a clean button
+    private static class DeleteButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
+        public DeleteButtonRenderer() {
+            setOpaque(true);
+            setForeground(new Color(156, 163, 175)); // TEXT_MUTED
+            setBackground(new Color(17, 24, 39));   // CARD_BG
+            setBorder(null);
+            setFont(new Font("SansSerif", Font.BOLD, 14));
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    // Handles clicks on the "×" button to trigger deletion
+    private static class DeleteButtonEditor extends DefaultCellEditor {
+        private final JButton button;
+        private String clickedTicker;
+        private JTable table;
+        private DeleteHoldingController controller;
+
+        public DeleteButtonEditor(JCheckBox checkBox, JTable table, DeleteHoldingController controller) {
+            super(checkBox);
+            this.table = table;
+            this.controller = controller;
+            button = new JButton("×");
+            button.setOpaque(true);
+            button.setForeground(new Color(239, 68, 68)); // Red color for delete
+            button.setBackground(new Color(17, 24, 39));
+            button.setBorder(null);
+            button.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                if (controller != null && clickedTicker != null) {
+                    controller.execute(clickedTicker);
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            // Extract just the ticker symbol from column 0 (e.g., "AAPL - Apple Inc." -> "AAPL")
+            String fullTickerString = (String) table.getValueAt(row, 0);
+            if (fullTickerString != null && fullTickerString.contains(" - ")) {
+                clickedTicker = fullTickerString.split(" - ")[0].trim();
+            } else {
+                clickedTicker = fullTickerString;
+            }
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return "×";
+        }
     }
 
     @Override
