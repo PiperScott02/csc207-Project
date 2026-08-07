@@ -61,16 +61,21 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
     private final BlackLittermanController blackLittermanController;
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
-    private DefaultTableModel tableModel;
+    private DefaultTableModel holdingsTableModel;
+    private DefaultTableModel watchlistTableModel;
     private JLabel lastUpdatedLabel;
-    private JLabel totalHoldingsLabel;
+
     private JLabel totalPortfolioValueValLabel;
+    private JLabel allTimePercentageBadge;
+    private JLabel subTextLabel;
     private JLabel totalGainLossValLabel;
+    private JLabel totalGainLossSubLabel;
     private JLabel dailyChangeValLabel;
-    private boolean hasAddedHolding = false;
+    private JLabel dailyChangeSubLabel;
+    private JLabel totalHoldingsLabel;
 
     /**
-     * Creates the home screen.
+     * Creates the home screen with sidebar layout.
      *
      * @param loggedInViewModel contains information about the logged-in user
      * @param viewManagerModel controls which application screen is visible
@@ -89,12 +94,184 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
 
         loggedInViewModel.addPropertyChangeListener(this);
 
-        setLayout(new BorderLayout(10, 15));
-        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        // Split main view into left sidebar and right main content area
+        setBackground(BG_DARK);
+        setLayout(new BorderLayout());
 
-        add(createTopPanel(), BorderLayout.NORTH);
-        add(createHoldingsPanel(), BorderLayout.CENTER);
+        add(createSidebarPanel(), BorderLayout.WEST);
+        add(createMainContentPanel(), BorderLayout.CENTER);
+
+        // Populate initial state if already present in the ViewModel
+        if (loggedInViewModel.getState() != null) {
+            updateViewFromState(loggedInViewModel.getState());
+        }
     }
+
+
+
+
+    // === DARK MODE UI CHANGE ===: Builds the persistent left navigation sidebar matching your screenshot
+    private JPanel createSidebarPanel() {
+        final JPanel sidebar = new JPanel();
+        sidebar.setBackground(SIDEBAR_BG);
+        sidebar.setPreferredSize(new Dimension(240, 0));
+        sidebar.setLayout(new BorderLayout());
+        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
+
+
+        // Top Brand Header inside Sidebar
+        final JPanel brandPanel = new JPanel();
+        brandPanel.setBackground(SIDEBAR_BG);
+        brandPanel.setPreferredSize(new Dimension(240, 70));
+        brandPanel.setLayout(null);
+
+
+        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
+        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
+        logoBadge.setForeground(TEXT_MAIN);
+        logoBadge.setBackground(ACCENT_GREEN);
+        logoBadge.setOpaque(true);
+        logoBadge.setBounds(20, 20, 28, 28);
+
+
+        final JLabel brandLabel = new JLabel("PortfolioPilot");
+        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
+        brandLabel.setForeground(TEXT_MAIN);
+        brandLabel.setBounds(58, 20, 150, 28);
+
+
+        brandPanel.add(logoBadge);
+        brandPanel.add(brandLabel);
+
+
+        // Center Navigation Links List
+        final JPanel navLinksPanel = new JPanel();
+        navLinksPanel.setBackground(SIDEBAR_BG);
+        navLinksPanel.setLayout(new GridLayout(9, 1, 0, 2));
+        navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+
+        // Highlight "Overview" as active since we are on the Overview screen
+        navLinksPanel.add(createSidebarNavLink("Overview", true, event -> {}));
+        navLinksPanel.add(createSidebarNavLink("Holdings", false, event -> {}));
+        navLinksPanel.add(createSidebarNavLink("Watchlist", false, event -> {
+            viewManagerModel.setState(WATCHLIST_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, event -> {
+            viewManagerModel.setState(NEWS_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, event -> {
+            LoggedInState state = loggedInViewModel.getState();
+            if (state != null && state.getUser() != null) {
+                portfolioHealthController.execute(state.getUser());
+            } else {
+                JOptionPane.showMessageDialog(this, "No active user session found.");
+            }
+        }));
+        navLinksPanel.add(createSidebarNavLink("Risk Preference", false, event -> {
+            viewManagerModel.setState(RISK_PREFERENCE_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Currency", false, event -> {
+            viewManagerModel.setState(CURRENCY_CONVERSION_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Search Stocks", false, event -> {
+            viewManagerModel.setState(SEARCH_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, event -> {
+            LoggedInState state = loggedInViewModel.getState();
+            if (state != null && state.getUser() != null) {
+                blackLittermanController.loadMarketData(state.getUser());
+            } else {
+                JOptionPane.showMessageDialog(this, "No active user session found.");
+            }
+        }));
+
+
+        // Bottom User Profile & Log Out Section
+        final JPanel userFooterPanel = new JPanel();
+        userFooterPanel.setBackground(SIDEBAR_BG);
+        userFooterPanel.setPreferredSize(new Dimension(240, 80));
+        userFooterPanel.setLayout(null);
+        userFooterPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
+
+
+        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
+        welcomeLabel.setForeground(TEXT_MUTED);
+        welcomeLabel.setBounds(20, 15, 200, 15);
+
+
+        dateLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        dateLabel.setForeground(TEXT_MUTED);
+        dateLabel.setBounds(20, 32, 200, 15);
+        updateDateTimeDisplay();
+
+
+        final JButton logOutLink = new JButton("↳ Log Out");
+        logOutLink.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        logOutLink.setForeground(new Color(239, 68, 68));
+        logOutLink.setContentAreaFilled(false);
+        logOutLink.setBorderPainted(false);
+        logOutLink.setFocusPainted(false);
+        logOutLink.setHorizontalAlignment(SwingConstants.LEFT);
+        logOutLink.setBounds(14, 50, 120, 20);
+        logOutLink.addActionListener(event -> {
+            viewManagerModel.setState(LOGIN_VIEW_NAME);
+            viewManagerModel.firePropertyChanged();
+        });
+
+
+        userFooterPanel.add(welcomeLabel);
+        userFooterPanel.add(dateLabel);
+        userFooterPanel.add(logOutLink);
+
+
+        sidebar.add(brandPanel, BorderLayout.NORTH);
+        sidebar.add(navLinksPanel, BorderLayout.CENTER);
+        sidebar.add(userFooterPanel, BorderLayout.SOUTH);
+
+
+        return sidebar;
+    }
+
+
+    // Helper for styled sidebar links
+    private JButton createSidebarNavLink(String text, boolean isActive, java.awt.event.ActionListener action) {
+        final JButton button = new JButton(text);
+        button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
+        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
+        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        button.addActionListener(action);
+
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (!isActive) {
+                    button.setForeground(TEXT_MAIN);
+                    button.setBackground(CARD_BG);
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (!isActive) {
+                    button.setForeground(TEXT_MUTED);
+                    button.setBackground(SIDEBAR_BG);
+                }
+            }
+        });
+        return button;
+    }
+
+
+
+
 
     private JPanel createTopPanel() {
         final JPanel topPanel = new JPanel(new BorderLayout(0, 15));
