@@ -324,8 +324,15 @@ public final class PortfolioPilotMain {
                 currencyConversionView.getViewName()
         );
 
+        // 14. Holdings View
+        final HoldingsView holdingsView = new HoldingsView(
+                viewManagerModel,
+                loggedInViewModel
+        );
+        views.add(holdingsView, holdingsView.getViewName());
+
         // ==========================================
-        // 14. Startup Configuration
+        // 15. Startup Configuration
         // ==========================================
         viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChanged();
