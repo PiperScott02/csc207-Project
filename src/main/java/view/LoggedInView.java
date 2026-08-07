@@ -61,6 +61,7 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
     private final BlackLittermanController blackLittermanController;
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
+    private final JLabel dateLabel = new JLabel();
     private DefaultTableModel holdingsTableModel;
     private DefaultTableModel watchlistTableModel;
     private JLabel lastUpdatedLabel;
@@ -72,7 +73,7 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
     private JLabel totalGainLossSubLabel;
     private JLabel dailyChangeValLabel;
     private JLabel dailyChangeSubLabel;
-    private JLabel totalHoldingsLabel;
+    private JLabel totalHoldingsValLabel;
 
     /**
      * Creates the home screen with sidebar layout.
@@ -507,91 +508,116 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         lastUpdatedLabel.setText("Last updated: " + now.format(formatter));
     }
 
-    /**
-     * Updates the username AND holdings table displayed on the home screen.
-     *
-     * @param event property-change event from the view model
-     */
+    private void updateViewFromState(LoggedInState state) {
+        final String username = state.getUsername();
+        if (username != null && !username.isBlank()) {
+            welcomeLabel.setText("WELCOME, " + username.toUpperCase());
+        } else {
+            welcomeLabel.setText("WELCOME");
+        }
+
+        if (state.getHoldings() != null) {
+            BigDecimal totalPortfolioValue = BigDecimal.ZERO;
+            BigDecimal totalCostBasis = BigDecimal.ZERO;
+            BigDecimal totalGainLoss = BigDecimal.ZERO;
+            BigDecimal totalDailyChange = BigDecimal.ZERO;
+
+            if (holdingsTableModel != null) {
+                holdingsTableModel.setRowCount(0);
+            }
+
+            for (StockHolding holding : state.getHoldings()) {
+                Stock stock = holding.getStock();
+                BigDecimal holdingValue = holding.calculateTotalValue();
+                BigDecimal holdingCost = holding.calculateTotalCost();
+                BigDecimal holdingGain = holding.calculateGainLoss();
+                BigDecimal holdingDailyChange = BigDecimal.ZERO;
+                if (stock != null && stock.getDailyPriceChange() != null) {
+                    holdingDailyChange = stock.getDailyPriceChange().multiply(BigDecimal.valueOf(holding.getNumberOfShares()));
+                }
+
+                totalPortfolioValue = totalPortfolioValue.add(holdingValue);
+                totalCostBasis = totalCostBasis.add(holdingCost);
+                totalGainLoss = totalGainLoss.add(holdingGain);
+                totalDailyChange = totalDailyChange.add(holdingDailyChange);
+
+                if (holdingsTableModel != null) {
+                    holdingsTableModel.addRow(new Object[]{
+                            stock != null ? stock.getTickerSymbol() : "",
+                            stock != null ? stock.getCompanyName() : "",
+                            String.format("$%.2f", holding.getAveragePrice()),
+                            String.format("%+.2f%%", holding.calculateGainLossPercentage())
+                    });
+                }
+
+                if (dailyChangeValLabel != null) {
+                    dailyChangeValLabel.setText(String.format("$%.2f", totalDailyChange.doubleValue()));
+                    if (totalDailyChange.compareTo(BigDecimal.ZERO) < 0) {
+                        dailyChangeValLabel.setForeground(new Color(239, 68, 68)); // Red for negative
+                    } else {
+                        dailyChangeValLabel.setForeground(ACCENT_GREEN); // Green for positive/zero
+                    }
+                }
+            }
+            BigDecimal allTimePercentage = BigDecimal.ZERO;
+            if (totalCostBasis.compareTo(BigDecimal.ZERO) > 0) {
+                allTimePercentage = totalGainLoss
+                        .divide(totalCostBasis, 4, java.math.RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100));
+            }
+
+            // Update Overview Metrics dynamically
+            if (totalPortfolioValueValLabel != null) {
+                totalPortfolioValueValLabel.setText(String.format("$%.2f", totalPortfolioValue.doubleValue()));
+            }
+            if (allTimePercentageBadge != null) {
+                allTimePercentageBadge.setText(String.format(" %+.2f%% ALL-TIME ", allTimePercentage.doubleValue()));
+
+                if (allTimePercentage.compareTo(BigDecimal.ZERO) < 0) {
+                    // Negative: Soft red text with a dark red background container
+                    allTimePercentageBadge.setForeground(new Color(239, 68, 68));
+                    allTimePercentageBadge.setBackground(new Color(127, 29, 29));
+                } else {
+                    // Positive / Zero: Green text with a dark green background container
+                    allTimePercentageBadge.setForeground(ACCENT_GREEN);
+                    allTimePercentageBadge.setBackground(new Color(6, 78, 59));
+                }
+            }
+            if (subTextLabel != null) {
+                subTextLabel.setText(String.format("Cost basis: $%.2f", totalCostBasis.doubleValue()));
+            }
+            if (totalGainLossValLabel != null) {
+                totalGainLossValLabel.setText(String.format("$%.2f", totalGainLoss.doubleValue()));
+                if (totalGainLoss.compareTo(BigDecimal.ZERO) < 0) {
+                    totalGainLossValLabel.setForeground(new Color(239, 68, 68)); // Red for negative
+                } else {
+                    totalGainLossValLabel.setForeground(ACCENT_GREEN); // Green for positive/zero
+                }
+            }
+            if (totalGainLossSubLabel != null) {
+                totalGainLossSubLabel.setText(String.format("%+.2f%%", allTimePercentage.doubleValue()));
+                if (allTimePercentage.compareTo(BigDecimal.ZERO) < 0) {
+                    totalGainLossSubLabel.setForeground(new Color(239, 68, 68)); // Red for negative
+                } else {
+                    totalGainLossSubLabel.setForeground(TEXT_MUTED); // Muted text for positive/zero
+                }
+            }
+            if (totalHoldingsValLabel != null) {
+                totalHoldingsValLabel.setText(String.valueOf(state.getHoldings().size()));
+            }
+        }
+        updateLastUpdatedTime();
+    }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         if ("state".equals(event.getPropertyName())) {
             final LoggedInState state = (LoggedInState) event.getNewValue();
-            final String username = state.getUsername();
-
-            if (username == null || username.isBlank()) {
-                welcomeLabel.setText("Welcome");
-            } else {
-                welcomeLabel.setText("Welcome, " + username);
-            }
-
-            // Repopulate the holdings table and calculate totals whenever the state changes
-            if (tableModel != null && state.getHoldings() != null) {
-                tableModel.setRowCount(0); // Clear current rows
-
-                java.math.BigDecimal totalPortfolioValue = java.math.BigDecimal.ZERO;
-                java.math.BigDecimal totalGainLoss = java.math.BigDecimal.ZERO;
-                java.math.BigDecimal totalDailyChange = java.math.BigDecimal.ZERO;
-
-                for (StockHolding holding : state.getHoldings()) {
-                    Stock stock = holding.getStock();
-
-                    // Accumulate portfolio-wide totals
-                    totalPortfolioValue = totalPortfolioValue.add(holding.calculateTotalValue());
-                    totalGainLoss = totalGainLoss.add(holding.calculateGainLoss());
-
-                    // Accumulate daily change if stock and price change data exist
-                    if (stock != null && stock.getDailyPriceChange() != null) {
-                        java.math.BigDecimal holdingDailyChange = stock.getDailyPriceChange()
-                                .multiply(java.math.BigDecimal.valueOf(holding.getNumberOfShares()));
-                        totalDailyChange = totalDailyChange.add(holdingDailyChange);
-                    }
-
-                    // Populate table rows
-                    tableModel.addRow(new Object[]{
-                            stock != null ? stock.getTickerSymbol() : "",
-                            stock != null ? stock.getCompanyName() : "",
-                            holding.getNumberOfShares(),
-                            String.format("$%.2f", holding.getAveragePrice()),
-                            stock != null ? String.format("$%.2f", stock.getClose()) : "",
-                            String.format("$%.2f", holding.calculateGainLoss()),
-                            String.format("%.2f%%", holding.calculateGainLossPercentage())
-                    });
-                }
-
-                // Update the top summary boxes
-                if (totalPortfolioValueValLabel != null) {
-                    totalPortfolioValueValLabel.setText(String.format("$%.2f", totalPortfolioValue));
-                }
-                if (totalGainLossValLabel != null) {
-                    totalGainLossValLabel.setText(String.format("$%.2f", totalGainLoss));
-                }
-                if (dailyChangeValLabel != null) {
-                    dailyChangeValLabel.setText(String.format("$%.2f", totalDailyChange));
-                }
-
-                // Only update "Total Holdings:" count when a Holding is added
-                if (totalHoldingsLabel != null) {
-                    int uniqueHoldingCount = state.getHoldings().size();
-                    totalHoldingsLabel.setText("Total Holdings: " + uniqueHoldingCount);
-                }
-
-                // Check if user has any Holdings
-                if (!state.getHoldings().isEmpty()) {
-                    hasAddedHolding = true;
-                }
-            }
-            // Only update "Last updated:" timestamp when a Holding is added
-            if (lastUpdatedLabel != null) {
-                if (hasAddedHolding) {
-                    String currentTime = java.time.LocalDateTime.now()
-                            .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    lastUpdatedLabel.setText("Last updated: " + currentTime);
-                } else {
-                    lastUpdatedLabel.setText("Last updated: --");
-                }
+            if (state != null) {
+                updateViewFromState(state);
             }
         }
     }
+
     public String getViewName() {
         return viewName;
     }
