@@ -17,6 +17,7 @@ import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 import use_case.risk_preference.RiskPreferenceUserDataAccessInterface;
+import use_case.delete_holding.DeleteHoldingUserDataAccessInterface;
 
 /**
  * DAO for user data implemented using a File to persist the data.
@@ -25,7 +26,8 @@ public class FileUserDataAccessObject
         implements SignupUserDataAccessInterface,
         LoginUserDataAccessInterface,
         ChangePasswordUserDataAccessInterface,
-        RiskPreferenceUserDataAccessInterface {
+        RiskPreferenceUserDataAccessInterface,
+        DeleteHoldingUserDataAccessInterface {
 
     private String currentUser;
     private static final String HEADER = "username,password,holdings";

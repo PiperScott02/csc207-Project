@@ -182,7 +182,6 @@ public class Portfolio {
         return stocksAndTimelines;
     }
 
-
     /** Returns a map pairing each stock holding with its historical timeline data.
      * @return a map of StockHolding to its list of DailyPriceData.
      */
@@ -193,7 +192,6 @@ public class Portfolio {
         }
         return stocksAndTimelines;
     }
-
 
     /** Calculates the proportion of the portfolio value represented by a specific holding.
      * @param holding the StockHolding to check.
@@ -299,6 +297,25 @@ public class Portfolio {
 
     public Portfolio(List<StockHolding> holdings) {
         this.holdings = new ArrayList<>(holdings);
+    }
+
+    /** Removes a stock holding from the portfolio.
+     * @param holding the StockHolding to remove.
+     */
+    public void removeHolding(StockHolding holding) {
+        this.holdings.remove(holding);
+    }
+
+    /** Removes a stock holding from the portfolio by its ticker symbol.
+     * @param ticker the ticker symbol of the holding to remove.
+     * @return true if a holding was removed, false otherwise.
+     */
+    public boolean removeHoldingByTicker(String ticker) {
+        StockHolding holding = getHoldingByTicker(ticker);
+        if (holding != null) {
+            return this.holdings.remove(holding);
+        }
+        return false;
     }
 
     /** Returns whether the user has set custom views regarding their stocks' perfomances.
