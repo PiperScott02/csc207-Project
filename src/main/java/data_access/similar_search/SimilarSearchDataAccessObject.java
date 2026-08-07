@@ -3,14 +3,12 @@ package data_access.similar_search;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
-import use_case.similar_search.SimilarSearchOutputData;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInterface {
@@ -48,12 +46,12 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
         SimilarSearchJSONResponse javaResponse =
                 GSON.fromJson(responseBody, SimilarSearchJSONResponse.class);
 
-        String[][] similarStocks = new String[javaResponse.bestMatches.length][3];
+        String[][] similarStocks = new String[javaResponse.getLength()][3];
 
-        for (int i = 0; i < javaResponse.bestMatches.length; i++) {
-            similarStocks[i][0] = javaResponse.bestMatches[i].tickerSymbol;
-            similarStocks[i][1] = javaResponse.bestMatches[i].companyName;
-            similarStocks[i][2] = javaResponse.bestMatches[i].region;
+        for (int i = 0; i < javaResponse.getLength(); i++) {
+            similarStocks[i][0] = javaResponse.getTickerSymbol(i);
+            similarStocks[i][1] = javaResponse.getCompanyName(i);
+            similarStocks[i][2] = javaResponse.getRegion(i);
         }
 
         return similarStocks;
