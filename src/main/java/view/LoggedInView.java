@@ -1,11 +1,17 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
+import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -37,6 +43,16 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
     private static final String NEWS_VIEW_NAME = "news";
     private static final String WATCHLIST_VIEW_NAME = "watchlist";
     private static final String ADD_HOLDING_VIEW_NAME = "add holding";
+
+    // === DARK MODE UI CHANGE ===: Figma color palette variables
+    private static final Color BG_DARK = new Color(11, 15, 25);       // #0B0F19 Main window background
+    private static final Color SIDEBAR_BG = new Color(7, 10, 17);     // Darker shade for persistent sidebar
+    private static final Color CARD_BG = new Color(17, 24, 39);       // #111827 Cards & Table background
+    private static final Color BORDER_COLOR = new Color(31, 41, 55);  // #1F2937 Borders
+    private static final Color TEXT_MAIN = new Color(243, 244, 246);  // #F3F4F6 Primary white text
+    private static final Color TEXT_MUTED = new Color(156, 163, 175); // #9CA3AF Muted labels
+    private static final Color ACCENT_GREEN = new Color(16, 185, 129); // #10B981 Gain/Success color
+    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39); // Active selection highlight for sidebar
 
     private final String viewName = "logged in";
     private final ViewManagerModel viewManagerModel;
