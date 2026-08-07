@@ -1,12 +1,8 @@
 package interface_adapter.risk_preference;
 
 import java.time.LocalDateTime;
-import java.util.EnumSet;
-import java.util.Set;
 
-import entity.InvestmentGoal;
 import entity.RiskLevel;
-import entity.TimeHorizon;
 
 /**
  * Stores the data displayed by the risk-preference view.
@@ -14,13 +10,6 @@ import entity.TimeHorizon;
 public class RiskPreferenceState {
 
     private RiskLevel riskLevel = RiskLevel.MODERATE;
-
-    private Set<InvestmentGoal> investmentGoals =
-            EnumSet.noneOf(InvestmentGoal.class);
-
-    private TimeHorizon timeHorizon =
-            TimeHorizon.FIVE_TO_TEN_YEARS;
-
     private LocalDateTime lastUpdated;
     private String message = "";
     private String error = "";
@@ -31,23 +20,6 @@ public class RiskPreferenceState {
 
     public void setRiskLevel(RiskLevel riskLevel) {
         this.riskLevel = riskLevel;
-    }
-
-    public Set<InvestmentGoal> getInvestmentGoals() {
-        return investmentGoals;
-    }
-
-    public void setInvestmentGoals(
-            Set<InvestmentGoal> investmentGoals) {
-        this.investmentGoals = investmentGoals;
-    }
-
-    public TimeHorizon getTimeHorizon() {
-        return timeHorizon;
-    }
-
-    public void setTimeHorizon(TimeHorizon timeHorizon) {
-        this.timeHorizon = timeHorizon;
     }
 
     public LocalDateTime getLastUpdated() {

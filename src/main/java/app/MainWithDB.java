@@ -59,8 +59,13 @@ public class MainWithDB {
                                                                   signupViewModel, userDataAccessObject);
         views.add(signupView, signupView.getViewName());
 
-        final LoginView loginView = LoginUseCaseFactory.create(viewManagerModel, loginViewModel,
-                                                               loggedInViewModel, userDataAccessObject);
+        final LoginView loginView = LoginUseCaseFactory.create(
+                viewManagerModel,
+                loginViewModel,
+                loggedInViewModel,
+                signupViewModel,
+                userDataAccessObject
+        );
         views.add(loginView, loginView.getViewName());
 
         final LoggedInView loggedInView = ChangePasswordUseCaseFactory.create(viewManagerModel,
