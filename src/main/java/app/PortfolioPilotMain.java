@@ -105,7 +105,7 @@ public final class PortfolioPilotMain {
         /*
          * Alpha Vantage API key
          */
-        final String apiKey = "API_KEY_PLACEHOLDER";
+        final String apiKey = "API_KEY_HERE";
 
         // ==========================================
         // 2. Data Access Objects
