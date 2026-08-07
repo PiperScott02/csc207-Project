@@ -32,7 +32,7 @@ public class AddHoldingPresenter implements AddHoldingOutputBoundary {
         loggedInViewModel.firePropertyChanged();
 
         // Tell the ViewManager to switch back to the main dashboard ("logged in") view
-        viewManagerModel.setState("logged in");
+        viewManagerModel.setState("holdings");
         viewManagerModel.firePropertyChanged();
     }
 
