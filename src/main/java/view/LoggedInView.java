@@ -108,7 +108,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         }
     }
 
-    // === DARK MODE UI CHANGE ===: Builds the persistent left navigation sidebar matching your screenshot
     private JPanel createSidebarPanel() {
         final JPanel sidebar = new JPanel();
         sidebar.setBackground(SIDEBAR_BG);
@@ -409,7 +408,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
 
         return row;
     }
-
 
     // Holdings & Watchlist bottom cards preview populated dynamically from state
     private JPanel createHoldingsAndWatchlistPreviewPanel() {

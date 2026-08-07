@@ -16,7 +16,6 @@ import java.time.format.DateTimeParseException;
 
 public class AddHoldingView extends JPanel implements ActionListener, PropertyChangeListener {
 
-    // === UI UPDATE: DARK MODE COLOR PALETTE ===
     private static final Color BG_DARK = new Color(11, 15, 25);
     private static final Color SIDEBAR_BG = new Color(7, 10, 17);
     private static final Color CARD_BG = new Color(17, 24, 39);
@@ -46,11 +45,9 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         this.viewManagerModel = viewManagerModel;
         this.addHoldingViewModel.addPropertyChangeListener(this);
 
-        // === UI UPDATE: Set main dark background and BorderLayout ===
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
-        // === UI UPDATE: Add persistent left sidebar and right content panel ===
         add(createSidebarPanel(), BorderLayout.WEST);
         add(createMainContentPanel(), BorderLayout.CENTER);
 
@@ -73,7 +70,6 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
                     try {
                         double shares = Double.parseDouble(sharesInputField.getText());
 
-                        // === VALIDATION: Check for zero or negative share amounts ===
                         if (shares <= 0) {
                             JOptionPane.showMessageDialog(AddHoldingView.this, "Please enter a positive number for shares.");
                             return;
@@ -118,7 +114,6 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         });
     }
 
-    // === UI UPDATE: Persistent sidebar builder method ===
     private JPanel createSidebarPanel() {
         final JPanel sidebar = new JPanel();
         sidebar.setBackground(SIDEBAR_BG);
@@ -188,7 +183,6 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         return sidebar;
     }
 
-    // === UI UPDATE: Sidebar nav link styling helper ===
     private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
         final JButton button = new JButton(text);
         button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
@@ -202,7 +196,6 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         return button;
     }
 
-    // === UI UPDATE: Custom layout for main form content matching screenshot ===
     private JPanel createMainContentPanel() {
         final JPanel panel = new JPanel(null);
         panel.setBackground(BG_DARK);
@@ -321,7 +314,6 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         return panel;
     }
 
-    // === UI UPDATE: Helper to style input fields with dark background and custom borders ===
     private void styleTextField(JTextField field, String placeholder) {
         field.setBackground(BG_DARK);
         field.setForeground(TEXT_MAIN);
@@ -333,7 +325,6 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         ));
     }
 
-    // === UI UPDATE: Helper to style secondary buttons inside the card (outlined style) ===
     private void styleSecondaryButton(JButton button) {
         button.setBackground(CARD_BG);
         button.setForeground(TEXT_MAIN);
@@ -354,8 +345,6 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
                     JOptionPane.showMessageDialog(this, state.getAddHoldingError());
                 } else {
                     JOptionPane.showMessageDialog(this, "Holding successfully added!");
-
-                    // === NAVIGATION UPDATE: Navigate to the holdings screen on successful addition ===
                     viewManagerModel.setState("holdings");
                     viewManagerModel.firePropertyChanged();
                 }
