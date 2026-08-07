@@ -199,13 +199,13 @@ public final class PortfolioPilotMain {
         views.add(signupView, signupView.getViewName());
 
         // 2. Login View
-        final LoginView loginView =
-                LoginUseCaseFactory.create(
-                        viewManagerModel,
-                        loginViewModel,
-                        loggedInViewModel,
-                        userDataAccessObject
-                );
+        final LoginView loginView = LoginUseCaseFactory.create(
+                viewManagerModel,
+                loginViewModel,
+                loggedInViewModel,
+                signupViewModel,
+                userDataAccessObject
+        );
         views.add(loginView, loginView.getViewName());
 
         // 3. Logged In View

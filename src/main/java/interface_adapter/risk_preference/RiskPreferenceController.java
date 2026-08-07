@@ -29,20 +29,10 @@ public class RiskPreferenceController {
      * Sends the selected preferences to the interactor.
      *
      * @param riskLevel selected risk level
-     * @param investmentGoals selected investment goals
-     * @param timeHorizon selected time horizon
      */
-    public void execute(
-            RiskLevel riskLevel,
-            Set<InvestmentGoal> investmentGoals,
-            TimeHorizon timeHorizon) {
-
+    public void execute(RiskLevel riskLevel) {
         final RiskPreferenceInputData inputData =
-                new RiskPreferenceInputData(
-                        riskLevel,
-                        investmentGoals,
-                        timeHorizon
-                );
+                new RiskPreferenceInputData(riskLevel);
 
         interactor.execute(inputData);
     }

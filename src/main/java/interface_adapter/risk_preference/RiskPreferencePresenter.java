@@ -29,12 +29,7 @@ public class RiskPreferencePresenter
                 viewModel.getState();
 
         state.setRiskLevel(outputData.getRiskLevel());
-        state.setInvestmentGoals(
-                outputData.getInvestmentGoals());
-        state.setTimeHorizon(
-                outputData.getTimeHorizon());
-        state.setLastUpdated(
-                outputData.getLastUpdated());
+        state.setLastUpdated(outputData.getLastUpdated());
         state.setError("");
         state.setMessage(
                 "Preferences saved successfully.");
