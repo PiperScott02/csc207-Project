@@ -32,11 +32,6 @@ public class RiskPreferenceInteractor
             return;
         }
 
-        if (inputData.getTimeHorizon() == null) {
-            presenter.prepareFailView("Please select a time horizon.");
-            return;
-        }
-
         final String username = userDataAccessObject.getCurrentUser();
 
         if (username == null || username.isBlank()) {
@@ -52,9 +47,7 @@ public class RiskPreferenceInteractor
         }
 
         final RiskProfile riskProfile = new RiskProfile(
-                inputData.getRiskLevel(),
-                inputData.getInvestmentGoals(),
-                inputData.getTimeHorizon()
+                inputData.getRiskLevel()
         );
 
         user.setRiskProfile(riskProfile);
@@ -63,8 +56,6 @@ public class RiskPreferenceInteractor
         final RiskPreferenceOutputData outputData =
                 new RiskPreferenceOutputData(
                         riskProfile.getRiskLevel(),
-                        riskProfile.getInvestmentGoals(),
-                        riskProfile.getTimeHorizon(),
                         riskProfile.getLastUpdated()
                 );
 
@@ -97,8 +88,6 @@ public class RiskPreferenceInteractor
         final RiskPreferenceOutputData outputData =
                 new RiskPreferenceOutputData(
                         riskProfile.getRiskLevel(),
-                        riskProfile.getInvestmentGoals(),
-                        riskProfile.getTimeHorizon(),
                         riskProfile.getLastUpdated()
                 );
 

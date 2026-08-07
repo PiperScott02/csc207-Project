@@ -1,11 +1,17 @@
 package view;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -22,7 +28,7 @@ import interface_adapter.login.LoginViewModel;
 /**
  * The View for when the user is logging into the program.
  */
-public class LoginView extends JPanel implements ActionListener, PropertyChangeListener {
+public class LoginView extends JPanel implements PropertyChangeListener {
 
     private final String viewName = "log in";
     private final LoginViewModel loginViewModel;
@@ -43,18 +49,43 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         this.loginViewModel = loginViewModel;
         this.loginViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel("Login Screen");
+        final JLabel title = new JLabel("PortfolioPilot");
+        title.setFont(new Font("SansSerif", Font.BOLD, 32));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        final LabelTextPanel usernameInfo = new LabelTextPanel(
-                new JLabel("Username"), usernameInputField);
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel("Password"), passwordInputField);
+        final JLabel subtitle = new JLabel("Login to Your Account");
+        subtitle.setFont(new Font("SansSerif", Font.BOLD, 20));
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        final JLabel usernameLabel = new JLabel("Username");
+        usernameLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+
+        final JLabel passwordLabel = new JLabel("Password");
+        passwordLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+
+        usernameInputField.setPreferredSize(new Dimension(320, 35));
+        usernameInputField.setFont(new Font("SansSerif", Font.PLAIN, 16));
+
+        passwordInputField.setPreferredSize(new Dimension(320, 35));
+        passwordInputField.setFont(new Font("SansSerif", Font.PLAIN, 16));
+
+        final LabelTextPanel usernameInfo =
+                new LabelTextPanel(usernameLabel, usernameInputField);
+
+        final LabelTextPanel passwordInfo =
+                new LabelTextPanel(passwordLabel, passwordInputField);
 
         final JPanel buttons = new JPanel();
-        logIn = new JButton("log in");
+
+        logIn = new JButton("Log In");
+        logIn.setFont(new Font("SansSerif", Font.BOLD, 15));
+        logIn.setPreferredSize(new Dimension(120, 38));
+
+        cancel = new JButton("Cancel");
+        cancel.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        cancel.setPreferredSize(new Dimension(120, 38));
+
         buttons.add(logIn);
-        cancel = new JButton("cancel");
         buttons.add(cancel);
 
         logIn.addActionListener(
@@ -72,7 +103,13 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
                 }
         );
 
-        cancel.addActionListener(this);
+        cancel.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        loginController.switchToSignupView();
+                    }
+                }
+        );
 
         usernameInputField.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -98,8 +135,6 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
             }
         });
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
@@ -124,19 +159,52 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
             }
         });
 
-        this.add(title);
-        this.add(usernameInfo);
-        this.add(usernameErrorField);
-        this.add(passwordInfo);
-        this.add(buttons);
-    }
+        final JPanel loginPanel = new JPanel();
+        loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
 
-    /**
-     * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
-     */
-    public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
+        loginPanel.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createTitledBorder("Login"),
+                        BorderFactory.createEmptyBorder(25, 40, 25, 40)
+                )
+        );
+
+        loginPanel.setPreferredSize(new Dimension(500, 370));
+
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        usernameInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        usernameErrorField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        passwordInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        passwordErrorField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        buttons.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        loginPanel.add(title);
+        loginPanel.add(Box.createVerticalStrut(8));
+
+        loginPanel.add(subtitle);
+        loginPanel.add(Box.createVerticalStrut(25));
+
+        loginPanel.add(usernameInfo);
+        loginPanel.add(Box.createVerticalStrut(5));
+        loginPanel.add(usernameErrorField);
+
+        loginPanel.add(Box.createVerticalStrut(15));
+
+        loginPanel.add(passwordInfo);
+        loginPanel.add(Box.createVerticalStrut(5));
+        loginPanel.add(passwordErrorField);
+
+        loginPanel.add(Box.createVerticalStrut(25));
+
+        loginPanel.add(buttons);
+
+        final JPanel outerPanel = new JPanel(new GridBagLayout());
+        outerPanel.add(loginPanel);
+
+        this.setLayout(new BorderLayout());
+        this.add(outerPanel, BorderLayout.CENTER);
     }
 
     @Override
