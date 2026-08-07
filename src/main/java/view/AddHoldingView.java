@@ -16,6 +16,15 @@ import java.time.format.DateTimeParseException;
 
 public class AddHoldingView extends JPanel implements ActionListener, PropertyChangeListener {
 
+    private static final Color BG_DARK = new Color(11, 15, 25);
+    private static final Color SIDEBAR_BG = new Color(7, 10, 17);
+    private static final Color CARD_BG = new Color(17, 24, 39);
+    private static final Color BORDER_COLOR = new Color(31, 41, 55);
+    private static final Color TEXT_MAIN = new Color(243, 244, 246);
+    private static final Color TEXT_MUTED = new Color(156, 163, 175);
+    private static final Color ACCENT_GREEN = new Color(16, 185, 129);
+    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
+
     private final String viewName = "add holding";
     private final AddHoldingViewModel addHoldingViewModel;
     private final AddHoldingController addHoldingController;
