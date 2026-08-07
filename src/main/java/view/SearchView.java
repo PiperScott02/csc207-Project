@@ -39,6 +39,9 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final TickerSearchController tickerSearchController;
     private final TickerSearchViewModel tickerSearchViewModel;
 
+    // Error Message Label
+    private final JLabel searchBarErrorMessage = new JLabel("");
+
     // Stock Navigation Dependencies
     private final StockController stockController;
     private final ViewManagerModel viewManagerModel;
@@ -63,6 +66,10 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.viewManagerModel = viewManagerModel;
         this.stockViewModel = stockViewModel;
         this.loggedInViewModel = loggedInViewModel;
+
+        searchBarErrorMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        searchBarErrorMessage.setForeground(Color.RED);
+        searchBarErrorMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         tickerSearchViewModel.addPropertyChangeListener(this);
         similarSearchViewModel.addPropertyChangeListener(this);
@@ -123,22 +130,34 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    tickerSearchController.execute(searchInputField.getText());
-                    similarSearchController.execute(searchInputField.getText());
-                } catch (InterruptedException ex) {
-                    System.out.println("InterruptedException");
-                } catch (IOException ex) {
-                    System.out.println("IOException");
+                String searchText = searchInputField.getText();
+                if (searchText.contains(" ") || searchText.isEmpty()) {
+                    searchBarErrorMessage.setText("ERROR: search contains space or search is empty.");
+                } else {
+                    searchBarErrorMessage.setText("");
+                    try {
+                        tickerSearchController.execute(searchInputField.getText());
+                        similarSearchController.execute(searchInputField.getText());
+                    } catch (InterruptedException ex) {
+                        System.out.println("InterruptedException");
+                    } catch (IOException ex) {
+                        System.out.println("IOException");
+                    }
                 }
-                System.out.println("YOU SEARCHED: " + searchInputField.getText());
             }
         });
 
         final JPanel searchPanel = new JPanel();
-        searchPanel.add(searchButton);
-        searchPanel.add(searchInputField);
-        searchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
+
+        final JPanel searchBar = new JPanel();
+        searchBar.add(searchButton);
+        searchBar.add(searchInputField);
+        searchBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        searchPanel.add(searchBar);
+        searchPanel.add(searchBarErrorMessage);
+        searchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         return searchPanel;
     }
@@ -146,7 +165,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private JPanel createSimilarSearchPanel(JPanel similarSearchResultsPanel) {
         final JPanel similarSearchPanel = new JPanel();
         similarSearchPanel.setLayout(new BoxLayout(similarSearchPanel, BoxLayout.Y_AXIS));
-        similarSearchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        similarSearchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         similarSearchPanel.add(new JLabel("Similar Search Results"));
 
@@ -168,7 +187,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         final JPanel tickerSearchResultPanel = new JPanel();
         tickerSearchResultPanel.setLayout(
                 new BoxLayout(tickerSearchResultPanel, BoxLayout.Y_AXIS));
-        tickerSearchResultPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        tickerSearchResultPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         final JPanel tickerSearchValuesPanel = new JPanel();
         tickerSearchValuesPanel.setLayout(new GridLayout(2, 5));
@@ -241,7 +260,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         if (evt.getPropertyName().equals("ticker search")) {
             TickerSearchState tickerSearchState = (TickerSearchState) evt.getNewValue();
 
-            tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol()); // TODO: add toUpperCase()
+            tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol());
             tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
             tickerSearchCountry.setText(tickerSearchState.getCountry());
             tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());
