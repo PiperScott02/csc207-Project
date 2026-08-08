@@ -9,6 +9,7 @@ import interface_adapter.login.LoginViewModel;
 import interface_adapter.signup.SignupViewModel;
 import interface_adapter.watchlist.WatchlistViewModel;
 import use_case.stock.StockDataAccessInterface;
+import use_case.watchlist.WatchlistDataAccessInterface;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
@@ -79,7 +80,8 @@ public class MainWithInMemory {
                 viewManagerModel,
                 watchlistViewModel,
                 loggedInViewModel,
-                stockDataAccessObject
+                stockDataAccessObject,
+                (WatchlistDataAccessInterface) userDataAccessObject
         );
         views.add(watchlistView, watchlistView.getViewName());
 

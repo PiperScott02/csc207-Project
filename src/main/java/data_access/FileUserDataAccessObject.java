@@ -13,11 +13,13 @@ import java.util.Map;
 import java.time.LocalDate;
 
 import entity.*;
+import interface_adapter.watchlist.WatchlistState;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 import use_case.risk_preference.RiskPreferenceUserDataAccessInterface;
 import use_case.delete_holding.DeleteHoldingUserDataAccessInterface;
+import use_case.watchlist.WatchlistDataAccessInterface;
 
 /**
  * DAO for user data implemented using a File to persist the data.
@@ -27,7 +29,8 @@ public class FileUserDataAccessObject
         LoginUserDataAccessInterface,
         ChangePasswordUserDataAccessInterface,
         RiskPreferenceUserDataAccessInterface,
-        DeleteHoldingUserDataAccessInterface {
+        DeleteHoldingUserDataAccessInterface,
+        WatchlistDataAccessInterface {
 
     private String currentUser;
     private static final String HEADER = "username,password,holdings";
@@ -55,8 +58,7 @@ public class FileUserDataAccessObject
 
         if (csvFile.length() == 0) {
             save();
-        }
-        else {
+        } else {
 
             try (BufferedReader reader = new BufferedReader(new FileReader(csvFile))) {
                 final String header = reader.readLine();
@@ -117,8 +119,7 @@ public class FileUserDataAccessObject
 
             writer.close();
 
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -234,5 +235,58 @@ public class FileUserDataAccessObject
     @Override
     public String getCurrentUser() {
         return currentUser;
+    }
+
+    @Override
+    public void addWatchlistStock(String ticker) {
+        User user = get(currentUser);
+        if (user != null && user.getPortfolio() != null) {
+            if (!exists(ticker)) {
+                WatchlistStockItem item = new WatchlistStockItem(ticker, ticker, null, null);
+                user.getPortfolio().getWatchlist().add(item);
+                save();
+            }
+        }
+    }
+
+    @Override
+    public void removeWatchlistStock(String ticker) {
+        User user = get(currentUser);
+        if (user != null && user.getPortfolio() != null && user.getPortfolio().getWatchlist() != null) {
+            user.getPortfolio().getWatchlist().removeIf(item -> item.ticker().equalsIgnoreCase(ticker));
+            save();
+        }
+    }
+
+    @Override
+    public List<WatchlistState.WatchlistStockItem> getWatchlistItems() {
+        User user = get(currentUser);
+        if (user != null && user.getPortfolio() != null) {
+            List<WatchlistStockItem> rawItems = user.getPortfolio().getWatchlist();
+            List<WatchlistState.WatchlistStockItem> stateItems = new java.util.ArrayList<>();
+            for (WatchlistStockItem item : rawItems) {
+                stateItems.add(new WatchlistState.WatchlistStockItem(
+                        item.ticker(),
+                        item.companyName() != null ? item.companyName() : "",
+                        item.closePrice() != null ? item.closePrice().toString() : "",
+                        item.dailyPriceChange() != null ? item.dailyPriceChange().toString() : ""
+                ));
+            }
+            return stateItems;
+        }
+        return new java.util.ArrayList<>();
+    }
+
+    @Override
+    public boolean exists(String ticker) {
+        User user = get(currentUser);
+        if (user != null && user.getPortfolio() != null && user.getPortfolio().getWatchlist() != null) {
+            for (WatchlistStockItem item : user.getPortfolio().getWatchlist()) {
+                if (item.ticker().equalsIgnoreCase(ticker)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

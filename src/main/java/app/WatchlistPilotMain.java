@@ -64,6 +64,16 @@ public final class WatchlistPilotMain {
         final StockDataAccessInterface stockDataAccessObject =
                 new FileStockDataAccessObject();
 
+        final FileUserDataAccessObject userDataAccessObject;
+        try {
+            userDataAccessObject = new FileUserDataAccessObject(
+                    "data/users.csv",
+                    new CommonUserFactory()
+            );
+        } catch (java.io.IOException exception) {
+            throw new RuntimeException("Unable to initialize user storage.", exception);
+        }
+
         /*
          * Manually wire the Clean Architecture layers using the Factory.
          */
@@ -80,7 +90,8 @@ public final class WatchlistPilotMain {
                 viewManagerModel,
                 watchlistViewModel,
                 loggedInViewModel,
-                stockDataAccessObject
+                stockDataAccessObject,
+                userDataAccessObject
         );
 
         /*

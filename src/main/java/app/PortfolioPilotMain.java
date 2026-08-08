@@ -282,7 +282,8 @@ public final class PortfolioPilotMain {
                         viewManagerModel,
                         watchlistViewModel,
                         loggedInViewModel,
-                        stockDataAccessObject
+                        stockDataAccessObject,
+                        userDataAccessObject
                 );
         views.add(watchlistView, watchlistView.getViewName());
 
