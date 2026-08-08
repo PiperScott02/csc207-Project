@@ -8,6 +8,7 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.delete_holding.DeleteHoldingController;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -175,8 +176,11 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         addHoldingBtn.setBackground(ACCENT_GREEN);
         addHoldingBtn.setForeground(Color.BLACK);
         addHoldingBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
+        addHoldingBtn.setBounds(795, 170, 145, 35);
         addHoldingBtn.setFocusPainted(false);
-        addHoldingBtn.setBounds(810, 170, 130, 35);
+        addHoldingBtn.setBorderPainted(false);
+        addHoldingBtn.setOpaque(true);
+        addHoldingBtn.setContentAreaFilled(true);
         addHoldingBtn.addActionListener(e -> {
             viewManagerModel.setState("add holding");
             viewManagerModel.firePropertyChanged();
@@ -189,7 +193,7 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         tablePanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
         final String[] columnNames = {
-                "TICKER / NAME", "SHARES", "AVG COST", "CURR. PRICE", "GAIN / LOSS", "GAIN %", ""
+                "TICKER", "COMPANY", "SHARES", "AVG COST", "CURR. PRICE", "GAIN / LOSS", "GAIN %", ""
         };
         detailedHoldingsTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -207,9 +211,34 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         holdingsTable.getTableHeader().setForeground(TEXT_MUTED);
         holdingsTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 10));
 
+        // === CUSTOM RENDERER: LEFT-ALIGN COMPANY (COL 1), CENTER EVERYTHING ELSE ===
+        DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (column == 1) {
+                    setHorizontalAlignment(JLabel.LEFT); // Left-align Company names
+                } else {
+                    setHorizontalAlignment(JLabel.CENTER); // Center everything else
+                }
+
+                setBackground(CARD_BG);
+                setForeground(TEXT_MAIN);
+                return c;
+            }
+        };
+        for (int i = 0; i < holdingsTable.getColumnCount(); i++) {
+            holdingsTable.getColumnModel().getColumn(i).setCellRenderer(customRenderer);
+        }
+
+        // === SET COLUMN WIDTHS (GIVES MORE ROOM TO COMPANY) ===
+        holdingsTable.getColumnModel().getColumn(0).setPreferredWidth(70);  // Ticker column
+        holdingsTable.getColumnModel().getColumn(1).setPreferredWidth(160); // Company column (wider to fit full names)
+
         // Set width for the delete column
-        holdingsTable.getColumnModel().getColumn(6).setPreferredWidth(40);
-        holdingsTable.getColumnModel().getColumn(6).setMaxWidth(50);
+        holdingsTable.getColumnModel().getColumn(7).setPreferredWidth(40);
+        holdingsTable.getColumnModel().getColumn(7).setMaxWidth(50);
 
         // === SINGLE-CLICK MOUSE LISTENER FOR THE "×" COLUMN ===
         holdingsTable.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -218,8 +247,8 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
                 int row = holdingsTable.rowAtPoint(e.getPoint());
                 int col = holdingsTable.columnAtPoint(e.getPoint());
 
-                // If column 6 ("×") is clicked
-                if (col == 6 && row >= 0) {
+                // If column 7 ("×") is clicked
+                if (col == 7 && row >= 0) {
                     String fullTickerString = (String) holdingsTable.getValueAt(row, 0);
                     if (fullTickerString != null && !fullTickerString.isEmpty()) {
                         String tickerToDelete;
@@ -322,7 +351,8 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
 
                 if (detailedHoldingsTableModel != null) {
                     detailedHoldingsTableModel.addRow(new Object[]{
-                            stock != null ? stock.getTickerSymbol() + " - " + stock.getCompanyName() : "",
+                            stock != null ? stock.getTickerSymbol() : "",
+                            stock != null ? stock.getCompanyName() : "",
                             holding.getNumberOfShares(),
                             String.format("$%.2f", holding.getAveragePrice()),
                             String.format("$%.2f", holding.calculateTotalValue().doubleValue() / holding.getNumberOfShares()), // or use average price if current price isn't a getter
