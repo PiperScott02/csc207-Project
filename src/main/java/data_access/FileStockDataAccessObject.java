@@ -1,16 +1,22 @@
 package data_access;
 
+
 import data_access.stock_daily.StockService;
 import entity.Stock;
+import use_case.StockDailyDataAccessInterface;
 import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
+
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+
 public class FileStockDataAccessObject implements
         StockDataAccessInterface,
-        BlackLittermanDataAccessInterface {
+        BlackLittermanDataAccessInterface,
+        StockDailyDataAccessInterface {
+
 
     /**
      * Checks whether a stock with the ticker identifier exists in the APIs' data.
@@ -29,6 +35,7 @@ public class FileStockDataAccessObject implements
         }
     }
 
+
     /**
      * Tries to create a stock object for the given ticker.
      * @param ticker the stock ticker symbol.
@@ -43,4 +50,19 @@ public class FileStockDataAccessObject implements
             throw new RuntimeException("Failed to fetch stock data for: " + ticker, e);
         }
     }
+
+
+    /**
+     * Creates and returns a stock object and its history for the given ticker symbol.
+     * @param tickerSymbol the stock ticker symbol.
+     * @return the Stock object associated with tickerSymbol.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @Override
+    public Stock createStockAndHistory(String tickerSymbol) throws IOException, InterruptedException {
+        StockService stockService = new StockService();
+        return stockService.createStockAndHistory(tickerSymbol);
+    }
 }
+
