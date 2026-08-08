@@ -4,6 +4,7 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.add_watchlist.AddWatchlistController;
 import interface_adapter.add_watchlist.AddWatchlistState;
 import interface_adapter.add_watchlist.AddWatchlistViewModel;
+import interface_adapter.delete_watchlist.DeleteWatchlistController;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.watchlist.WatchlistState;
 import interface_adapter.watchlist.WatchlistViewModel;
@@ -43,6 +44,7 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
     private final LoggedInViewModel loggedInViewModel;
     private final AddWatchlistViewModel addWatchlistViewModel;
     private final AddWatchlistController addWatchlistController;
+    private final DeleteWatchlistController deleteWatchlistController;
 
     private DefaultTableModel watchlistTableModel;
     private JPanel addFormCard;
@@ -62,12 +64,14 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
                          ViewManagerModel viewManagerModel,
                          LoggedInViewModel loggedInViewModel,
                          AddWatchlistViewModel addWatchlistViewModel,
-                         AddWatchlistController addWatchlistController) {
+                         AddWatchlistController addWatchlistController,
+                         DeleteWatchlistController deleteWatchlistController) {
         this.watchlistViewModel = watchlistViewModel;
         this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel = loggedInViewModel;
         this.addWatchlistViewModel = addWatchlistViewModel;
         this.addWatchlistController = addWatchlistController;
+        this.deleteWatchlistController = deleteWatchlistController;
 
         this.watchlistViewModel.addPropertyChangeListener(this);
         this.addWatchlistViewModel.addPropertyChangeListener(this);
@@ -326,7 +330,8 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
                 int col = watchlistTable.columnAtPoint(e.getPoint());
                 if (col == 4 && row >= 0) {
                     String ticker = (String) watchlistTable.getValueAt(row, 0);
-                    if (ticker != null && !ticker.isEmpty()) {
+                    if (ticker != null && !ticker.isEmpty() && deleteWatchlistController != null) {
+                        deleteWatchlistController.execute(ticker);
                     }
                 }
             }
