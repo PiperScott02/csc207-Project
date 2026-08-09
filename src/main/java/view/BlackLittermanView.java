@@ -182,7 +182,8 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             viewManagerModel.setState("news");
             viewManagerModel.firePropertyChanged();
         }));
-        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {}));
+        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {
+        }));
         navLinksPanel.add(createSidebarNavLink("Risk Preference", false, e -> {
             viewManagerModel.setState("risk preference");
             viewManagerModel.firePropertyChanged();
@@ -196,7 +197,8 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             viewManagerModel.firePropertyChanged();
         }));
         // Black-Litterman is active here
-        navLinksPanel.add(createSidebarNavLink("Black-Litterman", true, e -> {}));
+        navLinksPanel.add(createSidebarNavLink("Black-Litterman", true, e -> {
+        }));
 
         final JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(SIDEBAR_BG);
@@ -327,10 +329,12 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
                 viewManagerModel.setState("logged in");
                 viewManagerModel.firePropertyChanged();
             }
+
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 backLink.setForeground(TEXT_MAIN);
             }
+
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 backLink.setForeground(TEXT_MUTED);
@@ -441,7 +445,8 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
                     } else {
                         confidences.put(ticker, confidence);
                     }
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
     }
@@ -461,7 +466,8 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             if (dotIndex != -1 && dashIndex != -1 && dashIndex > dotIndex) {
                 return labelText.substring(dotIndex + 1, dashIndex).trim();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return null;
     }
 
@@ -480,7 +486,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // === MODIFIED: Added session state change listener branch to re-render UI dynamically ===
         if (evt.getSource() == blackLittermanViewModel) {
             BlackLittermanState state = (BlackLittermanState) evt.getNewValue();
             if (state != null) {
@@ -491,19 +496,28 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
                 updateStockRows(state);
             }
         } else if (evt.getPropertyName().equals("state") || evt.getPropertyName().equals("logged in")) {
+            // Re-render layout instantly without blocking
             removeAll();
             add(createSidebarPanel(), BorderLayout.WEST);
             add(createMainContentPanel(), BorderLayout.CENTER);
             revalidate();
             repaint();
 
-            // === ADDED: Automatically load market data when switching to this view ===
+            // Load market data asynchronously on a background thread so the UI never freezes
             if (blackLittermanController != null && loggedInViewModel.getState() != null
                     && loggedInViewModel.getState().getUser() != null) {
-                blackLittermanController.loadMarketData(loggedInViewModel.getState().getUser());
+                User user = loggedInViewModel.getState().getUser();
+
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() {
+                        blackLittermanController.loadMarketData(user);
+                        return null;
+                    }
+                }.execute();
             }
         }
-    }
+    } // <--- This closes propertyChange() properly
 
     private void updateStockRows(BlackLittermanState state) {
         List<String> topTickers = state.getTopTickers();

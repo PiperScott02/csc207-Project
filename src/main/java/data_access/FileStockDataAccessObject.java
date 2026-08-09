@@ -9,6 +9,8 @@ import use_case.stock.StockDataAccessInterface;
 
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -17,6 +19,8 @@ public class FileStockDataAccessObject implements
         BlackLittermanDataAccessInterface,
         StockDailyDataAccessInterface {
 
+    // === ADDED: Local cache to store fetched stocks and avoid redundant network calls ===
+    private final Map<String, Stock> stockCache = new HashMap<>();
 
     /**
      * Checks whether a stock with the ticker identifier exists in the APIs' data.
@@ -43,9 +47,17 @@ public class FileStockDataAccessObject implements
      */
     @Override
     public Stock get(String ticker) {
+        // === MODIFIED: Return from cache immediately if already downloaded ===
+        if (stockCache.containsKey(ticker)) {
+            return stockCache.get(ticker);
+        }
         try {
             StockService stockService = new StockService();
-            return stockService.createStockAndHistory(ticker);
+            Stock stock = stockService.createStockAndHistory(ticker);
+            if (stock != null) {
+                stockCache.put(ticker, stock); // Store in cache for next time
+            }
+            return stock;
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Failed to fetch stock data for: " + ticker, e);
         }
@@ -61,8 +73,7 @@ public class FileStockDataAccessObject implements
      */
     @Override
     public Stock createStockAndHistory(String tickerSymbol) throws IOException, InterruptedException {
-        StockService stockService = new StockService();
-        return stockService.createStockAndHistory(tickerSymbol);
+        return get(tickerSymbol); // Route through cache
     }
 }
 

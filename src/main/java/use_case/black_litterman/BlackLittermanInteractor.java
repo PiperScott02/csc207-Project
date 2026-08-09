@@ -34,15 +34,26 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
 
             List<StockHolding> holdings = user.getPortfolio().getHoldings();
 
-            // === ADDED: Hydrate each holding's stock with historical time series data using the DAO ===
+            // === SAFE HYDRATION & FILTERING ===
+            List<StockHolding> validHoldings = new ArrayList<>();
             for (StockHolding holding : holdings) {
                 if (holding.getStock() != null && holding.getStock().getTickerSymbol() != null) {
                     String ticker = holding.getStock().getTickerSymbol();
-                    Stock fullStock = blackLittermanDataAccessObject.get(ticker);
-                    if (fullStock != null) {
-                        holding.setStock(fullStock); // Replace with the fully populated stock containing history
+                    try {
+                        Stock fullStock = blackLittermanDataAccessObject.get(ticker);
+                        if (fullStock != null) {
+                            holding.setStock(fullStock);
+                            validHoldings.add(holding);
+                        }
+                    } catch (Exception ignored) {
+                        // Skip stocks that fail to fetch history instead of crashing
                     }
                 }
+            }
+
+            if (validHoldings.isEmpty()) {
+                blackLittermanPresenter.prepareFailView("Portfolio contains no stocks with valid historical data.");
+                return;
             }
 
             // 1. Compute market weight caps and determine top 5 heavily weighted stocks
