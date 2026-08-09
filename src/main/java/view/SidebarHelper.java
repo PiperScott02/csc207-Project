@@ -121,15 +121,28 @@ public class SidebarHelper {
         bottomPanel.setLayout(null);
         bottomPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        LoggedInState currentState = loggedInViewModel != null ? loggedInViewModel.getState() : null;
-        String username = (currentState != null && currentState.getUsername() != null && !currentState.getUsername().isBlank())
-                ? currentState.getUsername().toUpperCase()
-                : "USER";
-
-        final JLabel welcomeLabel = new JLabel("WELCOME, " + username);
+        // Helper method to fetch the current username dynamically
+        final JLabel welcomeLabel = new JLabel();
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
         welcomeLabel.setForeground(TEXT_MUTED);
         welcomeLabel.setBounds(20, 12, 180, 15);
+
+        // Update username text logic
+        Runnable updateUsernameText = () -> {
+            LoggedInState currentState = loggedInViewModel != null ? loggedInViewModel.getState() : null;
+            String username = (currentState != null && currentState.getUsername() != null && !currentState.getUsername().isBlank())
+                    ? currentState.getUsername().toUpperCase()
+                    : "USER";
+            welcomeLabel.setText("WELCOME, " + username);
+        };
+
+        // Initialize label text right away
+        updateUsernameText.run();
+
+        // Listen for future state changes so it updates automatically when logging in/switching users
+        if (loggedInViewModel != null) {
+            loggedInViewModel.addPropertyChangeListener(evt -> updateUsernameText.run());
+        }
 
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
         final JLabel dateLabel = new JLabel(currentDate);
