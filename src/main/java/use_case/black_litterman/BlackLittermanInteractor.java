@@ -45,8 +45,9 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
                             holding.setStock(fullStock);
                             validHoldings.add(holding);
                         }
-                    } catch (Exception ignored) {
-                        // Skip stocks that fail to fetch history instead of crashing
+                    } catch (Exception e) {
+                        System.err.println("FAILED to fetch historical data for ticker: " + ticker);
+                        e.printStackTrace();
                     }
                 }
             }

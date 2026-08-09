@@ -34,8 +34,6 @@ public class BlackLittermanPresenter implements BlackLittermanOutputBoundary {
         blackLittermanViewModel.setState(currentState);
         blackLittermanViewModel.firePropertyChanged();
 
-        viewManagerModel.setState(blackLittermanViewModel.getViewName());
-        viewManagerModel.firePropertyChanged();
     }
 
     @Override

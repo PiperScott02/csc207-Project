@@ -24,6 +24,7 @@ import javax.swing.table.DefaultTableModel;
 
 import entity.Stock;
 import entity.StockHolding;
+import entity.WatchlistStockItem;
 
 import interface_adapter.ViewManagerModel;
 import interface_adapter.black_litterman.BlackLittermanController;
@@ -444,11 +445,16 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         holdingsTable.setForeground(TEXT_MAIN);
         holdingsTable.setGridColor(BORDER_COLOR);
         holdingsTable.setRowHeight(28);
-        holdingsTable.getTableHeader().setVisible(false);
+        // Header is left visible so it matches the watchlist table
+
+        // === PUT HOLDINGS HEADER STYLING HERE ===
+        holdingsTable.getTableHeader().setBackground(CARD_BG);
+        holdingsTable.getTableHeader().setForeground(TEXT_MUTED);
+        holdingsTable.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_COLOR));
 
         final JScrollPane sp1 = new JScrollPane(holdingsTable);
         sp1.getViewport().setBackground(CARD_BG);
-        sp1.setBorder(null);
+        sp1.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1)); // Replaced null with faint grey border
 
         holdingsCard.add(hTitle, BorderLayout.NORTH);
         holdingsCard.add(sp1, BorderLayout.CENTER);
@@ -475,11 +481,15 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         watchTable.setForeground(TEXT_MAIN);
         watchTable.setGridColor(BORDER_COLOR);
         watchTable.setRowHeight(28);
-        watchTable.getTableHeader().setVisible(false);
+
+        // === PUT WATCHLIST HEADER STYLING HERE ===
+        watchTable.getTableHeader().setBackground(CARD_BG);
+        watchTable.getTableHeader().setForeground(TEXT_MUTED);
+        watchTable.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_COLOR));
 
         final JScrollPane sp2 = new JScrollPane(watchTable);
         sp2.getViewport().setBackground(CARD_BG);
-        sp2.setBorder(null);
+        sp2.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1)); // Replaced null with faint grey border
 
         watchlistCard.add(wTitle, BorderLayout.NORTH);
         watchlistCard.add(sp2, BorderLayout.CENTER);
@@ -614,6 +624,27 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
                 totalHoldingsValLabel.setText(String.valueOf(state.getHoldings().size()));
             }
         }
+
+        // === Populate Watchlist Preview Table ===
+        if (watchlistTableModel != null) {
+            watchlistTableModel.setRowCount(0);
+            if (state.getWatchlist() != null) {
+                for (entity.WatchlistStockItem item : state.getWatchlist()) {
+                    if (item != null) {
+                        BigDecimal price = item.closePrice() != null ? item.closePrice() : BigDecimal.ZERO;
+                        BigDecimal change = item.dailyPriceChange() != null ? item.dailyPriceChange() : BigDecimal.ZERO;
+
+                        watchlistTableModel.addRow(new Object[]{
+                                item.ticker(),
+                                item.companyName(),
+                                String.format("$%.2f", price.doubleValue()),
+                                String.format("%+.2f", change.doubleValue())
+                        });
+                    }
+                }
+            }
+        }
+
         updateLastUpdatedTime();
     }
     @Override
