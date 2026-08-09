@@ -1,17 +1,10 @@
 package view;
 
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JOptionPane;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.time.format.DateTimeFormatter;
@@ -100,16 +93,136 @@ public class RiskPreferenceView extends JPanel
             }
         });
 
-        // 3. Configure main panel layout and background
-        setLayout(new BorderLayout(15, 15));
-        setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+        // 3. Configure main panel layout and background with sidebar
         setBackground(BG_DARK);
+        setLayout(new BorderLayout());
 
-        // 4. Assemble UI sections
-        add(createHeaderPanel(), BorderLayout.NORTH);
-        add(createFormPanel(), BorderLayout.CENTER);
-        add(createBottomPanel(), BorderLayout.SOUTH);
+        add(createSidebarPanel(), BorderLayout.WEST);
+        add(createMainContentArea(), BorderLayout.CENTER);
     }
+
+    /**
+     * Creates the sidebar navigation panel.
+     *
+     * @return the sidebar panel
+     */
+    private JPanel createSidebarPanel() {
+        final JPanel sidebarPanel = new JPanel();
+        sidebarPanel.setBackground(SIDEBAR_BG);
+        sidebarPanel.setPreferredSize(new Dimension(240, 0));
+        sidebarPanel.setLayout(new BorderLayout());
+        sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
+
+        final JPanel brandPanel = new JPanel();
+        brandPanel.setBackground(SIDEBAR_BG);
+        brandPanel.setPreferredSize(new Dimension(240, 70));
+        brandPanel.setLayout(null);
+
+        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
+        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
+        logoBadge.setForeground(TEXT_MAIN);
+        logoBadge.setBackground(ACCENT_GREEN);
+        logoBadge.setOpaque(true);
+        logoBadge.setBounds(20, 20, 28, 28);
+
+        final JLabel brandLabel = new JLabel("PortfolioPilot");
+        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
+        brandLabel.setForeground(TEXT_MAIN);
+        brandLabel.setBounds(58, 20, 150, 28);
+
+        brandPanel.add(logoBadge);
+        brandPanel.add(brandLabel);
+
+        final JPanel navLinksPanel = new JPanel();
+        navLinksPanel.setBackground(SIDEBAR_BG);
+        navLinksPanel.setLayout(new GridLayout(10, 1, 0, 2));
+        navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        navLinksPanel.add(createSidebarNavLink("Overview", false, e -> {
+            viewManagerModel.setState("logged in");
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Holdings", false, e -> {
+            viewManagerModel.setState("holdings");
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Watchlist", false, e -> {
+            viewManagerModel.setState("watchlist");
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, e -> {
+            viewManagerModel.setState("news");
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {}));
+        navLinksPanel.add(createSidebarNavLink("Risk Preference", true, e -> {}));
+        navLinksPanel.add(createSidebarNavLink("Currency", false, e -> {
+            viewManagerModel.setState("currency conversion");
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Search Stocks", false, e -> {
+            viewManagerModel.setState("search");
+            viewManagerModel.firePropertyChanged();
+        }));
+        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, e -> {}));
+
+        final JPanel bottomPanel = new JPanel();
+        bottomPanel.setBackground(SIDEBAR_BG);
+        bottomPanel.setPreferredSize(new Dimension(240, 60));
+        bottomPanel.setLayout(null);
+        bottomPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
+
+        final JLabel welcomeLabel = new JLabel("WELCOME, HANA");
+        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
+        welcomeLabel.setForeground(TEXT_MUTED);
+        welcomeLabel.setBounds(20, 12, 180, 15);
+
+        final JLabel dateLabel = new JLabel("Aug 7, 2026");
+        dateLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        dateLabel.setForeground(TEXT_MUTED);
+        dateLabel.setBounds(20, 30, 180, 15);
+
+        bottomPanel.add(welcomeLabel);
+        bottomPanel.add(dateLabel);
+
+        sidebarPanel.add(brandPanel, BorderLayout.NORTH);
+        sidebarPanel.add(navLinksPanel, BorderLayout.CENTER);
+        sidebarPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        return sidebarPanel;
+    }
+
+    /**
+     * Helper to create sidebar navigation buttons.
+     */
+    private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
+        final JButton button = new JButton(text);
+        button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
+        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
+        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        button.addActionListener(action);
+        return button;
+    }
+
+    /**
+     * Creates the central container holding header, form, and bottom panels.
+     */
+    private JPanel createMainContentArea() {
+        final JPanel mainContent = new JPanel(new BorderLayout(15, 15));
+        mainContent.setBackground(BG_DARK);
+        mainContent.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+
+        mainContent.add(createHeaderPanel(), BorderLayout.NORTH);
+        mainContent.add(createFormPanel(), BorderLayout.CENTER);
+        mainContent.add(createBottomPanel(), BorderLayout.SOUTH);
+
+        return mainContent;
+    }
+
 
     /**
      * Creates the title section.
