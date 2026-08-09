@@ -61,277 +61,283 @@ public final class PortfolioPilotMain {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
-        final JFrame application =
-                new JFrame("PortfolioPilot");
+        System.out.println("[DEBUG] 1. Application main started.");
 
-        application.setDefaultCloseOperation(
-                WindowConstants.EXIT_ON_CLOSE
-        );
-
-        final CardLayout cardLayout = new CardLayout();
-        final JPanel views = new JPanel(cardLayout);
-
-        application.add(views);
-
-        final ViewManagerModel viewManagerModel =
-                new ViewManagerModel();
-
-        new ViewManager(
-                views,
-                cardLayout,
-                viewManagerModel
-        );
-
-        // ==========================================
-        // 1. View Models
-        // ==========================================
-        final LoginViewModel loginViewModel = new LoginViewModel();
-        final SignupViewModel signupViewModel = new SignupViewModel();
-        final LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
-        final NewsViewModel newsViewModel = new NewsViewModel();
-        final SimilarSearchViewModel similarSearchViewModel = new SimilarSearchViewModel();
-        final TickerSearchViewModel tickerSearchViewModel = new TickerSearchViewModel();
-        final StockViewModel stockViewModel = new StockViewModel();
-        final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
-        final RiskPreferenceViewModel riskPreferenceViewModel = new RiskPreferenceViewModel();
-        final WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
-        final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel();
-        final AddHoldingViewModel addHoldingViewModel = new AddHoldingViewModel();
-        final AddWatchlistViewModel addWatchlistViewModel = new AddWatchlistViewModel();
-        final CurrencyConversionViewModel currencyConversionViewModel =
-                new CurrencyConversionViewModel();
-
-        /*
-         * Alpha Vantage API key
-         */
-        final String apiKey = "API_KEY_PLACEHOLDER";
-
-        // ==========================================
-        // 2. Data Access Objects
-        // ==========================================
-        final FileUserDataAccessObject userDataAccessObject;
-
+        // Wrap everything in a try-catch to catch initialization crashes
         try {
-            userDataAccessObject =
-                    new FileUserDataAccessObject(
-                            "data/users.csv",
-                            new CommonUserFactory()
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                try {
+                    System.out.println("[DEBUG] 2. Inside Event Dispatch Thread (EDT). Creating JFrame...");
+                    final JFrame application = new JFrame("PortfolioPilot");
+
+                    application.setDefaultCloseOperation(
+                            WindowConstants.EXIT_ON_CLOSE
                     );
+
+                    final CardLayout cardLayout = new CardLayout();
+                    final JPanel views = new JPanel(cardLayout);
+
+                    application.add(views);
+
+                    System.out.println("[DEBUG] 3. Initializing ViewManagerModel...");
+                    final ViewManagerModel viewManagerModel =
+                            new ViewManagerModel();
+
+                    new ViewManager(
+                            views,
+                            cardLayout,
+                            viewManagerModel
+                    );
+
+                    // ==========================================
+                    // 1. View Models
+                    // ==========================================
+                    System.out.println("[DEBUG] 4. Instantiating View Models...");
+                    final LoginViewModel loginViewModel = new LoginViewModel();
+                    final SignupViewModel signupViewModel = new SignupViewModel();
+                    final LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
+                    final NewsViewModel newsViewModel = new NewsViewModel();
+                    final SimilarSearchViewModel similarSearchViewModel = new SimilarSearchViewModel();
+                    final TickerSearchViewModel tickerSearchViewModel = new TickerSearchViewModel();
+                    final StockViewModel stockViewModel = new StockViewModel();
+                    final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
+                    final RiskPreferenceViewModel riskPreferenceViewModel = new RiskPreferenceViewModel();
+                    final WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
+                    final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel();
+                    final AddHoldingViewModel addHoldingViewModel = new AddHoldingViewModel();
+                    final AddWatchlistViewModel addWatchlistViewModel = new AddWatchlistViewModel();
+                    final CurrencyConversionViewModel currencyConversionViewModel =
+                            new CurrencyConversionViewModel();
+
+                    final String apiKey = "API_KEY_PLACEHOLDER";
+
+                    // ==========================================
+                    // 2. Data Access Objects
+                    // ==========================================
+                    System.out.println("[DEBUG] 5. Instantiating DAOs...");
+                    final FileUserDataAccessObject userDataAccessObject;
+
+                    try {
+                        userDataAccessObject =
+                                new FileUserDataAccessObject(
+                                        "data/users.csv",
+                                        new CommonUserFactory()
+                                );
+                    } catch (IOException exception) {
+                        throw new RuntimeException(
+                                "Unable to initialize user storage.",
+                                exception
+                        );
+                    }
+
+                    final StockDailyDataAccessInterface stockDailyDataAccessObject =
+                            new StockService(apiKey);
+
+                    final SimilarSearchDataAccessInterface similarSearchDataAccessObject =
+                            new SimilarSearchDataAccessObject(apiKey);
+
+                    final TickerSearchDataAccessInterface tickerSearchDataAccessObject =
+                            new TickerSearchDataAccessObject(apiKey);
+
+                    final StockDataAccessInterface stockDataAccessObject =
+                            new FileStockDataAccessObject();
+
+                    final NewsDataAccessInterface newsDataAccessObject =
+                            new AlphaVantageNewsDataAccessObject(apiKey);
+
+                    // ==========================================
+                    // 3. Controllers
+                    // ==========================================
+                    System.out.println("[DEBUG] 6. Creating Controllers...");
+                    final StockController stockController =
+                            StockUseCaseFactory.createStockUseCase(
+                                    viewManagerModel,
+                                    stockViewModel,
+                                    stockDataAccessObject
+                            );
+
+                    final PortfolioHealthController portfolioHealthController =
+                            PortfolioHealthUseCaseFactory.createPortfolioHealthUseCase(
+                                    viewManagerModel,
+                                    portfolioHealthViewModel,
+                                    stockDataAccessObject,
+                                    newsDataAccessObject
+                            );
+
+                    final WatchlistController watchlistController =
+                            WatchlistUseCaseFactory.createWatchlistUseCase(
+                                    viewManagerModel,
+                                    watchlistViewModel,
+                                    stockDataAccessObject
+                            );
+
+                    final BlackLittermanDataAccessInterface blackLittermanDataAccessObject =
+                            (BlackLittermanDataAccessInterface) stockDataAccessObject;
+                    final BlackLittermanService blackLittermanService = new BlackLittermanService();
+
+                    final BlackLittermanController blackLittermanController =
+                            BlackLittermanUseCaseFactory.createBlackLittermanUseCase(
+                                    viewManagerModel,
+                                    blackLittermanViewModel,
+                                    blackLittermanDataAccessObject,
+                                    blackLittermanService
+                            );
+
+                    final CurrencyConversionController currencyConversionController =
+                            CurrencyConversionUseCaseFactory.create(
+                                    currencyConversionViewModel
+                            );
+
+                    // ==========================================
+                    // 4. View Creation & Assembly
+                    // ==========================================
+                    System.out.println("[DEBUG] 7. Assembling Views...");
+
+                    final SignupView signupView =
+                            SignupUseCaseFactory.create(
+                                    viewManagerModel,
+                                    loginViewModel,
+                                    signupViewModel,
+                                    userDataAccessObject
+                            );
+                    views.add(signupView, signupView.getViewName());
+
+                    final LoginView loginView =
+                            LoginUseCaseFactory.create(
+                                    viewManagerModel,
+                                    loginViewModel,
+                                    loggedInViewModel,
+                                    userDataAccessObject
+                            );
+                    views.add(loginView, loginView.getViewName());
+
+                    final LoggedInView loggedInView =
+                            new LoggedInView(
+                                    loggedInViewModel,
+                                    viewManagerModel,
+                                    portfolioHealthController,
+                                    blackLittermanController
+                            );
+                    views.add(loggedInView, loggedInView.getViewName());
+
+                    final PortfolioHealthView portfolioHealthView =
+                            PortfolioHealthUseCaseFactory.create(
+                                    viewManagerModel,
+                                    portfolioHealthViewModel,
+                                    loggedInViewModel
+                            );
+                    views.add(portfolioHealthView, portfolioHealthView.viewName);
+
+                    final NewsView newsView =
+                            NewsUseCaseFactory.create(
+                                    newsViewModel,
+                                    viewManagerModel,
+                                    apiKey
+                            );
+                    views.add(newsView, newsView.getViewName());
+
+                    final SearchView searchView =
+                            SearchUseCaseFactory.create(
+                                    viewManagerModel,
+                                    similarSearchViewModel,
+                                    tickerSearchViewModel,
+                                    stockViewModel,
+                                    tickerSearchDataAccessObject,
+                                    similarSearchDataAccessObject,
+                                    stockController,
+                                    loggedInViewModel
+                            );
+                    views.add(searchView, searchView.getViewName());
+
+                    final StockView stockView =
+                            StockUseCaseFactory.create(
+                                    viewManagerModel,
+                                    stockViewModel,
+                                    loggedInViewModel,
+                                    stockDataAccessObject
+                            );
+                    views.add(stockView, stockView.getViewName());
+
+                    final RiskPreferenceView riskPreferenceView =
+                            RiskPreferenceUseCaseFactory.create(
+                                    viewManagerModel,
+                                    riskPreferenceViewModel,
+                                    userDataAccessObject
+                            );
+                    views.add(riskPreferenceView, riskPreferenceView.getViewName());
+
+                    final WatchlistView watchlistView =
+                            WatchlistUseCaseFactory.create(
+                                    viewManagerModel,
+                                    watchlistViewModel,
+                                    loggedInViewModel,
+                                    stockDataAccessObject
+                            );
+                    views.add(watchlistView, watchlistView.getViewName());
+
+                    final BlackLittermanView blackLittermanView =
+                            BlackLittermanUseCaseFactory.create(
+                                    viewManagerModel,
+                                    blackLittermanViewModel,
+                                    blackLittermanDataAccessObject,
+                                    blackLittermanService
+                            );
+                    views.add(blackLittermanView, blackLittermanView.getViewName());
+
+                    final AddHoldingView addHoldingView =
+                            AddHoldingUseCaseFactory.create(
+                                    viewManagerModel,
+                                    addHoldingViewModel,
+                                    loggedInViewModel,
+                                    stockDailyDataAccessObject
+                            );
+                    views.add(addHoldingView, addHoldingView.getViewName());
+
+                    final AddWatchlistView addWatchlistView =
+                            AddWatchlistUseCaseFactory.create(
+                                    viewManagerModel,
+                                    addWatchlistViewModel,
+                                    watchlistViewModel,
+                                    loggedInViewModel,
+                                    stockDailyDataAccessObject
+                            );
+                    views.add(addWatchlistView, addWatchlistView.viewName);
+
+                    final CurrencyConversionView currencyConversionView =
+                            new CurrencyConversionView(
+                                    viewManagerModel,
+                                    currencyConversionController,
+                                    currencyConversionViewModel,
+                                    loggedInViewModel
+                            );
+                    views.add(
+                            currencyConversionView,
+                            currencyConversionView.getViewName()
+                    );
+
+                    // ==========================================
+                    // 14. Startup Configuration
+                    // ==========================================
+                    System.out.println("[DEBUG] 8. Setting initial view state and packing window...");
+                    viewManagerModel.setState(signupView.getViewName());
+                    viewManagerModel.firePropertyChanged();
+
+                    application.pack();
+                    application.setSize(1250, 750);
+                    application.setLocationRelativeTo(null);
+
+                    System.out.println("[DEBUG] 9. Setting application visible = true...");
+                    application.setVisible(true);
+                    System.out.println("[DEBUG] 10. Frame successfully initialized and rendered.");
+
+                } catch (Throwable t) {
+                    System.err.println("[ERROR] Exception caught inside Swing EDT:");
+                    t.printStackTrace();
+                }
+            });
+        } catch (Throwable t) {
+            System.err.println("[ERROR] Exception caught in main thread:");
+            t.printStackTrace();
         }
-        catch (IOException exception) {
-            throw new RuntimeException(
-                    "Unable to initialize user storage.",
-                    exception
-            );
-        }
-
-        final StockDailyDataAccessInterface stockDailyDataAccessObject =
-                new StockService(apiKey);
-
-        final SimilarSearchDataAccessInterface similarSearchDataAccessObject =
-                new SimilarSearchDataAccessObject(apiKey);
-
-        final TickerSearchDataAccessInterface tickerSearchDataAccessObject =
-                new TickerSearchDataAccessObject(apiKey);
-
-        final StockDataAccessInterface stockDataAccessObject =
-                new FileStockDataAccessObject();
-
-        final NewsDataAccessInterface newsDataAccessObject =
-                new AlphaVantageNewsDataAccessObject(apiKey);
-
-        // ==========================================
-        // 3. Controllers
-        // ==========================================
-        final StockController stockController =
-                StockUseCaseFactory.createStockUseCase(
-                        viewManagerModel,
-                        stockViewModel,
-                        stockDataAccessObject
-                );
-
-        final PortfolioHealthController portfolioHealthController =
-                PortfolioHealthUseCaseFactory.createPortfolioHealthUseCase(
-                        viewManagerModel,
-                        portfolioHealthViewModel,
-                        stockDataAccessObject,
-                        newsDataAccessObject
-                );
-
-        final WatchlistController watchlistController =
-                WatchlistUseCaseFactory.createWatchlistUseCase(
-                        viewManagerModel,
-                        watchlistViewModel,
-                        stockDataAccessObject
-                );
-
-        // Instantiate dependencies for Black-Litterman
-        final BlackLittermanDataAccessInterface blackLittermanDataAccessObject =
-                (BlackLittermanDataAccessInterface) stockDataAccessObject;
-        final BlackLittermanService blackLittermanService = new BlackLittermanService();
-
-        // Black-Litterman Controller Creation with correct parameters
-        final BlackLittermanController blackLittermanController =
-                BlackLittermanUseCaseFactory.createBlackLittermanUseCase(
-                        viewManagerModel,
-                        blackLittermanViewModel,
-                        blackLittermanDataAccessObject,
-                        blackLittermanService
-                );
-
-        final CurrencyConversionController currencyConversionController =
-                CurrencyConversionUseCaseFactory.create(
-                        currencyConversionViewModel
-                );
-
-        // ==========================================
-        // 4. View Creation & Assembly
-        // ==========================================
-
-        // 1. Signup View
-        final SignupView signupView =
-                SignupUseCaseFactory.create(
-                        viewManagerModel,
-                        loginViewModel,
-                        signupViewModel,
-                        userDataAccessObject
-                );
-        views.add(signupView, signupView.getViewName());
-
-        // 2. Login View
-        final LoginView loginView =
-                LoginUseCaseFactory.create(
-                        viewManagerModel,
-                        loginViewModel,
-                        loggedInViewModel,
-                        userDataAccessObject
-                );
-        views.add(loginView, loginView.getViewName());
-
-        // 3. Logged In View
-        final LoggedInView loggedInView =
-                new LoggedInView(
-                        loggedInViewModel,
-                        viewManagerModel,
-                        portfolioHealthController,
-                        blackLittermanController
-                );
-        views.add(loggedInView, loggedInView.getViewName());
-
-        // 4. Portfolio Health View
-        final PortfolioHealthView portfolioHealthView =
-                PortfolioHealthUseCaseFactory.create(
-                        viewManagerModel,
-                        portfolioHealthViewModel,
-                        loggedInViewModel
-                );
-        views.add(portfolioHealthView, portfolioHealthView.viewName);
-
-        // 5. News View
-        final NewsView newsView =
-                NewsUseCaseFactory.create(
-                        newsViewModel,
-                        viewManagerModel,
-                        apiKey
-                );
-        views.add(newsView, newsView.getViewName());
-
-        // 6. Search View
-        final SearchView searchView =
-                SearchUseCaseFactory.create(
-                        viewManagerModel,
-                        similarSearchViewModel,
-                        tickerSearchViewModel,
-                        stockViewModel,
-                        tickerSearchDataAccessObject,
-                        similarSearchDataAccessObject,
-                        stockController,
-                        loggedInViewModel
-                );
-        views.add(searchView, searchView.getViewName());
-
-        // 7. Stock View
-        final StockView stockView =
-                StockUseCaseFactory.create(
-                        viewManagerModel,
-                        stockViewModel,
-                        loggedInViewModel,
-                        stockDataAccessObject
-                );
-        views.add(stockView, stockView.getViewName());
-
-        // 8. Risk Preference View
-        final RiskPreferenceView riskPreferenceView =
-                RiskPreferenceUseCaseFactory.create(
-                        viewManagerModel,
-                        riskPreferenceViewModel,
-                        userDataAccessObject
-                );
-        views.add(riskPreferenceView, riskPreferenceView.getViewName());
-
-        // 9. Watchlist View
-        final WatchlistView watchlistView =
-                WatchlistUseCaseFactory.create(
-                        viewManagerModel,
-                        watchlistViewModel,
-                        loggedInViewModel,
-                        stockDataAccessObject
-                );
-        views.add(watchlistView, watchlistView.getViewName());
-
-        // 10. Black-Litterman View
-        final BlackLittermanView blackLittermanView =
-                BlackLittermanUseCaseFactory.create(
-                        viewManagerModel,
-                        blackLittermanViewModel,
-                        blackLittermanDataAccessObject,
-                        blackLittermanService
-                );
-        views.add(blackLittermanView, blackLittermanView.getViewName());
-
-        // 11. Add Holding View
-        final AddHoldingView addHoldingView =
-                AddHoldingUseCaseFactory.create(
-                        viewManagerModel,
-                        addHoldingViewModel,
-                        loggedInViewModel,
-                        stockDailyDataAccessObject
-                );
-        views.add(addHoldingView, addHoldingView.getViewName());
-
-        // 12. Add Watchlist View
-        final AddWatchlistView addWatchlistView =
-                AddWatchlistUseCaseFactory.create(
-                        viewManagerModel,
-                        addWatchlistViewModel,
-                        watchlistViewModel,
-                        loggedInViewModel,
-                        stockDailyDataAccessObject
-                );
-        views.add(addWatchlistView, addWatchlistView.viewName);
-
-        // 13. Currency Conversion View
-        final CurrencyConversionView currencyConversionView =
-                new CurrencyConversionView(
-                        viewManagerModel,
-                        currencyConversionController,
-                        currencyConversionViewModel,
-                        loggedInViewModel
-                );
-        views.add(
-                currencyConversionView,
-                currencyConversionView.getViewName()
-        );
-
-        // ==========================================
-        // 14. Startup Configuration
-        // ==========================================
-        viewManagerModel.setState(signupView.getViewName());
-        viewManagerModel.firePropertyChanged();
-
-        application.pack();
-        application.setSize(1250, 750);
-        application.setLocationRelativeTo(null);
-        application.setVisible(true);
     }
 }

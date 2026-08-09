@@ -97,10 +97,6 @@ public class Stock {
         this.industry = industry;
     }
 
-    public BigDecimal getDailyPriceChange() {
-        return dailyChange;
-    }
-
     public void setDailyChange(BigDecimal dailyChange) {
         this.dailyChange = dailyChange;
     }
