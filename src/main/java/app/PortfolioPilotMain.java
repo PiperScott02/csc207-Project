@@ -246,6 +246,9 @@ public final class PortfolioPilotMain {
                 NewsUseCaseFactory.create(
                         newsViewModel,
                         viewManagerModel,
+                        loggedInViewModel,
+                        blackLittermanController,
+                        portfolioHealthController,
                         apiKey
                 );
         views.add(newsView, newsView.getViewName());
@@ -260,7 +263,9 @@ public final class PortfolioPilotMain {
                         tickerSearchDataAccessObject,
                         similarSearchDataAccessObject,
                         stockController,
-                        loggedInViewModel
+                        loggedInViewModel,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(searchView, searchView.getViewName());
 
@@ -279,7 +284,10 @@ public final class PortfolioPilotMain {
                 RiskPreferenceUseCaseFactory.create(
                         viewManagerModel,
                         riskPreferenceViewModel,
-                        userDataAccessObject
+                        userDataAccessObject,
+                        loggedInViewModel,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(riskPreferenceView, riskPreferenceView.getViewName());
 
@@ -289,8 +297,11 @@ public final class PortfolioPilotMain {
                         viewManagerModel,
                         watchlistViewModel,
                         loggedInViewModel,
+                        addWatchlistViewModel,
                         stockDataAccessObject,
-                        userDataAccessObject
+                        userDataAccessObject,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(watchlistView, watchlistView.getViewName());
 
@@ -316,41 +327,33 @@ public final class PortfolioPilotMain {
                 );
         views.add(addHoldingView, addHoldingView.getViewName());
 
-        // 12. Add Watchlist View
-        final AddWatchlistView addWatchlistView =
-                AddWatchlistUseCaseFactory.create(
-                        viewManagerModel,
-                        addWatchlistViewModel,
-                        watchlistViewModel,
-                        loggedInViewModel,
-                        stockDailyDataAccessObject,
-                        userDataAccessObject
-                );
-        views.add(addWatchlistView, addWatchlistView.viewName);
-
-        // 13. Currency Conversion View
+        // 12. Currency Conversion View
         final CurrencyConversionView currencyConversionView =
                 new CurrencyConversionView(
                         viewManagerModel,
                         currencyConversionController,
                         currencyConversionViewModel,
-                        loggedInViewModel
+                        loggedInViewModel,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(
                 currencyConversionView,
                 currencyConversionView.getViewName()
         );
 
-        // 14. Holdings View
+        // 13. Holdings View
         final HoldingsView holdingsView = new HoldingsView(
                 viewManagerModel,
                 loggedInViewModel,
-                deleteHoldingController
+                deleteHoldingController,
+                portfolioHealthController,
+                blackLittermanController
         );
         views.add(holdingsView, holdingsView.getViewName());
 
         // ==========================================
-        // 15. Startup Configuration
+        // 14. Startup Configuration
         // ==========================================
         viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChanged();

@@ -10,6 +10,9 @@ import java.beans.PropertyChangeListener;
 import java.time.format.DateTimeFormatter;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.black_litterman.BlackLittermanController;
+import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.risk_preference.RiskPreferenceController;
 import interface_adapter.risk_preference.RiskPreferenceViewModel;
 import interface_adapter.risk_preference.RiskPreferenceState;
@@ -27,16 +30,17 @@ public class RiskPreferenceView extends JPanel
     private final ViewManagerModel viewManagerModel;
     private final RiskPreferenceController controller;
     private final RiskPreferenceViewModel viewModel;
+    private final LoggedInViewModel loggedInViewModel;
+    private final BlackLittermanController blackLittermanController;
+    private final PortfolioHealthController portfolioHealthController;
 
     // Dark UI Color Palette
     private static final Color BG_DARK = new Color(11, 15, 25);
-    private static final Color SIDEBAR_BG = new Color(7, 10, 17);
     private static final Color CARD_BG = new Color(17, 24, 39);
     private static final Color BORDER_COLOR = new Color(31, 41, 55);
     private static final Color TEXT_MAIN = new Color(243, 244, 246);
     private static final Color TEXT_MUTED = new Color(156, 163, 175);
     private static final Color ACCENT_GREEN = new Color(16, 185, 129);
-    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
 
     // Layout Dimension Constants
     private static final int PANEL_PREFERRED_WIDTH = 750;
@@ -72,15 +76,24 @@ public class RiskPreferenceView extends JPanel
      * @param viewManagerModel controls which application screen is visible
      * @param controller handles risk-preference actions
      * @param viewModel stores the risk-preference screen state
+     * @param loggedInViewModel contains information about the logged-in user
+     * @param blackLittermanController triggers Black-Litterman workflow
+     * @param portfolioHealthController triggers calculation of portfolio health
      */
     public RiskPreferenceView(
             ViewManagerModel viewManagerModel,
             RiskPreferenceController controller,
-            RiskPreferenceViewModel viewModel) {
+            RiskPreferenceViewModel viewModel,
+            LoggedInViewModel loggedInViewModel,
+            BlackLittermanController blackLittermanController,
+            PortfolioHealthController portfolioHealthController) {
 
         this.viewManagerModel = viewManagerModel;
         this.controller = controller;
         this.viewModel = viewModel;
+        this.loggedInViewModel = loggedInViewModel;
+        this.blackLittermanController = blackLittermanController;
+        this.portfolioHealthController = portfolioHealthController;
 
         // 1. Register listener for view model updates
         viewModel.addPropertyChangeListener(this);
@@ -93,119 +106,17 @@ public class RiskPreferenceView extends JPanel
             }
         });
 
-        // 3. Configure main panel layout and background with sidebar
+        // 3. Configure main panel layout and background with sidebar helper
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
-        add(createSidebarPanel(), BorderLayout.WEST);
+        add(SidebarHelper.createSidebar("Risk Preference",
+                this,
+                viewManagerModel,
+                loggedInViewModel,
+                blackLittermanController,
+                portfolioHealthController), BorderLayout.WEST);
         add(createMainContentArea(), BorderLayout.CENTER);
-    }
-
-    /**
-     * Creates the sidebar navigation panel.
-     *
-     * @return the sidebar panel
-     */
-    private JPanel createSidebarPanel() {
-        final JPanel sidebarPanel = new JPanel();
-        sidebarPanel.setBackground(SIDEBAR_BG);
-        sidebarPanel.setPreferredSize(new Dimension(240, 0));
-        sidebarPanel.setLayout(new BorderLayout());
-        sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
-
-        final JPanel brandPanel = new JPanel();
-        brandPanel.setBackground(SIDEBAR_BG);
-        brandPanel.setPreferredSize(new Dimension(240, 70));
-        brandPanel.setLayout(null);
-
-        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
-        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
-        logoBadge.setForeground(TEXT_MAIN);
-        logoBadge.setBackground(ACCENT_GREEN);
-        logoBadge.setOpaque(true);
-        logoBadge.setBounds(20, 20, 28, 28);
-
-        final JLabel brandLabel = new JLabel("PortfolioPilot");
-        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-        brandLabel.setForeground(TEXT_MAIN);
-        brandLabel.setBounds(58, 20, 150, 28);
-
-        brandPanel.add(logoBadge);
-        brandPanel.add(brandLabel);
-
-        final JPanel navLinksPanel = new JPanel();
-        navLinksPanel.setBackground(SIDEBAR_BG);
-        navLinksPanel.setLayout(new GridLayout(10, 1, 0, 2));
-        navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        navLinksPanel.add(createSidebarNavLink("Overview", false, e -> {
-            viewManagerModel.setState("logged in");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Holdings", false, e -> {
-            viewManagerModel.setState("holdings");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Watchlist", false, e -> {
-            viewManagerModel.setState("watchlist");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, e -> {
-            viewManagerModel.setState("news");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {}));
-        navLinksPanel.add(createSidebarNavLink("Risk Preference", true, e -> {}));
-        navLinksPanel.add(createSidebarNavLink("Currency", false, e -> {
-            viewManagerModel.setState("currency conversion");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Search Stocks", false, e -> {
-            viewManagerModel.setState("search");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, e -> {}));
-
-        final JPanel bottomPanel = new JPanel();
-        bottomPanel.setBackground(SIDEBAR_BG);
-        bottomPanel.setPreferredSize(new Dimension(240, 60));
-        bottomPanel.setLayout(null);
-        bottomPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
-
-        final JLabel welcomeLabel = new JLabel("WELCOME, HANA");
-        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
-        welcomeLabel.setForeground(TEXT_MUTED);
-        welcomeLabel.setBounds(20, 12, 180, 15);
-
-        final JLabel dateLabel = new JLabel("Aug 7, 2026");
-        dateLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
-        dateLabel.setForeground(TEXT_MUTED);
-        dateLabel.setBounds(20, 30, 180, 15);
-
-        bottomPanel.add(welcomeLabel);
-        bottomPanel.add(dateLabel);
-
-        sidebarPanel.add(brandPanel, BorderLayout.NORTH);
-        sidebarPanel.add(navLinksPanel, BorderLayout.CENTER);
-        sidebarPanel.add(bottomPanel, BorderLayout.SOUTH);
-
-        return sidebarPanel;
-    }
-
-    /**
-     * Helper to create sidebar navigation buttons.
-     */
-    private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
-        final JButton button = new JButton(text);
-        button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
-        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
-        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
-        button.addActionListener(action);
-        return button;
     }
 
     /**
@@ -222,7 +133,6 @@ public class RiskPreferenceView extends JPanel
 
         return mainContent;
     }
-
 
     /**
      * Creates the title section.

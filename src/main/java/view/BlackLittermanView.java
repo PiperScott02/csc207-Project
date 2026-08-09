@@ -8,14 +8,10 @@ import interface_adapter.black_litterman.BlackLittermanViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -68,7 +64,7 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
     private final JComboBox<String> stock5ConfidenceBox = new JComboBox<>(new String[]{"None", "Low", "Medium", "High", "Very High"});
 
     private final JButton inputViews = new JButton("Input views");
-    private final JButton backButton = new JButton("← Back to Profile"); // <-- Added Back Button
+    private final JButton backButton = new JButton("← Back to Profile");
 
     public BlackLittermanView(ViewManagerModel viewManagerModel,
                               BlackLittermanViewModel blackLittermanViewModel,
@@ -79,19 +75,14 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         this.blackLittermanController = blackLittermanController;
         this.blackLittermanViewModel.addPropertyChangeListener(this);
         this.loggedInViewModel = loggedInViewModel;
-
-        this.blackLittermanViewModel.addPropertyChangeListener(this);
-        // === ADDED: Listen to loggedInViewModel changes for dynamic session updates ===
         this.loggedInViewModel.addPropertyChangeListener(this);
 
-        // === MODIFIED: Set dark theme layout structure using BorderLayout for Sidebar + Main Content ===
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
         add(createSidebarPanel(), BorderLayout.WEST);
         add(createMainContentPanel(), BorderLayout.CENTER);
 
-        // Update display if state already contains populated data upon view creation
         if (blackLittermanViewModel.getState() != null) {
             updateStockRows(blackLittermanViewModel.getState());
         }
@@ -126,14 +117,12 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             }
         });
 
-        // Back button behavior utilizing ViewManagerModel cleanly
         backButton.addActionListener(e -> {
-            viewManagerModel.setState("logged in"); // Matches LoggedInView's view name
+            viewManagerModel.setState("logged in");
             viewManagerModel.firePropertyChanged();
         });
     }
 
-    // === ADDED: Sidebar navigation panel creation method matching other views ===
     private JPanel createSidebarPanel() {
         final JPanel sidebarPanel = new JPanel();
         sidebarPanel.setBackground(SIDEBAR_BG);
@@ -183,6 +172,8 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             viewManagerModel.firePropertyChanged();
         }));
         navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {
+            viewManagerModel.setState("portfolio health");
+            viewManagerModel.firePropertyChanged();
         }));
         navLinksPanel.add(createSidebarNavLink("Risk Preference", false, e -> {
             viewManagerModel.setState("risk preference");
@@ -196,7 +187,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             viewManagerModel.setState("search");
             viewManagerModel.firePropertyChanged();
         }));
-        // Black-Litterman is active here
         navLinksPanel.add(createSidebarNavLink("Black-Litterman", true, e -> {
         }));
 
@@ -206,7 +196,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         bottomPanel.setLayout(null);
         bottomPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        // === ADDED: Dynamic username loading from session state instead of hardcoding ===
         String username = loggedInViewModel.getState() != null && loggedInViewModel.getState().getUsername() != null
                 ? loggedInViewModel.getState().getUsername().toUpperCase()
                 : "USER";
@@ -216,7 +205,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         welcomeLabel.setForeground(TEXT_MUTED);
         welcomeLabel.setBounds(20, 12, 180, 15);
 
-        // === ADDED: Dynamic live system date formatting ===
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
         final JLabel dateLabel = new JLabel(currentDate);
         dateLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -233,7 +221,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         return sidebarPanel;
     }
 
-    // === ADDED: Helper method for styling sidebar nav buttons ===
     private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
         final JButton button = new JButton(text);
         button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
@@ -247,7 +234,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         return button;
     }
 
-    // === ADDED: Main content container with scroll support ===
     private JPanel createMainContentPanel() {
         final JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
         mainPanel.setBackground(BG_DARK);
@@ -259,7 +245,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         centerContainer.setLayout(new BoxLayout(centerContainer, BoxLayout.Y_AXIS));
         centerContainer.setBackground(BG_DARK);
 
-        // === MODIFIED: Wrapped each stock row inside a styled dark card container ===
         centerContainer.add(createStockCard(stock1Label, stock1OpinionField, stock1ConfidenceBox));
         centerContainer.add(Box.createVerticalStrut(15));
         centerContainer.add(createStockCard(stock2Label, stock2OpinionField, stock2ConfidenceBox));
@@ -275,7 +260,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         buttonPanel.setBackground(BG_DARK);
         buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // === MODIFIED: Styled action buttons to match dark theme palette ===
         inputViews.setBackground(ACCENT_GREEN);
         inputViews.setForeground(Color.BLACK);
         inputViews.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -310,7 +294,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         return mainPanel;
     }
 
-    // === ADDED: Dark-themed header with back link and typography ===
     private JPanel createHeader() {
         final JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
@@ -360,7 +343,6 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         return headerPanel;
     }
 
-    // === ADDED: Reusable card layout helper for each stock row ===
     private JPanel createStockCard(JLabel label, JTextField opinionField, JComboBox<String> confidenceBox) {
         final JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
@@ -435,11 +417,9 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             String ticker = extractTickerFromText(rowLabelText);
             if (ticker != null && !ticker.contains("[")) {
                 try {
-                    // Convert percentage input (e.g. "15" -> 0.15) for the mathematical model
                     double opinionVal = Double.parseDouble(opinionText.trim()) / 100.0;
                     views.put(ticker, opinionVal);
 
-                    // If confidence is left as "None", gracefully default it to "Medium" so the view isn't lost
                     if (confidence == null || "None".equalsIgnoreCase(confidence)) {
                         confidences.put(ticker, "Medium");
                     } else {
@@ -460,7 +440,7 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             int dotIndex = labelText.indexOf('.');
             int dashIndex = labelText.indexOf('—');
             if (dashIndex == -1) {
-                dashIndex = labelText.indexOf('—');
+                dashIndex = labelText.indexOf('-');
             }
 
             if (dotIndex != -1 && dashIndex != -1 && dashIndex > dotIndex) {
@@ -496,14 +476,12 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
                 updateStockRows(state);
             }
         } else if (evt.getPropertyName().equals("state") || evt.getPropertyName().equals("logged in")) {
-            // Re-render layout instantly without blocking
             removeAll();
             add(createSidebarPanel(), BorderLayout.WEST);
             add(createMainContentPanel(), BorderLayout.CENTER);
             revalidate();
             repaint();
 
-            // Load market data asynchronously on a background thread so the UI never freezes
             if (blackLittermanController != null && loggedInViewModel.getState() != null
                     && loggedInViewModel.getState().getUser() != null) {
                 User user = loggedInViewModel.getState().getUser();
@@ -517,7 +495,7 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
                 }.execute();
             }
         }
-    } // <--- This closes propertyChange() properly
+    }
 
     private void updateStockRows(BlackLittermanState state) {
         List<String> topTickers = state.getTopTickers();

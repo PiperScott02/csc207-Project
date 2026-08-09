@@ -13,12 +13,13 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.add_watchlist.AddWatchlistController;
 import interface_adapter.add_watchlist.AddWatchlistState;
 import interface_adapter.add_watchlist.AddWatchlistViewModel;
+import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.delete_watchlist.DeleteWatchlistController;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistState;
 import interface_adapter.watchlist.WatchlistViewModel;
-
 
 /**
  * The View component for the WatchlistView screen.
@@ -29,13 +30,11 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
 
     // Dark UI Color Palette
     private static final Color BG_DARK = new Color(11, 15, 25);
-    private static final Color SIDEBAR_BG = new Color(7, 10, 17);
     private static final Color CARD_BG = new Color(17, 24, 39);
     private static final Color BORDER_COLOR = new Color(31, 41, 55);
     private static final Color TEXT_MAIN = new Color(243, 244, 246);
     private static final Color TEXT_MUTED = new Color(156, 163, 175);
     private static final Color ACCENT_GREEN = new Color(16, 185, 129);
-    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
 
     private final String viewName = "watchlist";
 
@@ -47,6 +46,8 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
     private final AddWatchlistController addWatchlistController;
     private final DeleteWatchlistController deleteWatchlistController;
     private final WatchlistController watchlistController;
+    private final BlackLittermanController blackLittermanController;
+    private final PortfolioHealthController portfolioHealthController;
 
     // UI Components and State References
     private DefaultTableModel watchlistTableModel;
@@ -57,11 +58,15 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
     /**
      * Constructs a new WatchlistView with the necessary view models and controllers.
      *
-     * @param watchlistViewModel     the view model managing watchlist state data
-     * @param viewManagerModel       the model responsible for switching views
-     * @param loggedInViewModel      the view model for logged-in user details
-     * @param addWatchlistViewModel  the view model managing add-watchlist status/errors
-     * @param addWatchlistController the controller used to execute add-watchlist requests
+     * @param watchlistViewModel        the view model managing watchlist state data
+     * @param viewManagerModel          the model responsible for switching views
+     * @param loggedInViewModel         the view model for logged-in user details
+     * @param addWatchlistViewModel     the view model managing add-watchlist status/errors
+     * @param addWatchlistController    the controller used to execute add-watchlist requests
+     * @param deleteWatchlistController the controller used to delete items from the watchlist
+     * @param watchlistController       the controller used to fetch the watchlist
+     * @param blackLittermanController  the controller for Black-Litterman optimization
+     * @param portfolioHealthController the controller for portfolio health checks
      */
     public WatchlistView(WatchlistViewModel watchlistViewModel,
                          ViewManagerModel viewManagerModel,
@@ -69,7 +74,9 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
                          AddWatchlistViewModel addWatchlistViewModel,
                          AddWatchlistController addWatchlistController,
                          DeleteWatchlistController deleteWatchlistController,
-                         WatchlistController watchlistController) {
+                         WatchlistController watchlistController,
+                         BlackLittermanController blackLittermanController,
+                         PortfolioHealthController portfolioHealthController) {
         this.watchlistViewModel = watchlistViewModel;
         this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel = loggedInViewModel;
@@ -77,6 +84,8 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         this.addWatchlistController = addWatchlistController;
         this.deleteWatchlistController = deleteWatchlistController;
         this.watchlistController = watchlistController;
+        this.blackLittermanController = blackLittermanController;
+        this.portfolioHealthController = portfolioHealthController;
 
         // 1. Register listener for view model updates
         this.watchlistViewModel.addPropertyChangeListener(this);
@@ -86,7 +95,15 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         // 2. Configure primary panel components and style
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
-        add(createSidebarPanel(), BorderLayout.WEST);
+
+        // Use the shared SidebarHelper component
+        add(SidebarHelper.createSidebar("Watchlist",
+                this,
+                viewManagerModel,
+                loggedInViewModel,
+                blackLittermanController,
+                portfolioHealthController), BorderLayout.WEST);
+
         add(createMainContentPanel(), BorderLayout.CENTER);
 
         // 3. Sync the initial UI components with state data if present
@@ -102,104 +119,6 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
      */
     public String getViewName() {
         return viewName;
-    }
-
-    /**
-     * Creates and returns the navigation sidebar panel
-     *
-     * @return the configured sidebar JPanel
-     */
-    private JPanel createSidebarPanel() {
-        // Initialize and style the main sidebar pane
-        final JPanel sidebar = new JPanel();
-        sidebar.setBackground(SIDEBAR_BG);
-        sidebar.setPreferredSize(new Dimension(240, 0));
-        sidebar.setLayout(new BorderLayout());
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
-
-        final JPanel brandPanel = new JPanel();
-        brandPanel.setBackground(SIDEBAR_BG);
-        brandPanel.setPreferredSize(new Dimension(240, 70));
-        brandPanel.setLayout(null);
-
-        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
-        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
-        logoBadge.setForeground(TEXT_MAIN);
-        logoBadge.setBackground(ACCENT_GREEN);
-        logoBadge.setOpaque(true);
-        logoBadge.setBounds(20, 20, 28, 28);
-
-        final JLabel brandLabel = new JLabel("PortfolioPilot");
-        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-        brandLabel.setForeground(TEXT_MAIN);
-        brandLabel.setBounds(58, 20, 150, 28);
-
-        brandPanel.add(logoBadge);
-        brandPanel.add(brandLabel);
-
-        // Build the navigation links panel and wire view-switching actions
-        final JPanel navLinksPanel = new JPanel();
-        navLinksPanel.setBackground(SIDEBAR_BG);
-        navLinksPanel.setLayout(new GridLayout(9, 1, 0, 2));
-        navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        navLinksPanel.add(createSidebarNavLink("Overview", false, e -> {
-            viewManagerModel.setState("logged in");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Holdings", false, e -> {
-            viewManagerModel.setState("holdings");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Watchlist", true, e -> {
-        }));
-        navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, e -> {
-            viewManagerModel.setState("news");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {
-        }));
-        navLinksPanel.add(createSidebarNavLink("Risk Preference", false, e -> {
-            viewManagerModel.setState("risk preference");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Currency", false, e -> {
-            viewManagerModel.setState("currency conversion");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Search Stocks", false, e -> {
-            viewManagerModel.setState("search");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, e -> {
-        }));
-
-        // Assemble and return the final sidebar layout
-        sidebar.add(brandPanel, BorderLayout.NORTH);
-        sidebar.add(navLinksPanel, BorderLayout.CENTER);
-
-        return sidebar;
-    }
-
-    /**
-     * Helper method to create the styled navigation button for the sidebar
-     *
-     * @param text     the button display text
-     * @param isActive whether this navigation link corresponds to the current active view
-     * @param action   the action listener triggered when clicked
-     * @return the configured navigation JButton
-     */
-    private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
-        final JButton button = new JButton(text);
-        button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
-        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
-        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
-        button.addActionListener(action);
-        return button;
     }
 
     /**

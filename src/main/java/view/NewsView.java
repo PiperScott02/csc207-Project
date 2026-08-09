@@ -3,9 +3,12 @@ package view;
 import entity.NewsArticle;
 import entity.NewsSentiment;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.black_litterman.BlackLittermanController;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.news.NewsController;
 import interface_adapter.news.NewsState;
 import interface_adapter.news.NewsViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -28,7 +31,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URI;
@@ -41,24 +43,15 @@ public class NewsView extends JPanel implements PropertyChangeListener {
 
     public static final String VIEW_NAME = "news";
 
-    private static final String LOGGED_IN_VIEW_NAME = "logged in";
-    private static final String HOLDINGS_VIEW_NAME = "holdings";
-    private static final String WATCHLIST_VIEW_NAME = "watchlist";
-    private static final String RISK_PREFERENCE_VIEW_NAME = "risk preference";
-    private static final String CURRENCY_VIEW_NAME = "currency conversion";
-    private static final String SEARCH_VIEW_NAME = "search";
-
     /*
      * The same dark colour palette used by the Overview page.
      */
     private static final Color BG_DARK = new Color(11, 15, 25);
-    private static final Color SIDEBAR_BG = new Color(7, 10, 17);
     private static final Color CARD_BG = new Color(17, 24, 39);
     private static final Color BORDER_COLOR = new Color(31, 41, 55);
     private static final Color TEXT_MAIN = new Color(243, 244, 246);
     private static final Color TEXT_MUTED = new Color(156, 163, 175);
     private static final Color ACCENT_GREEN = new Color(16, 185, 129);
-    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
     private static final Color ERROR_RED = new Color(248, 113, 113);
 
     /*
@@ -95,7 +88,10 @@ public class NewsView extends JPanel implements PropertyChangeListener {
 
     public NewsView(NewsViewModel newsViewModel,
                     NewsController newsController,
-                    ViewManagerModel viewManagerModel) {
+                    ViewManagerModel viewManagerModel,
+                    LoggedInViewModel loggedInViewModel,
+                    BlackLittermanController blackLittermanController,
+                    PortfolioHealthController portfolioHealthController) {
 
         this.newsViewModel = newsViewModel;
         this.newsController = newsController;
@@ -105,150 +101,13 @@ public class NewsView extends JPanel implements PropertyChangeListener {
         setLayout(new BorderLayout());
         setBackground(BG_DARK);
 
-        add(createSidebarPanel(viewManagerModel), BorderLayout.WEST);
+        add(SidebarHelper.createSidebar("News & Sentiment",
+                this,
+                viewManagerModel,
+                loggedInViewModel,
+                blackLittermanController,
+                portfolioHealthController), BorderLayout.WEST);
         add(createMainContentPanel(), BorderLayout.CENTER);
-    }
-
-    private JPanel createSidebarPanel(ViewManagerModel viewManagerModel) {
-        final JPanel sidebar = new JPanel(new BorderLayout());
-        sidebar.setBackground(SIDEBAR_BG);
-        sidebar.setPreferredSize(new Dimension(240, 0));
-        sidebar.setBorder(
-                BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR)
-        );
-
-        sidebar.add(createBrandPanel(), BorderLayout.NORTH);
-        sidebar.add(createNavigationPanel(viewManagerModel), BorderLayout.CENTER);
-        sidebar.add(createSidebarFooter(viewManagerModel), BorderLayout.SOUTH);
-
-        return sidebar;
-    }
-
-    private JPanel createBrandPanel() {
-        final JPanel brandPanel = new JPanel();
-        brandPanel.setBackground(SIDEBAR_BG);
-        brandPanel.setPreferredSize(new Dimension(240, 70));
-        brandPanel.setLayout(null);
-
-        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
-        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
-        logoBadge.setForeground(TEXT_MAIN);
-        logoBadge.setBackground(ACCENT_GREEN);
-        logoBadge.setOpaque(true);
-        logoBadge.setBounds(20, 20, 28, 28);
-
-        final JLabel brandLabel = new JLabel("PortfolioPilot");
-        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-        brandLabel.setForeground(TEXT_MAIN);
-        brandLabel.setBounds(58, 20, 150, 28);
-
-        brandPanel.add(logoBadge);
-        brandPanel.add(brandLabel);
-        return brandPanel;
-    }
-
-    private JPanel createNavigationPanel(ViewManagerModel viewManagerModel) {
-        final JPanel navigationPanel = new JPanel(new GridLayout(9, 1, 0, 2));
-        navigationPanel.setBackground(SIDEBAR_BG);
-        navigationPanel.setBorder(
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        );
-
-        navigationPanel.add(createSidebarNavLink("Overview", false,
-                event -> switchView(viewManagerModel, LOGGED_IN_VIEW_NAME)));
-        navigationPanel.add(createSidebarNavLink("Holdings", false,
-                event -> switchView(viewManagerModel, HOLDINGS_VIEW_NAME)));
-        navigationPanel.add(createSidebarNavLink("Watchlist", false,
-                event -> switchView(viewManagerModel, WATCHLIST_VIEW_NAME)));
-        navigationPanel.add(createSidebarNavLink("News & Sentiment", true,
-                event -> { }));
-        navigationPanel.add(createSidebarNavLink("Portfolio Health", false,
-                event -> { }));
-        navigationPanel.add(createSidebarNavLink("Risk Preference", false,
-                event -> switchView(
-                        viewManagerModel,
-                        RISK_PREFERENCE_VIEW_NAME
-                )));
-        navigationPanel.add(createSidebarNavLink("Currency", false,
-                event -> switchView(viewManagerModel, CURRENCY_VIEW_NAME)));
-        navigationPanel.add(createSidebarNavLink("Search Stocks", false,
-                event -> switchView(viewManagerModel, SEARCH_VIEW_NAME)));
-        navigationPanel.add(createSidebarNavLink("Black-Litterman", false,
-                event -> { }));
-
-        return navigationPanel;
-    }
-
-    private JButton createSidebarNavLink(
-            String text,
-            boolean isActive,
-            ActionListener action) {
-
-        final JButton button = new JButton(text);
-        button.setFont(new Font(
-                "SansSerif",
-                isActive ? Font.BOLD : Font.PLAIN,
-                13
-        ));
-        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
-        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
-        button.addActionListener(action);
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent event) {
-                if (!isActive) {
-                    button.setForeground(TEXT_MAIN);
-                    button.setBackground(CARD_BG);
-                }
-            }
-
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent event) {
-                if (!isActive) {
-                    button.setForeground(TEXT_MUTED);
-                    button.setBackground(SIDEBAR_BG);
-                }
-            }
-        });
-
-        return button;
-    }
-
-    private JPanel createSidebarFooter(ViewManagerModel viewManagerModel) {
-        final JPanel footer = new JPanel(new BorderLayout());
-        footer.setBackground(SIDEBAR_BG);
-        footer.setPreferredSize(new Dimension(240, 65));
-        footer.setBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR)
-        );
-
-        final JButton overviewButton = new JButton("← Back to Overview");
-        overviewButton.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        overviewButton.setForeground(TEXT_MUTED);
-        overviewButton.setContentAreaFilled(false);
-        overviewButton.setBorderPainted(false);
-        overviewButton.setFocusPainted(false);
-        overviewButton.setHorizontalAlignment(SwingConstants.LEFT);
-        overviewButton.setBorder(new EmptyBorder(0, 20, 0, 0));
-        overviewButton.addActionListener(
-                event -> switchView(viewManagerModel, LOGGED_IN_VIEW_NAME)
-        );
-
-        footer.add(overviewButton, BorderLayout.CENTER);
-        return footer;
-    }
-
-    private void switchView(
-            ViewManagerModel viewManagerModel,
-            String viewName) {
-
-        viewManagerModel.setState(viewName);
-        viewManagerModel.firePropertyChanged();
     }
 
     private JPanel createMainContentPanel() {

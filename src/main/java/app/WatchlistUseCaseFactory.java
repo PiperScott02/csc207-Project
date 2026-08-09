@@ -6,9 +6,11 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.add_watchlist.AddWatchlistController;
 import interface_adapter.add_watchlist.AddWatchlistPresenter;
 import interface_adapter.add_watchlist.AddWatchlistViewModel;
+import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.delete_watchlist.DeleteWatchlistController;
 import interface_adapter.delete_watchlist.DeleteWatchlistPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistPresenter;
 import interface_adapter.watchlist.WatchlistViewModel;
@@ -42,8 +44,11 @@ public final class WatchlistUseCaseFactory {
             ViewManagerModel viewManagerModel,
             WatchlistViewModel watchlistViewModel,
             LoggedInViewModel loggedInViewModel,
+            AddWatchlistViewModel addWatchlistViewModel,
             StockDataAccessInterface stockDataAccessObject,
-            WatchlistDataAccessInterface watchlistDataAccessObject) {
+            WatchlistDataAccessInterface watchlistDataAccessObject,
+            BlackLittermanController blackLittermanController,
+            PortfolioHealthController portfolioHealthController) {
 
         final WatchlistController watchlistController = createWatchlistUseCase(
                 viewManagerModel,
@@ -51,8 +56,6 @@ public final class WatchlistUseCaseFactory {
                 loggedInViewModel,
                 stockDataAccessObject
         );
-
-        final AddWatchlistViewModel addWatchlistViewModel = new AddWatchlistViewModel();
 
         final AddWatchlistController addWatchlistController = createAddWatchlistUseCase(
                 viewManagerModel,
@@ -77,7 +80,9 @@ public final class WatchlistUseCaseFactory {
                 addWatchlistViewModel,
                 addWatchlistController,
                 deleteWatchlistController,
-                watchlistController
+                watchlistController,
+                blackLittermanController,
+                portfolioHealthController
         );
     }
 

@@ -13,9 +13,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -24,7 +22,6 @@ import javax.swing.table.DefaultTableModel;
 
 import entity.Stock;
 import entity.StockHolding;
-import entity.WatchlistStockItem;
 
 import interface_adapter.ViewManagerModel;
 import interface_adapter.black_litterman.BlackLittermanController;
@@ -37,23 +34,13 @@ import interface_adapter.portfolio_health.PortfolioHealthController;
  */
 public class    LoggedInView extends JPanel implements PropertyChangeListener {
 
-    private static final String LOGIN_VIEW_NAME = "log in";
-    private static final String SEARCH_VIEW_NAME = "search";
-    private static final String RISK_PREFERENCE_VIEW_NAME = "risk preference";
-    private static final String CURRENCY_CONVERSION_VIEW_NAME = "currency conversion";
-    private static final String NEWS_VIEW_NAME = "news";
-    private static final String WATCHLIST_VIEW_NAME = "watchlist";
-    private static final String ADD_HOLDING_VIEW_NAME = "add holding";
-
     // === DARK MODE UI CHANGE ===: Figma color palette variables
     private static final Color BG_DARK = new Color(11, 15, 25);       // #0B0F19 Main window background
-    private static final Color SIDEBAR_BG = new Color(7, 10, 17);     // Darker shade for persistent sidebar
     private static final Color CARD_BG = new Color(17, 24, 39);       // #111827 Cards & Table background
     private static final Color BORDER_COLOR = new Color(31, 41, 55);  // #1F2937 Borders
     private static final Color TEXT_MAIN = new Color(243, 244, 246);  // #F3F4F6 Primary white text
     private static final Color TEXT_MUTED = new Color(156, 163, 175); // #9CA3AF Muted labels
     private static final Color ACCENT_GREEN = new Color(16, 185, 129); // #10B981 Gain/Success color
-    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39); // Active selection highlight for sidebar
 
     private final String viewName = "logged in";
     private final ViewManagerModel viewManagerModel;
@@ -100,166 +87,18 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
-        add(createSidebarPanel(), BorderLayout.WEST);
+        add(SidebarHelper.createSidebar("Overview",
+                this,
+                viewManagerModel,
+                loggedInViewModel,
+                blackLittermanController,
+                portfolioHealthController), BorderLayout.WEST);
         add(createMainContentPanel(), BorderLayout.CENTER);
 
         // Populate initial state if already present in the ViewModel
         if (loggedInViewModel.getState() != null) {
             updateViewFromState(loggedInViewModel.getState());
         }
-    }
-
-    private JPanel createSidebarPanel() {
-        final JPanel sidebar = new JPanel();
-        sidebar.setBackground(SIDEBAR_BG);
-        sidebar.setPreferredSize(new Dimension(240, 0));
-        sidebar.setLayout(new BorderLayout());
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
-
-        // Top Brand Header inside Sidebar
-        final JPanel brandPanel = new JPanel();
-        brandPanel.setBackground(SIDEBAR_BG);
-        brandPanel.setPreferredSize(new Dimension(240, 70));
-        brandPanel.setLayout(null);
-
-        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
-        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
-        logoBadge.setForeground(TEXT_MAIN);
-        logoBadge.setBackground(ACCENT_GREEN);
-        logoBadge.setOpaque(true);
-        logoBadge.setBounds(20, 20, 28, 28);
-
-        final JLabel brandLabel = new JLabel("PortfolioPilot");
-        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-        brandLabel.setForeground(TEXT_MAIN);
-        brandLabel.setBounds(58, 20, 150, 28);
-
-        brandPanel.add(logoBadge);
-        brandPanel.add(brandLabel);
-
-        // Center Navigation Links List
-        final JPanel navLinksPanel = new JPanel();
-        navLinksPanel.setBackground(SIDEBAR_BG);
-        navLinksPanel.setLayout(new GridLayout(9, 1, 0, 2));
-        navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // Highlight "Overview" as active since we are on the Overview screen
-        navLinksPanel.add(createSidebarNavLink("Overview", false, e -> {
-            viewManagerModel.setState("logged in");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Holdings", false, e -> {
-            viewManagerModel.setState("holdings");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Watchlist", false, event -> {
-            viewManagerModel.setState(WATCHLIST_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, event -> {
-            viewManagerModel.setState(NEWS_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, event -> {
-            LoggedInState state = loggedInViewModel.getState();
-            if (state != null && state.getUser() != null) {
-                portfolioHealthController.execute(state.getUser());
-            } else {
-                JOptionPane.showMessageDialog(this, "No active user session found.");
-            }
-        }));
-        navLinksPanel.add(createSidebarNavLink("Risk Preference", false, event -> {
-            viewManagerModel.setState(RISK_PREFERENCE_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Currency", false, event -> {
-            viewManagerModel.setState(CURRENCY_CONVERSION_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Search Stocks", false, event -> {
-            viewManagerModel.setState(SEARCH_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, event -> {
-            LoggedInState state = loggedInViewModel.getState();
-            if (state != null && state.getUser() != null) {
-                blackLittermanController.loadMarketData(state.getUser());
-
-                // === ADDED: Switch to the Black-Litterman view ===
-                viewManagerModel.setState("Black-Litterman view");
-                viewManagerModel.firePropertyChanged();
-            } else {
-                JOptionPane.showMessageDialog(this, "No active user session found.");
-            }
-        }));
-
-        // Bottom User Profile & Log Out Section
-        final JPanel userFooterPanel = new JPanel();
-        userFooterPanel.setBackground(SIDEBAR_BG);
-        userFooterPanel.setPreferredSize(new Dimension(240, 80));
-        userFooterPanel.setLayout(null);
-        userFooterPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
-
-        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
-        welcomeLabel.setForeground(TEXT_MUTED);
-        welcomeLabel.setBounds(20, 15, 200, 15);
-
-        dateLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
-        dateLabel.setForeground(TEXT_MUTED);
-        dateLabel.setBounds(20, 32, 200, 15);
-        updateDateTimeDisplay();
-
-        final JButton logOutLink = new JButton("↳ Log Out");
-        logOutLink.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        logOutLink.setForeground(new Color(239, 68, 68));
-        logOutLink.setContentAreaFilled(false);
-        logOutLink.setBorderPainted(false);
-        logOutLink.setFocusPainted(false);
-        logOutLink.setHorizontalAlignment(SwingConstants.LEFT);
-        logOutLink.setBounds(14, 50, 120, 20);
-        logOutLink.addActionListener(event -> {
-            viewManagerModel.setState(LOGIN_VIEW_NAME);
-            viewManagerModel.firePropertyChanged();
-        });
-
-        userFooterPanel.add(welcomeLabel);
-        userFooterPanel.add(dateLabel);
-        userFooterPanel.add(logOutLink);
-
-        sidebar.add(brandPanel, BorderLayout.NORTH);
-        sidebar.add(navLinksPanel, BorderLayout.CENTER);
-        sidebar.add(userFooterPanel, BorderLayout.SOUTH);
-
-        return sidebar;
-    }
-
-    // Helper for styled sidebar links
-    private JButton createSidebarNavLink(String text, boolean isActive, java.awt.event.ActionListener action) {
-        final JButton button = new JButton(text);
-        button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
-        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
-        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
-        button.addActionListener(action);
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (!isActive) {
-                    button.setForeground(TEXT_MAIN);
-                    button.setBackground(CARD_BG);
-                }
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (!isActive) {
-                    button.setForeground(TEXT_MUTED);
-                    button.setBackground(SIDEBAR_BG);
-                }
-            }
-        });
-        return button;
     }
 
     // Right Main Content Area containing Overview Header, Metrics, and Preview Tables

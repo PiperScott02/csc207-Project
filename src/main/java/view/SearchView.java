@@ -1,7 +1,9 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.similar_search.SimilarSearchController;
 import interface_adapter.similar_search.SimilarSearchState;
 import interface_adapter.similar_search.SimilarSearchViewModel;
@@ -19,10 +21,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-// === ADDED: Imports for dynamic date formatting ===
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 /**
  * The screen for searching stocks and viewing search/similar results with dark theme and sidebar.
@@ -34,15 +32,12 @@ public class SearchView extends JPanel implements PropertyChangeListener {
 
     // === DARK MODE UI PALETTE ===
     private static final Color BG_DARK = new Color(11, 15, 25);
-    private static final Color SIDEBAR_BG = new Color(7, 10, 17);
     private static final Color CARD_BG = new Color(17, 24, 39);
     private static final Color BORDER_COLOR = new Color(31, 41, 55);
     private static final Color TEXT_MAIN = new Color(243, 244, 246);
     private static final Color TEXT_MUTED = new Color(156, 163, 175);
     private static final Color ACCENT_GREEN = new Color(16, 185, 129);
-    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
 
-    // The Display Text Fields for the Ticker Search Result
     private final JButton searchButton = new JButton("Search");
     private final JButton tickerSearchSymbol = new JButton("N/A");
     private final JLabel tickerSearchCompanyName = new JLabel("N/A");
@@ -51,21 +46,18 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final JLabel tickerSearchPreviousClose = new JLabel("N/A");
     private final JTextField searchInputField = new JTextField(30);
 
-    // Similar Search Panel
     private final JPanel similarSearchResultsPanel = createSimilarSearchResultsPanel();
 
     private final SimilarSearchController similarSearchController;
     private final SimilarSearchViewModel similarSearchViewModel;
     private final TickerSearchController tickerSearchController;
     private final TickerSearchViewModel tickerSearchViewModel;
-
-    // Stock Navigation Dependencies
     private final StockController stockController;
     private final ViewManagerModel viewManagerModel;
     private final StockViewModel stockViewModel;
-
-    // Return to Portfolio Dependency
     private final LoggedInViewModel loggedInViewModel;
+    private final BlackLittermanController blackLittermanController;
+    private final PortfolioHealthController portfolioHealthController;
 
     public SearchView(SimilarSearchController similarSearchController,
                       SimilarSearchViewModel similarSearchViewModel,
@@ -74,7 +66,9 @@ public class SearchView extends JPanel implements PropertyChangeListener {
                       StockController stockController,
                       ViewManagerModel viewManagerModel,
                       StockViewModel stockViewModel,
-                      LoggedInViewModel loggedInViewModel) {
+                      LoggedInViewModel loggedInViewModel,
+                      BlackLittermanController blackLittermanController,
+                      PortfolioHealthController portfolioHealthController) {
         this.similarSearchController = similarSearchController;
         this.similarSearchViewModel = similarSearchViewModel;
         this.tickerSearchController = tickerSearchController;
@@ -83,13 +77,13 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.viewManagerModel = viewManagerModel;
         this.stockViewModel = stockViewModel;
         this.loggedInViewModel = loggedInViewModel;
+        this.blackLittermanController = blackLittermanController;
+        this.portfolioHealthController = portfolioHealthController;
 
         tickerSearchViewModel.addPropertyChangeListener(this);
         similarSearchViewModel.addPropertyChangeListener(this);
-        // === ADDED: Listen to loggedInViewModel changes for dynamic session updates ===
         loggedInViewModel.addPropertyChangeListener(this);
 
-        // Click main ticker button -> Execute StockUseCase & Switch to Stock View
         tickerSearchSymbol.addActionListener(e -> {
             String ticker = tickerSearchSymbol.getText();
             if (!ticker.equals("N/A") && !ticker.trim().isEmpty()) {
@@ -102,127 +96,15 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
-        // Add sidebar on the left and main content on the center
-        add(createSidebarPanel(), BorderLayout.WEST);
+        add(SidebarHelper.createSidebar("Search Stocks",
+                this,
+                viewManagerModel,
+                loggedInViewModel,
+                blackLittermanController,
+                portfolioHealthController), BorderLayout.WEST);
         add(createMainContentPanel(), BorderLayout.CENTER);
     }
 
-    /**
-     * Creates the sidebar navigation panel matching other redesigned views. ===
-     */
-    private JPanel createSidebarPanel() {
-        final JPanel sidebarPanel = new JPanel();
-        sidebarPanel.setBackground(SIDEBAR_BG);
-        sidebarPanel.setPreferredSize(new Dimension(240, 0));
-        sidebarPanel.setLayout(new BorderLayout());
-        sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
-
-        final JPanel brandPanel = new JPanel();
-        brandPanel.setBackground(SIDEBAR_BG);
-        brandPanel.setPreferredSize(new Dimension(240, 70));
-        brandPanel.setLayout(null);
-
-        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
-        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
-        logoBadge.setForeground(TEXT_MAIN);
-        logoBadge.setBackground(ACCENT_GREEN);
-        logoBadge.setOpaque(true);
-        logoBadge.setBounds(20, 20, 28, 28);
-
-        final JLabel brandLabel = new JLabel("PortfolioPilot");
-        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-        brandLabel.setForeground(TEXT_MAIN);
-        brandLabel.setBounds(58, 20, 150, 28);
-
-        brandPanel.add(logoBadge);
-        brandPanel.add(brandLabel);
-
-        final JPanel navLinksPanel = new JPanel();
-        navLinksPanel.setBackground(SIDEBAR_BG);
-        navLinksPanel.setLayout(new GridLayout(10, 1, 0, 2));
-        navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        navLinksPanel.add(createSidebarNavLink("Overview", false, e -> {
-            viewManagerModel.setState("logged in");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Holdings", false, e -> {
-            viewManagerModel.setState("holdings");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Watchlist", false, e -> {
-            viewManagerModel.setState("watchlist");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, e -> {
-            viewManagerModel.setState("news");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {}));
-        navLinksPanel.add(createSidebarNavLink("Risk Preference", false, e -> {
-            viewManagerModel.setState("risk preference");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Currency", false, e -> {
-            viewManagerModel.setState("currency conversion");
-            viewManagerModel.firePropertyChanged();
-        }));
-        // Search Stocks is active here
-        navLinksPanel.add(createSidebarNavLink("Search Stocks", true, e -> {}));
-        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, e -> {}));
-
-        final JPanel bottomPanel = new JPanel();
-        bottomPanel.setBackground(SIDEBAR_BG);
-        bottomPanel.setPreferredSize(new Dimension(240, 60));
-        bottomPanel.setLayout(null);
-        bottomPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
-
-        // === MODIFIED: Dynamically retrieve logged-in username instead of hardcoding "HANA" ===
-        String username = loggedInViewModel.getState() != null && loggedInViewModel.getState().getUsername() != null
-                ? loggedInViewModel.getState().getUsername().toUpperCase()
-                : "USER";
-
-        final JLabel welcomeLabel = new JLabel("WELCOME, " + username);
-        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
-        welcomeLabel.setForeground(TEXT_MUTED);
-        welcomeLabel.setBounds(20, 12, 180, 15);
-
-        // === MODIFIED: Dynamically retrieve current live system date instead of hardcoding "Aug 7, 2026" ===
-        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
-        final JLabel dateLabel = new JLabel(currentDate);
-        dateLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
-        dateLabel.setForeground(TEXT_MUTED);
-        dateLabel.setBounds(20, 30, 180, 15);
-
-        bottomPanel.add(welcomeLabel);
-        bottomPanel.add(dateLabel);
-
-        sidebarPanel.add(brandPanel, BorderLayout.NORTH);
-        sidebarPanel.add(navLinksPanel, BorderLayout.CENTER);
-        sidebarPanel.add(bottomPanel, BorderLayout.SOUTH);
-
-        return sidebarPanel;
-    }
-
-    /**
-     * Helper to style sidebar navigation buttons. ===
-     */
-    private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
-        final JButton button = new JButton(text);
-        button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
-        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
-        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
-        button.addActionListener(action);
-        return button;
-    }
-
-    /**
-     * Wrapper panel to manage scrollable content area alongside the sidebar. ===
-     */
     private JPanel createMainContentPanel() {
         final JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
         mainPanel.setBackground(BG_DARK);
@@ -316,7 +198,6 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         ));
         searchInputField.setBounds(20, 32, 590, 36);
 
-        // === MODIFIED: Uses class-level searchButton instance variable instead of redeclaring final local ===
         searchButton.setBackground(ACCENT_GREEN);
         searchButton.setForeground(Color.BLACK);
         searchButton.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -371,14 +252,12 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         ));
         tickerSearchValuesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Header Labels
         addHeaderLabel(tickerSearchValuesPanel, "TICKER SYMBOL");
         addHeaderLabel(tickerSearchValuesPanel, "COUNTRY");
         addHeaderLabel(tickerSearchValuesPanel, "COMPANY NAME");
         addHeaderLabel(tickerSearchValuesPanel, "INDUSTRY");
         addHeaderLabel(tickerSearchValuesPanel, "PREVIOUS CLOSE");
 
-        // Style Ticker Symbol Button
         tickerSearchSymbol.setBackground(CARD_BG);
         tickerSearchSymbol.setForeground(ACCENT_GREEN);
         tickerSearchSymbol.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -475,7 +354,6 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             symbolButton.setHorizontalAlignment(SwingConstants.LEFT);
             symbolButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-            // Click similar search symbol button -> Execute StockUseCase & Switch to Stock View
             symbolButton.addActionListener(e -> {
                 this.stockController.execute(outputData.getTickerSymbol());
                 this.viewManagerModel.setState(this.stockViewModel.getViewName());
@@ -504,9 +382,6 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         similarSearchResultsPanel.repaint();
     }
 
-    /**
-     * Helper method for consistent table column header text styling. ===
-     */
     private void addHeaderLabel(JPanel panel, String text) {
         final JLabel label = new JLabel(text);
         label.setFont(new Font("SansSerif", Font.BOLD, 10));
@@ -514,9 +389,6 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         panel.add(label);
     }
 
-    /**
-     * Helper method for consistent table data text styling. ===
-     */
     private void styleResultLabel(JLabel label) {
         label.setFont(new Font("SansSerif", Font.PLAIN, 13));
         label.setForeground(TEXT_MAIN);
@@ -538,13 +410,6 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             removeSimilarSearchResults(similarSearchResultsPanel);
             addSimilarSearchResults(similarSearchResultsPanel,
                     similarSearchState.getSimilarSearchOutputData());
-            // === ADDED: Re-renders UI dynamically when user state or login session updates ===
-        } else if (evt.getPropertyName().equals("state") || evt.getPropertyName().equals("logged in")) {
-            removeAll();
-            add(createSidebarPanel(), BorderLayout.WEST);
-            add(createMainContentPanel(), BorderLayout.CENTER);
-            revalidate();
-            repaint();
         }
     }
 

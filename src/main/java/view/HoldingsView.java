@@ -3,9 +3,11 @@ package view;
 import entity.Stock;
 import entity.StockHolding;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.delete_holding.DeleteHoldingController;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -23,18 +25,18 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
 
     // === DARK MODE UI PALETTE ===
     private static final Color BG_DARK = new Color(11, 15, 25);
-    private static final Color SIDEBAR_BG = new Color(7, 10, 17);
     private static final Color CARD_BG = new Color(17, 24, 39);
     private static final Color BORDER_COLOR = new Color(31, 41, 55);
     private static final Color TEXT_MAIN = new Color(243, 244, 246);
     private static final Color TEXT_MUTED = new Color(156, 163, 175);
     private static final Color ACCENT_GREEN = new Color(16, 185, 129);
-    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
 
     private final String viewName = "holdings";
     private final ViewManagerModel viewManagerModel;
     private final LoggedInViewModel loggedInViewModel;
     private final DeleteHoldingController deleteHoldingController;
+    private final PortfolioHealthController portfolioHealthController;
+    private final BlackLittermanController blackLittermanController;
 
     // Dynamic Summary Metric Labels
     private final JLabel portfolioValLabel = new JLabel("$0.00");
@@ -46,16 +48,30 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
 
     private DefaultTableModel detailedHoldingsTableModel;
 
-    public HoldingsView(ViewManagerModel viewManagerModel, LoggedInViewModel loggedInViewModel, DeleteHoldingController deleteHoldingController) {
+    public HoldingsView(ViewManagerModel viewManagerModel,
+                        LoggedInViewModel loggedInViewModel,
+                        DeleteHoldingController deleteHoldingController,
+                        PortfolioHealthController portfolioHealthController,
+                        BlackLittermanController blackLittermanController) {
         this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel = loggedInViewModel;
         this.deleteHoldingController = deleteHoldingController;
+        this.portfolioHealthController = portfolioHealthController;
+        this.blackLittermanController = blackLittermanController;
+
         this.loggedInViewModel.addPropertyChangeListener(this);
 
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
-        add(createSidebarPanel(), BorderLayout.WEST);
+        // Use the shared SidebarHelper component
+        add(SidebarHelper.createSidebar("Holdings",
+                this,
+                viewManagerModel,
+                loggedInViewModel,
+                blackLittermanController,
+                portfolioHealthController), BorderLayout.WEST);
+
         add(createMainContentPanel(), BorderLayout.CENTER);
 
         if (loggedInViewModel.getState() != null) {
@@ -65,85 +81,6 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
 
     public String getViewName() {
         return viewName;
-    }
-
-    private JPanel createSidebarPanel() {
-        final JPanel sidebar = new JPanel();
-        sidebar.setBackground(SIDEBAR_BG);
-        sidebar.setPreferredSize(new Dimension(240, 0));
-        sidebar.setLayout(new BorderLayout());
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
-
-        final JPanel brandPanel = new JPanel();
-        brandPanel.setBackground(SIDEBAR_BG);
-        brandPanel.setPreferredSize(new Dimension(240, 70));
-        brandPanel.setLayout(null);
-
-        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
-        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
-        logoBadge.setForeground(TEXT_MAIN);
-        logoBadge.setBackground(ACCENT_GREEN);
-        logoBadge.setOpaque(true);
-        logoBadge.setBounds(20, 20, 28, 28);
-
-        final JLabel brandLabel = new JLabel("PortfolioPilot");
-        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-        brandLabel.setForeground(TEXT_MAIN);
-        brandLabel.setBounds(58, 20, 150, 28);
-
-        brandPanel.add(logoBadge);
-        brandPanel.add(brandLabel);
-
-        final JPanel navLinksPanel = new JPanel();
-        navLinksPanel.setBackground(SIDEBAR_BG);
-        navLinksPanel.setLayout(new GridLayout(9, 1, 0, 2));
-        navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        navLinksPanel.add(createSidebarNavLink("Overview", false, e -> {
-            viewManagerModel.setState("logged in");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Holdings", false, e -> {}));
-        navLinksPanel.add(createSidebarNavLink("Watchlist", false, e -> {
-            viewManagerModel.setState("watchlist");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, e -> {
-            viewManagerModel.setState("news");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {}));
-        navLinksPanel.add(createSidebarNavLink("Risk Preference", false, e -> {
-            viewManagerModel.setState("risk preference");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Currency", false, e -> {
-            viewManagerModel.setState("currency conversion");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Search Stocks", false, e -> {
-            viewManagerModel.setState("search");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, e -> {}));
-
-        sidebar.add(brandPanel, BorderLayout.NORTH);
-        sidebar.add(navLinksPanel, BorderLayout.CENTER);
-
-        return sidebar;
-    }
-
-    private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
-        final JButton button = new JButton(text);
-        button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
-        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
-        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
-        button.addActionListener(action);
-        return button;
     }
 
     private JPanel createMainContentPanel() {
@@ -218,9 +155,9 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 if (column == 1) {
-                    setHorizontalAlignment(JLabel.LEFT); // Left-align Company names
+                    setHorizontalAlignment(JLabel.LEFT);
                 } else {
-                    setHorizontalAlignment(JLabel.CENTER); // Center everything else
+                    setHorizontalAlignment(JLabel.CENTER);
                 }
 
                 setBackground(CARD_BG);
@@ -232,22 +169,18 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
             holdingsTable.getColumnModel().getColumn(i).setCellRenderer(customRenderer);
         }
 
-        // === SET COLUMN WIDTHS (GIVES MORE ROOM TO COMPANY) ===
-        holdingsTable.getColumnModel().getColumn(0).setPreferredWidth(70);  // Ticker column
-        holdingsTable.getColumnModel().getColumn(1).setPreferredWidth(160); // Company column (wider to fit full names)
-
-        // Set width for the delete column
+        holdingsTable.getColumnModel().getColumn(0).setPreferredWidth(70);
+        holdingsTable.getColumnModel().getColumn(1).setPreferredWidth(160);
         holdingsTable.getColumnModel().getColumn(7).setPreferredWidth(40);
         holdingsTable.getColumnModel().getColumn(7).setMaxWidth(50);
 
         // === SINGLE-CLICK MOUSE LISTENER FOR THE "×" COLUMN ===
         holdingsTable.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
+            public void mousePressed(java.awt.event.MouseEvent e) {
                 int row = holdingsTable.rowAtPoint(e.getPoint());
                 int col = holdingsTable.columnAtPoint(e.getPoint());
 
-                // If column 7 ("×") is clicked
                 if (col == 7 && row >= 0) {
                     String fullTickerString = (String) holdingsTable.getValueAt(row, 0);
                     if (fullTickerString != null && !fullTickerString.isEmpty()) {
@@ -355,10 +288,10 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
                             stock != null ? stock.getCompanyName() : "",
                             holding.getNumberOfShares(),
                             String.format("$%.2f", holding.getAveragePrice()),
-                            String.format("$%.2f", holding.calculateTotalValue().doubleValue() / holding.getNumberOfShares()), // or use average price if current price isn't a getter
+                            String.format("$%.2f", holding.calculateTotalValue().doubleValue() / holding.getNumberOfShares()),
                             String.format("$%.2f", holdingGain.doubleValue()),
                             String.format("%+.2f%%", holding.calculateGainLossPercentage().doubleValue()),
-                            "x" // The delete button symbol
+                            "×"
                     });
                 }
             }
@@ -370,7 +303,6 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
                         .multiply(BigDecimal.valueOf(100));
             }
 
-            // Update Summary Labels Dynamically
             portfolioValLabel.setText(String.format("$%.2f", totalPortfolioValue.doubleValue()));
             totalPnlValLabel.setText(String.format("$%.2f", totalGainLoss.doubleValue()));
             if (totalGainLoss.compareTo(BigDecimal.ZERO) < 0) {
@@ -390,67 +322,6 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
             holdingsCountLabel.setText(state.getHoldings().size() + " positions");
         }
         updateLastUpdatedTime();
-    }
-
-    // Renders the "×" text styled like a clean button
-    private static class DeleteButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
-        public DeleteButtonRenderer() {
-            setOpaque(true);
-            setForeground(new Color(156, 163, 175)); // TEXT_MUTED
-            setBackground(new Color(17, 24, 39));   // CARD_BG
-            setBorder(null);
-            setFont(new Font("SansSerif", Font.BOLD, 14));
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setText((value == null) ? "" : value.toString());
-            return this;
-        }
-    }
-
-    // Handles clicks on the "×" button to trigger deletion
-    private static class DeleteButtonEditor extends DefaultCellEditor {
-        private final JButton button;
-        private String clickedTicker;
-        private JTable table;
-        private DeleteHoldingController controller;
-
-        public DeleteButtonEditor(JCheckBox checkBox, JTable table, DeleteHoldingController controller) {
-            super(checkBox);
-            this.table = table;
-            this.controller = controller;
-            button = new JButton("×");
-            button.setOpaque(true);
-            button.setForeground(new Color(239, 68, 68)); // Red color for delete
-            button.setBackground(new Color(17, 24, 39));
-            button.setBorder(null);
-            button.setFont(new Font("SansSerif", Font.BOLD, 14));
-
-            button.addActionListener(e -> {
-                fireEditingStopped();
-                if (controller != null && clickedTicker != null) {
-                    controller.execute(clickedTicker);
-                }
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            // Extract just the ticker symbol from column 0 (e.g., "AAPL - Apple Inc." -> "AAPL")
-            String fullTickerString = (String) table.getValueAt(row, 0);
-            if (fullTickerString != null && fullTickerString.contains(" - ")) {
-                clickedTicker = fullTickerString.split(" - ")[0].trim();
-            } else {
-                clickedTicker = fullTickerString;
-            }
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            return "×";
-        }
     }
 
     @Override
