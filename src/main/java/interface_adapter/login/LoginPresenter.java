@@ -38,7 +38,6 @@ public class LoginPresenter implements LoginOutputBoundary {
     @Override
     public void prepareSuccessView(LoginOutputData response) {
         // On success, switch to the logged in view.
-
         final LoggedInState loggedInState = loggedInViewModel.getState();
         loggedInState.setUsername(response.getUsername());
         loggedInState.setUser(response.getUser());
@@ -47,10 +46,8 @@ public class LoginPresenter implements LoginOutputBoundary {
             loggedInState.setHoldings(response.getUser().getPortfolio().getHoldings());
             loggedInState.setWatchlist(response.getUser().getPortfolio().getWatchlist());
 
-            // =========================================================================
-            // ADDED: Pre-load the user's saved watchlist into the WatchlistViewModel
+            // Pre-load the user's saved watchlist into the WatchlistViewModel
             // so it appears immediately when switching to the watchlist tab upon login.
-            // =========================================================================
             List<WatchlistState.WatchlistStockItem> stateItems = new ArrayList<>();
             for (entity.WatchlistStockItem item : response.getUser().getPortfolio().getWatchlist()) {
                 String closeStr = (item.closePrice() != null) ? item.closePrice().toString() : "";

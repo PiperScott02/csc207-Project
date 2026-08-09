@@ -33,7 +33,7 @@ public class FileUserDataAccessObject
         WatchlistDataAccessInterface {
 
     private String currentUser;
-    private static final String HEADER = "username,password,holdings,watchlist";
+    private static final String HEADER = "username,password,holdings,watchlist,riskPreference";
 
     private final File csvFile;
     private final Map<String, Integer> headers = new LinkedHashMap<>();
@@ -56,6 +56,7 @@ public class FileUserDataAccessObject
         headers.put("password", 1);
         headers.put("holdings", 2);
         headers.put("watchlist", 3);
+        headers.put("riskPreference", 4);
 
         if (csvFile.length() == 0) {
             save();
@@ -90,6 +91,7 @@ public class FileUserDataAccessObject
                     final String password = col[headers.get("password")];
                     final String holdingsString = col.length > headers.get("holdings") ? col[headers.get("holdings")] : "";
                     final String watchlistString = col.length > headers.get("watchlist") ? col[headers.get("watchlist")] : "";
+                    final String riskProfileString = col.length > headers.get("riskPreference") ? col[headers.get("riskPreference")] : "";
 
                     if (username.isEmpty()) {
                         continue;
@@ -98,6 +100,18 @@ public class FileUserDataAccessObject
                     final User user = userFactory.create(username, password);
                     parseAndRestoreHoldings(user, holdingsString);
                     parseAndRestoreWatchlist(user, watchlistString);
+
+                    // Restore risk preference if it exists
+                    if (!riskProfileString.isBlank()) {
+                        try {
+                            RiskLevel level = RiskLevel.valueOf(riskProfileString);
+                            RiskProfile profile = new RiskProfile(level);
+                            user.setRiskProfile(profile);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                     accounts.put(username, user);
                 }
             }
@@ -115,11 +129,16 @@ public class FileUserDataAccessObject
                 List<StockHolding> holdings = (user.getPortfolio() != null) ? user.getPortfolio().getHoldings() : null;
                 List<WatchlistStockItem> watchlist = (user.getPortfolio() != null) ? user.getPortfolio().getWatchlist() : null;
 
+                RiskProfile riskProfileObj = user.getRiskProfile();
+                String riskProfileString = "";
+                if (riskProfileObj != null && riskProfileObj.getRiskLevel() != null) {
+                    riskProfileString = riskProfileObj.getRiskLevel().name();
+                }
                 final String holdingsString = formatHoldingsToString(holdings);
                 final String watchlistString = formatWatchlistToString(watchlist);
 
-                final String line = String.format("%s,%s,%s,%s",
-                        user.getName(), user.getPassword(), holdingsString, watchlistString);
+                final String line = String.format("%s,%s,%s,%s,%s",
+                        user.getName(), user.getPassword(), holdingsString, watchlistString, riskProfileString);
                 writer.write(line);
                 writer.newLine();
             }
