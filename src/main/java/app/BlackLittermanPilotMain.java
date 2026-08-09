@@ -7,6 +7,7 @@ import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.black_litterman.BlackLittermanPresenter;
 import interface_adapter.black_litterman.BlackLittermanState;
 import interface_adapter.black_litterman.BlackLittermanViewModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.analysis.BlackLittermanService;
 import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.black_litterman.BlackLittermanInputBoundary;
@@ -37,6 +38,7 @@ public class BlackLittermanPilotMain {
             final BlackLittermanService blackLittermanService = new BlackLittermanService();
             final ViewManagerModel viewManagerModel = new ViewManagerModel();
             final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel();
+            final LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
 
             // 3. Create a test user with holdings
             final User testUser = new CommonUser("testUser", "password");
@@ -81,7 +83,8 @@ public class BlackLittermanPilotMain {
             final BlackLittermanView blackLittermanView = new BlackLittermanView(
                     viewManagerModel,
                     blackLittermanViewModel,
-                    blackLittermanController
+                    blackLittermanController,
+                    loggedInViewModel
             );
 
             // 6. Automatically trigger initial market data load so labels populate right away
