@@ -98,7 +98,10 @@ public final class PortfolioHealthPilotMain {
          * Instantiate the View using the factory method or direct instantiation with LoggedInViewModel.
          */
         final PortfolioHealthView portfolioHealthView = PortfolioHealthUseCaseFactory.create(
-                viewManagerModel, portfolioHealthViewModel, loggedInViewModel
+                viewManagerModel,
+                portfolioHealthViewModel,
+                loggedInViewModel,
+                portfolioHealthController
         );
 
         /*

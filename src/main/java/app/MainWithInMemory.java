@@ -96,7 +96,8 @@ public class MainWithInMemory {
         final PortfolioHealthView portfolioHealthView = PortfolioHealthUseCaseFactory.create(
                 viewManagerModel,
                 portfolioHealthViewModel,
-                loggedInViewModel
+                loggedInViewModel,
+                portfolioHealthController
         );
         views.add(portfolioHealthView, "portfolio health");
 

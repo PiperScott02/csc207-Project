@@ -123,9 +123,11 @@ public final class WatchlistPilotMain {
         final PortfolioHealthView portfolioHealthView = PortfolioHealthUseCaseFactory.create(
                 viewManagerModel,
                 portfolioHealthViewModel,
-                loggedInViewModel
+                loggedInViewModel,
+                portfolioHealthController
         );
         views.add(portfolioHealthView, "portfolio health");
+
         /*
          * Manually wire the Clean Architecture layers using the Factory.
          */

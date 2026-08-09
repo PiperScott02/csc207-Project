@@ -19,10 +19,15 @@ public final class PortfolioHealthUseCaseFactory {
 
     public static PortfolioHealthView create(
             ViewManagerModel viewManagerModel,
-            PortfolioHealthViewModel portfolioHealthViewModel, LoggedInViewModel loggedInViewModel) {
+            PortfolioHealthViewModel portfolioHealthViewModel,
+            LoggedInViewModel loggedInViewModel,
+            PortfolioHealthController portfolioHealthController) {
 
-        return new PortfolioHealthView(portfolioHealthViewModel, viewManagerModel,
-                loggedInViewModel
+        return new PortfolioHealthView(
+                portfolioHealthViewModel,
+                viewManagerModel,
+                loggedInViewModel,
+                portfolioHealthController
         );
     }
 
