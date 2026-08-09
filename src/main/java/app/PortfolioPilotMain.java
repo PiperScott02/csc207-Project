@@ -300,7 +300,8 @@ public final class PortfolioPilotMain {
                         viewManagerModel,
                         blackLittermanViewModel,
                         blackLittermanDataAccessObject,
-                        blackLittermanService
+                        blackLittermanService,
+                        loggedInViewModel
                 );
         views.add(blackLittermanView, blackLittermanView.getViewName());
 

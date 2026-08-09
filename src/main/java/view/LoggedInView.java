@@ -183,6 +183,10 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
             LoggedInState state = loggedInViewModel.getState();
             if (state != null && state.getUser() != null) {
                 blackLittermanController.loadMarketData(state.getUser());
+
+                // === ADDED: Switch to the Black-Litterman view ===
+                viewManagerModel.setState("Black-Litterman view");
+                viewManagerModel.firePropertyChanged();
             } else {
                 JOptionPane.showMessageDialog(this, "No active user session found.");
             }

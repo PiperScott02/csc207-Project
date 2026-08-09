@@ -122,10 +122,7 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             blackLittermanViewModel.setState(currentState);
 
             if (blackLittermanController != null) {
-                blackLittermanController.execute(user,
-                        blackLittermanViewModel.getState().getUserViews(),
-                        blackLittermanViewModel.getState().getConfidenceLevels()
-                );
+                blackLittermanController.execute(user, userViews, confidenceLevels);
             }
         });
 
@@ -430,15 +427,20 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
 
     private void extractViewIfValid(String rowLabelText, String opinionText, String confidence,
                                     Map<String, Double> views, Map<String, String> confidences) {
-        if (opinionText != null && !opinionText.trim().isEmpty()
-                && confidence != null && !"None".equalsIgnoreCase(confidence)) {
-
+        if (opinionText != null && !opinionText.trim().isEmpty()) {
             String ticker = extractTickerFromText(rowLabelText);
             if (ticker != null && !ticker.contains("[")) {
                 try {
-                    double opinionVal = Double.parseDouble(opinionText.trim());
+                    // Convert percentage input (e.g. "15" -> 0.15) for the mathematical model
+                    double opinionVal = Double.parseDouble(opinionText.trim()) / 100.0;
                     views.put(ticker, opinionVal);
-                    confidences.put(ticker, confidence);
+
+                    // If confidence is left as "None", gracefully default it to "Medium" so the view isn't lost
+                    if (confidence == null || "None".equalsIgnoreCase(confidence)) {
+                        confidences.put(ticker, "Medium");
+                    } else {
+                        confidences.put(ticker, confidence);
+                    }
                 } catch (NumberFormatException ignored) {}
             }
         }
@@ -451,7 +453,11 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
     private String extractTickerFromText(String labelText) {
         try {
             int dotIndex = labelText.indexOf('.');
-            int dashIndex = labelText.indexOf('-');
+            int dashIndex = labelText.indexOf('—');
+            if (dashIndex == -1) {
+                dashIndex = labelText.indexOf('—');
+            }
+
             if (dotIndex != -1 && dashIndex != -1 && dashIndex > dotIndex) {
                 return labelText.substring(dotIndex + 1, dashIndex).trim();
             }
@@ -490,6 +496,12 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             add(createMainContentPanel(), BorderLayout.CENTER);
             revalidate();
             repaint();
+
+            // === ADDED: Automatically load market data when switching to this view ===
+            if (blackLittermanController != null && loggedInViewModel.getState() != null
+                    && loggedInViewModel.getState().getUser() != null) {
+                blackLittermanController.loadMarketData(loggedInViewModel.getState().getUser());
+            }
         }
     }
 

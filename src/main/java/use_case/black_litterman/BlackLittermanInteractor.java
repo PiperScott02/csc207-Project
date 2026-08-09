@@ -34,6 +34,17 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
 
             List<StockHolding> holdings = user.getPortfolio().getHoldings();
 
+            // === ADDED: Hydrate each holding's stock with historical time series data using the DAO ===
+            for (StockHolding holding : holdings) {
+                if (holding.getStock() != null && holding.getStock().getTickerSymbol() != null) {
+                    String ticker = holding.getStock().getTickerSymbol();
+                    Stock fullStock = blackLittermanDataAccessObject.get(ticker);
+                    if (fullStock != null) {
+                        holding.setStock(fullStock); // Replace with the fully populated stock containing history
+                    }
+                }
+            }
+
             // 1. Compute market weight caps and determine top 5 heavily weighted stocks
             Map<String, Double> marketWeightCaps = blackLittermanService.computeMarketWeightCaps(holdings);
             List<Map.Entry<String, Double>> sortedWeights = new ArrayList<>(marketWeightCaps.entrySet());
@@ -66,11 +77,17 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
             // 3. Compute adjusted returns if user views are provided
             Map<String, Double> adjustedReturns = new HashMap<>();
             if (inputData.getUserViews() != null && !inputData.getUserViews().isEmpty()) {
+                System.out.println("DEBUG - User Views Received: " + inputData.getUserViews());
+                System.out.println("DEBUG - Confidence Levels Received: " + inputData.getConfidenceLevels());
+
                 adjustedReturns = blackLittermanService.computeAdjustedReturns(
                         holdings,
                         inputData.getUserViews(),
                         inputData.getConfidenceLevels()
                 );
+                System.out.println("DEBUG - Computed Adjusted Returns: " + adjustedReturns);
+            } else {
+                System.out.println("DEBUG - User views were empty or null!");
             }
 
 
@@ -82,6 +99,9 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
                 user.getPortfolio().setCustomViews(null);
                 user.getPortfolio().setHasCustomViews(false);
             }
+
+            System.out.println("DEBUG - Top Tickers found: " + topTickers);
+            System.out.println("DEBUG - Market Returns: " + marketReturns);
 
             // 4. Package into output data
             BlackLittermanOutputData outputData = new BlackLittermanOutputData(
