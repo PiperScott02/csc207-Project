@@ -192,7 +192,7 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
 
         final JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(SIDEBAR_BG);
-        bottomPanel.setPreferredSize(new Dimension(240, 60));
+        bottomPanel.setPreferredSize(new Dimension(240, 95));
         bottomPanel.setLayout(null);
         bottomPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
@@ -211,8 +211,22 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         dateLabel.setForeground(TEXT_MUTED);
         dateLabel.setBounds(20, 30, 180, 15);
 
+        final JButton logoutButton = new JButton("Log Out");
+        logoutButton.setFont(new Font("SansSerif", Font.BOLD, 11));
+        logoutButton.setForeground(TEXT_MAIN);
+        logoutButton.setBackground(CARD_BG);
+        logoutButton.setFocusPainted(false);
+        logoutButton.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        logoutButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        logoutButton.setBounds(20, 52, 200, 30);
+        logoutButton.addActionListener(e -> {
+            viewManagerModel.setState("log in");
+            viewManagerModel.firePropertyChanged();
+        });
+
         bottomPanel.add(welcomeLabel);
         bottomPanel.add(dateLabel);
+        bottomPanel.add(logoutButton);
 
         sidebarPanel.add(brandPanel, BorderLayout.NORTH);
         sidebarPanel.add(navLinksPanel, BorderLayout.CENTER);
