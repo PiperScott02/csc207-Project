@@ -5,6 +5,7 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.watchlist.WatchlistViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -35,6 +36,7 @@ public final class LoginUseCaseFactory {
             LoginViewModel loginViewModel,
             LoggedInViewModel loggedInViewModel,
             SignupViewModel signupViewModel,
+            WatchlistViewModel watchlistViewModel,
             LoginUserDataAccessInterface userDataAccessObject) {
 
         final LoginController loginController = createLoginUseCase(
@@ -42,6 +44,7 @@ public final class LoginUseCaseFactory {
                 loginViewModel,
                 loggedInViewModel,
                 signupViewModel,
+                watchlistViewModel,
                 userDataAccessObject
         );
         return new LoginView(loginViewModel, loginController);
@@ -53,6 +56,7 @@ public final class LoginUseCaseFactory {
             LoginViewModel loginViewModel,
             LoggedInViewModel loggedInViewModel,
             SignupViewModel signupViewModel,
+            WatchlistViewModel watchlistViewModel,
             LoginUserDataAccessInterface userDataAccessObject) {
 
         // Notice how we pass this method's parameters to the Presenter.
@@ -60,7 +64,8 @@ public final class LoginUseCaseFactory {
                 viewManagerModel,
                 loggedInViewModel,
                 loginViewModel,
-                signupViewModel
+                signupViewModel,
+                watchlistViewModel
         );
         final LoginInputBoundary loginInteractor = new LoginInteractor(
                 userDataAccessObject, loginOutputBoundary);

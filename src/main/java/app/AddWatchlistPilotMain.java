@@ -1,5 +1,6 @@
 package app;
 
+import data_access.FileUserDataAccessObject;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_watchlist.AddWatchlistController;
 import interface_adapter.add_watchlist.AddWatchlistPresenter;
@@ -23,7 +24,8 @@ public class AddWatchlistPilotMain {
             LoggedInViewModel loggedInViewModel,
             WatchlistViewModel watchlistViewModel,
             AddWatchlistViewModel addWatchlistViewModel,
-            StockDailyDataAccessInterface dataAccessObject) {
+            StockDailyDataAccessInterface dataAccessObject,
+            FileUserDataAccessObject userDataAccessObject) {
 
 // 1. Create the Presenter
         AddWatchlistOutputBoundary addWatchlistOutputBoundary = new AddWatchlistPresenter(
@@ -37,7 +39,8 @@ public class AddWatchlistPilotMain {
         AddWatchlistInputBoundary addWatchlistInteractor = new AddWatchlistInteractor(
                 dataAccessObject,
                 addWatchlistOutputBoundary,
-                loggedInViewModel
+                loggedInViewModel,
+                userDataAccessObject
         );
 
         // 3. Create the Controller

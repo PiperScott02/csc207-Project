@@ -318,6 +318,14 @@ public class Portfolio {
         return false;
     }
 
+    /** Removes a stock item from the watchlist by its ticker symbol.
+     * @param ticker the ticker symbol of the watchlist item to remove.
+     * @return true if an item was removed, false otherwise.
+     */
+    public boolean removeWatchlistByTicker(String ticker) {
+        return watchlist.removeIf(item -> item.ticker().equals(ticker));
+    }
+
     /** Returns whether the user has set custom views regarding their stocks' perfomances.
      * @return a boolean representing whether they have set custom views or not.
      */

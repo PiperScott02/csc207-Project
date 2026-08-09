@@ -1,25 +1,24 @@
 package view;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import entity.User;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_watchlist.AddWatchlistController;
 import interface_adapter.add_watchlist.AddWatchlistState;
 import interface_adapter.add_watchlist.AddWatchlistViewModel;
 import interface_adapter.delete_watchlist.DeleteWatchlistController;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistState;
 import interface_adapter.watchlist.WatchlistViewModel;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.List;
-
-import static org.junit.jupiter.params.shadow.com.univocity.parsers.conversions.Conversions.toUpperCase;
 
 /**
  * The View component for the WatchlistView screen.
@@ -39,13 +38,17 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
     private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
 
     private final String viewName = "watchlist";
+
+    // View Models and Controllers
     private final WatchlistViewModel watchlistViewModel;
     private final ViewManagerModel viewManagerModel;
     private final LoggedInViewModel loggedInViewModel;
     private final AddWatchlistViewModel addWatchlistViewModel;
     private final AddWatchlistController addWatchlistController;
     private final DeleteWatchlistController deleteWatchlistController;
+    private final WatchlistController watchlistController;
 
+    // UI Components and State References
     private DefaultTableModel watchlistTableModel;
     private JPanel addFormCard;
     private JTextField tickerInputField;
@@ -65,24 +68,28 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
                          LoggedInViewModel loggedInViewModel,
                          AddWatchlistViewModel addWatchlistViewModel,
                          AddWatchlistController addWatchlistController,
-                         DeleteWatchlistController deleteWatchlistController) {
+                         DeleteWatchlistController deleteWatchlistController,
+                         WatchlistController watchlistController) {
         this.watchlistViewModel = watchlistViewModel;
         this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel = loggedInViewModel;
         this.addWatchlistViewModel = addWatchlistViewModel;
         this.addWatchlistController = addWatchlistController;
         this.deleteWatchlistController = deleteWatchlistController;
+        this.watchlistController = watchlistController;
 
+        // 1. Register listener for view model updates
         this.watchlistViewModel.addPropertyChangeListener(this);
         this.addWatchlistViewModel.addPropertyChangeListener(this);
+        this.viewManagerModel.addPropertyChangeListener(this);
 
-        // Configure primary panel components and style
+        // 2. Configure primary panel components and style
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
         add(createSidebarPanel(), BorderLayout.WEST);
         add(createMainContentPanel(), BorderLayout.CENTER);
 
-        // Sync the initial UI components with state data if present
+        // 3. Sync the initial UI components with state data if present
         if (watchlistViewModel.getState() != null) {
             updateViewFromState(watchlistViewModel.getState());
         }
@@ -90,6 +97,7 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
 
     /**
      * Returns the name of this view for navigation and screen switching
+     *
      * @return the view name string
      */
     public String getViewName() {
@@ -98,6 +106,7 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
 
     /**
      * Creates and returns the navigation sidebar panel
+     *
      * @return the configured sidebar JPanel
      */
     private JPanel createSidebarPanel() {
@@ -142,12 +151,14 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
             viewManagerModel.setState("holdings");
             viewManagerModel.firePropertyChanged();
         }));
-        navLinksPanel.add(createSidebarNavLink("Watchlist", true, e -> {}));
+        navLinksPanel.add(createSidebarNavLink("Watchlist", true, e -> {
+        }));
         navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, e -> {
             viewManagerModel.setState("news");
             viewManagerModel.firePropertyChanged();
         }));
-        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {}));
+        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {
+        }));
         navLinksPanel.add(createSidebarNavLink("Risk Preference", false, e -> {
             viewManagerModel.setState("risk preference");
             viewManagerModel.firePropertyChanged();
@@ -160,7 +171,8 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
             viewManagerModel.setState("search");
             viewManagerModel.firePropertyChanged();
         }));
-        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, e -> {}));
+        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, e -> {
+        }));
 
         // Assemble and return the final sidebar layout
         sidebar.add(brandPanel, BorderLayout.NORTH);
@@ -171,9 +183,10 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
 
     /**
      * Helper method to create the styled navigation button for the sidebar
-     * @param text the button display text
+     *
+     * @param text     the button display text
      * @param isActive whether this navigation link corresponds to the current active view
-     * @param action the action listener triggered when clicked
+     * @param action   the action listener triggered when clicked
      * @return the configured navigation JButton
      */
     private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
@@ -190,7 +203,8 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
     }
 
     /**
-     * Creates and returns the main content panel containing the watchlist table and inline add form card.
+     * Creates and returns the main content panel containing the title, add button, form card, and table.
+     *
      * @return the configured main content JPanel
      */
     private JPanel createMainContentPanel() {
@@ -198,37 +212,86 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         panel.setBackground(BG_DARK);
         panel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
-        // Screen title
+        final JLabel titleLabel = createTitleLabel();
+        final JButton addWatchlistBtn = createAddWatchlistButton(panel);
+
+        panel.add(titleLabel);
+        panel.add(addWatchlistBtn);
+        panel.add(addFormCard);
+        panel.add(tablePanel);
+
+        return panel;
+    }
+
+    /**
+     * Creates the main screen title label.
+     *
+     * @return the title JLabel
+     */
+    private JLabel createTitleLabel() {
         final JLabel titleLabel = new JLabel("Watchlist");
         titleLabel.setFont(new Font("Serif", Font.BOLD, 26));
         titleLabel.setForeground(TEXT_MAIN);
         titleLabel.setBounds(20, 10, 200, 80);
+        return titleLabel;
+    }
 
-        // + Add Company Button
+    /**
+     * Creates the "+ Add Company" action button and initializes dependent panels.
+     *
+     * @param parentPanel the parent container panel for revalidation layout updates
+     * @return the configured add watchlist JButton
+     */
+    private JButton createAddWatchlistButton(JPanel parentPanel) {
         final JButton addWatchlistBtn = new JButton("+ Add Company");
         addWatchlistBtn.setBackground(ACCENT_GREEN);
         addWatchlistBtn.setForeground(Color.BLACK);
         addWatchlistBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
-        addWatchlistBtn.setBounds(800, 60, 145, 35);
+        addWatchlistBtn.setBounds(800, 60, 160, 35);
         addWatchlistBtn.setFocusPainted(false);
         addWatchlistBtn.setBorderPainted(false);
         addWatchlistBtn.setOpaque(true);
         addWatchlistBtn.setContentAreaFilled(true);
 
-        // ==== INLINE ADD COMPANY FORM CARD (pops up after clicking Add button) ====
-        addFormCard = new JPanel(null);
-        addFormCard.setBackground(CARD_BG);
-        addFormCard.setBounds(20, 80, 550, 160);
-        addFormCard.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
-        addFormCard.setVisible(false);
+        // Initialize subordinate UI sections
+        addFormCard = createAddFormCard(parentPanel, addWatchlistBtn);
+        tablePanel = createTablePanel();
 
-        // Card title
+        // Toggle button listener to show/hide the inline add form card
+        addWatchlistBtn.addActionListener(e -> {
+            final boolean isVisible = addFormCard.isVisible();
+            addFormCard.setVisible(!isVisible);
+            if (!isVisible) {
+                tablePanel.setBounds(0, 285, 940, 260);
+            } else {
+                tablePanel.setBounds(0, 110, 940, 420);
+            }
+            parentPanel.revalidate();
+            parentPanel.repaint();
+        });
+
+        return addWatchlistBtn;
+    }
+
+    /**
+     * Creates the inline form card used for inputting new ticker symbols.
+     *
+     * @param parentPanel     the parent container panel
+     * @param addWatchlistBtn the trigger button reference
+     * @return the configured add form JPanel
+     */
+    private JPanel createAddFormCard(JPanel parentPanel, JButton addWatchlistBtn) {
+        final JPanel card = new JPanel(null);
+        card.setBackground(CARD_BG);
+        card.setBounds(20, 80, 550, 160);
+        card.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        card.setVisible(false);
+
         final JLabel formHeader = new JLabel("ADD NEW WATCHLIST ITEM");
         formHeader.setFont(new Font("SansSerif", Font.BOLD, 10));
         formHeader.setForeground(TEXT_MUTED);
         formHeader.setBounds(25, 15, 250, 15);
 
-        // Ticker symbol label and text field input
         final JLabel tickerLabel = new JLabel("TICKER SYMBOL");
         tickerLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
         tickerLabel.setForeground(TEXT_MUTED);
@@ -245,7 +308,6 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         ));
         tickerInputField.setBounds(20, 62, 510, 35);
 
-        // + Add Button
         final JButton submitBtn = new JButton("+ Add");
         submitBtn.setBackground(ACCENT_GREEN);
         submitBtn.setForeground(TEXT_MAIN);
@@ -254,7 +316,6 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         submitBtn.setBorderPainted(false);
         submitBtn.setBounds(0, 110, 120, 32);
 
-        // Cancel Button
         final JButton cancelBtn = new JButton("Cancel");
         cancelBtn.setBackground(new Color(28, 38, 58));
         cancelBtn.setForeground(TEXT_MAIN);
@@ -263,19 +324,48 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         cancelBtn.setBorderPainted(false);
         cancelBtn.setBounds(80, 110, 120, 32);
 
-        addFormCard.add(formHeader);
-        addFormCard.add(tickerLabel);
-        addFormCard.add(tickerInputField);
-        addFormCard.add(submitBtn);
-        addFormCard.add(cancelBtn);
+        // Cancel Button Action
+        cancelBtn.addActionListener(e -> {
+            tickerInputField.setText("");
+            card.setVisible(false);
+            tablePanel.setBounds(0, 110, 940, 420);
+            parentPanel.revalidate();
+            parentPanel.repaint();
+        });
 
-        // ==== WATCHLIST TABLE (BOTTOM PANEL) ====
-        tablePanel = new JPanel(new BorderLayout());
-        tablePanel.setBackground(CARD_BG);
-        tablePanel.setBounds(20, 110, 940, 420);
-        tablePanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        // Submit Button Action
+        submitBtn.addActionListener(e -> {
+            final String ticker = tickerInputField.getText().trim().toUpperCase();
+            if (!ticker.isEmpty() && addWatchlistController != null) {
+                addWatchlistController.execute(ticker);
+            }
+            tickerInputField.setText("");
+            card.setVisible(false);
+            tablePanel.setBounds(0, 110, 940, 420);
+            parentPanel.revalidate();
+            parentPanel.repaint();
+        });
 
-        // Table headers
+        card.add(formHeader);
+        card.add(tickerLabel);
+        card.add(tickerInputField);
+        card.add(submitBtn);
+        card.add(cancelBtn);
+
+        return card;
+    }
+
+    /**
+     * Creates and returns the table panel containing the watchlist items table.
+     *
+     * @return the configured table JPanel
+     */
+    private JPanel createTablePanel() {
+        final JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(CARD_BG);
+        panel.setBounds(20, 110, 940, 420);
+        panel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+
         final String[] columnNames = {"TICKER", "COMPANY", "CLOSE", "CHANGE", ""};
         watchlistTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -284,7 +374,6 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
             }
         };
 
-        // Table Pane
         final JTable watchlistTable = new JTable(watchlistTableModel);
         watchlistTable.setBackground(CARD_BG);
         watchlistTable.setForeground(TEXT_MAIN);
@@ -294,11 +383,11 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         watchlistTable.getTableHeader().setForeground(TEXT_MUTED);
         watchlistTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 10));
 
-        // Configure custom cell rendering, alignment, padding, and column widths
-        DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
+        // Configure custom cell rendering, alignment, and padding
+        final DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                final Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 if (column == 1) {
                     setHorizontalAlignment(JLabel.LEFT);
                 } else {
@@ -322,14 +411,14 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         watchlistTable.getColumnModel().getColumn(4).setPreferredWidth(45);
         watchlistTable.getColumnModel().getColumn(4).setMaxWidth(50);
 
-        // Handle delete button (x) clicks
+        // Handle delete button row actions
         watchlistTable.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                int row = watchlistTable.rowAtPoint(e.getPoint());
-                int col = watchlistTable.columnAtPoint(e.getPoint());
+                final int row = watchlistTable.rowAtPoint(e.getPoint());
+                final int col = watchlistTable.columnAtPoint(e.getPoint());
                 if (col == 4 && row >= 0) {
-                    String ticker = (String) watchlistTable.getValueAt(row, 0);
+                    final String ticker = (String) watchlistTable.getValueAt(row, 0);
                     if (ticker != null && !ticker.isEmpty() && deleteWatchlistController != null) {
                         deleteWatchlistController.execute(ticker);
                     }
@@ -337,55 +426,17 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        // Add scroll pane and remove default borders
         final JScrollPane scrollPane = new JScrollPane(watchlistTable);
         scrollPane.getViewport().setBackground(CARD_BG);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
-
-        // Toggle Button & Form Actions
-        addWatchlistBtn.addActionListener(e -> {
-            boolean isVisible = addFormCard.isVisible();
-            addFormCard.setVisible(!isVisible);
-            if (!isVisible) {
-                tablePanel.setBounds(0, 285, 940, 260);
-            } else {
-                tablePanel.setBounds(0, 110, 940, 420);
-            }
-            panel.revalidate();
-            panel.repaint();
-        });
-
-        cancelBtn.addActionListener(e -> {
-            tickerInputField.setText("");
-            addFormCard.setVisible(false);
-            tablePanel.setBounds(0, 110, 940, 420);
-            panel.revalidate();
-            panel.repaint();
-        });
-
-        submitBtn.addActionListener(e -> {
-            String ticker = tickerInputField.getText().trim().toUpperCase();
-            if (!ticker.isEmpty() && addWatchlistController != null) {
-                addWatchlistController.execute(ticker);
-            }
-            tickerInputField.setText("");
-            addFormCard.setVisible(false);
-            tablePanel.setBounds(0, 110, 940, 420);
-            panel.revalidate();
-            panel.repaint();
-        });
-
-        panel.add(titleLabel);
-        panel.add(addWatchlistBtn);
-        panel.add(addFormCard);
-        panel.add(tablePanel);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
     }
 
     /**
      * Refreshes the watchlist table with formatted stock data from the provided state.
+     *
      * @param state the current watchlist state containing stock items and prices
      */
     private void updateViewFromState(WatchlistState state) {
@@ -393,7 +444,7 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
             watchlistTableModel.setRowCount(0);
             for (WatchlistState.WatchlistStockItem item : state.getItems()) {
 
-                // Parse close price safely if it's a String
+                // Parse close price safely
                 Object closeVal = "—";
                 if (item.getClose() != null && !item.getClose().isEmpty()) {
                     try {
@@ -403,7 +454,7 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
                     }
                 }
 
-                // Parse daily price change safely if it's a String
+                // Parse daily price change safely
                 Object changeVal = "—";
                 if (item.getDailyPriceChange() != null && !item.getDailyPriceChange().isEmpty()) {
                     try {
@@ -431,9 +482,21 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof WatchlistState state) {
+        // Only trigger a fetch when switching views to "watchlist"
+        if ("view".equals(evt.getPropertyName()) && "watchlist".equals(evt.getNewValue())) {
+            if (this.watchlistController != null && loggedInViewModel.getState() != null) {
+                User currentUser = loggedInViewModel.getState().getUser();
+                if (currentUser != null) {
+                    this.watchlistController.execute(currentUser);
+                }
+            }
+        }
+        // Handle standard model updates from WatchlistViewModel
+        else if (evt.getNewValue() instanceof WatchlistState state) {
             updateViewFromState(state);
-        } else if (evt.getNewValue() instanceof AddWatchlistState state) {
+        }
+        // Handle error states from AddWatchlistViewModel
+        else if (evt.getNewValue() instanceof AddWatchlistState state) {
             if (state.getAddWatchlistError() != null) {
                 JOptionPane.showMessageDialog(this, state.getAddWatchlistError());
             }

@@ -13,6 +13,7 @@ import data_access.FileUserDataAccessObject;
 import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
 import data_access.ticker_search.TickerSearchDataAccessObject;
+import data_access.FileWatchlistDataAccessObject;
 import entity.CommonUserFactory;
 
 import interface_adapter.ViewManagerModel;
@@ -44,6 +45,7 @@ import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.news.NewsDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
+import use_case.watchlist.WatchlistDataAccessInterface;
 
 import view.*;
 
@@ -105,7 +107,7 @@ public final class PortfolioPilotMain {
         /*
          * Alpha Vantage API key
          */
-        final String apiKey = "API_KEY_HERE";
+        final String apiKey = "NKH8SNZW8I690AJQ";
 
         // ==========================================
         // 2. Data Access Objects
@@ -141,6 +143,9 @@ public final class PortfolioPilotMain {
         final NewsDataAccessInterface newsDataAccessObject =
                 new AlphaVantageNewsDataAccessObject(apiKey);
 
+        final WatchlistDataAccessInterface watchlistDataAccessObject =
+                new FileWatchlistDataAccessObject("data/watchlist.csv");
+
         // ==========================================
         // 3. Controllers
         // ==========================================
@@ -163,6 +168,7 @@ public final class PortfolioPilotMain {
                 WatchlistUseCaseFactory.createWatchlistUseCase(
                         viewManagerModel,
                         watchlistViewModel,
+                        loggedInViewModel,
                         stockDataAccessObject
                 );
 
@@ -211,6 +217,7 @@ public final class PortfolioPilotMain {
                 loginViewModel,
                 loggedInViewModel,
                 signupViewModel,
+                watchlistViewModel,
                 userDataAccessObject
         );
         views.add(loginView, loginView.getViewName());
@@ -315,7 +322,8 @@ public final class PortfolioPilotMain {
                         addWatchlistViewModel,
                         watchlistViewModel,
                         loggedInViewModel,
-                        stockDailyDataAccessObject
+                        stockDailyDataAccessObject,
+                        userDataAccessObject
                 );
         views.add(addWatchlistView, addWatchlistView.viewName);
 

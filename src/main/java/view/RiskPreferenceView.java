@@ -1,39 +1,26 @@
 package view;
 
-import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
-
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.SwingConstants;
+import javax.swing.JOptionPane;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-
-import interface_adapter.ViewManagerModel;
-import interface_adapter.risk_preference.RiskPreferenceController;
-import interface_adapter.risk_preference.RiskPreferenceViewModel;
-
-import entity.RiskLevel;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.time.format.DateTimeFormatter;
 
-import javax.swing.JOptionPane;
-
+import interface_adapter.ViewManagerModel;
+import interface_adapter.risk_preference.RiskPreferenceController;
+import interface_adapter.risk_preference.RiskPreferenceViewModel;
 import interface_adapter.risk_preference.RiskPreferenceState;
-
-
+import entity.RiskLevel;
 
 /**
  * The screen where a user selects their investment risk preferences.
@@ -48,6 +35,21 @@ public class RiskPreferenceView extends JPanel
     private final RiskPreferenceController controller;
     private final RiskPreferenceViewModel viewModel;
 
+    // Dark UI Color Palette
+    private static final Color BG_DARK = new Color(11, 15, 25);
+    private static final Color SIDEBAR_BG = new Color(7, 10, 17);
+    private static final Color CARD_BG = new Color(17, 24, 39);
+    private static final Color BORDER_COLOR = new Color(31, 41, 55);
+    private static final Color TEXT_MAIN = new Color(243, 244, 246);
+    private static final Color TEXT_MUTED = new Color(156, 163, 175);
+    private static final Color ACCENT_GREEN = new Color(16, 185, 129);
+    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
+
+    // Layout Dimension Constants
+    private static final int PANEL_PREFERRED_WIDTH = 750;
+    private static final int PANEL_PREFERRED_HEIGHT = 260;
+
+    // Risk tolerance selection buttons
     private final JRadioButton conservativeButton =
             new JRadioButton("Conservative (Low Risk)");
 
@@ -57,12 +59,14 @@ public class RiskPreferenceView extends JPanel
     private final JRadioButton aggressiveButton =
             new JRadioButton("Aggressive (High Risk)");
 
+    // Status and profile information display labels
     private final JLabel currentProfileLabel =
             new JLabel("Current Risk Profile: Not Set");
 
     private final JLabel lastUpdatedLabel =
             new JLabel("Last Updated: --");
 
+    // Form interaction action buttons
     private final JButton saveButton =
             new JButton("Save Preferences");
 
@@ -85,8 +89,10 @@ public class RiskPreferenceView extends JPanel
         this.controller = controller;
         this.viewModel = viewModel;
 
+        // 1. Register listener for view model updates
         viewModel.addPropertyChangeListener(this);
 
+        // 2. Load initial data when the view becomes visible
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent event) {
@@ -94,14 +100,16 @@ public class RiskPreferenceView extends JPanel
             }
         });
 
+        // 3. Configure main panel layout and background
         setLayout(new BorderLayout(15, 15));
-        setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+        setBackground(BG_DARK);
 
+        // 4. Assemble UI sections
         add(createHeaderPanel(), BorderLayout.NORTH);
         add(createFormPanel(), BorderLayout.CENTER);
         add(createBottomPanel(), BorderLayout.SOUTH);
     }
-
 
     /**
      * Creates the title section.
@@ -109,24 +117,39 @@ public class RiskPreferenceView extends JPanel
      * @return the header panel
      */
     private JPanel createHeaderPanel() {
-        final JPanel headerPanel = new JPanel(
-                new GridLayout(2, 1, 0, 5)
-        );
+        final JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setBackground(BG_DARK);
 
-        final JLabel title = new JLabel(
-                "PortfolioPilot",
-                SwingConstants.CENTER
-        );
-        title.setFont(new Font("SansSerif", Font.BOLD, 28));
+        final JLabel backLink = new JLabel("← Back to Dashboard");
+        backLink.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        backLink.setForeground(TEXT_MUTED);
+        backLink.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        final JLabel subtitle = new JLabel(
-                "Risk Preference Settings",
-                SwingConstants.CENTER
-        );
-        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 17));
+        backLink.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                viewManagerModel.setState(LOGGED_IN_VIEW_NAME);
+                viewManagerModel.firePropertyChanged();
+            }
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                backLink.setForeground(TEXT_MAIN);
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                backLink.setForeground(TEXT_MUTED);
+            }
+        });
 
+        final JLabel title = new JLabel("Risk Preference Settings");
+        title.setFont(new Font("SansSerif", Font.BOLD, 26));
+        title.setForeground(TEXT_MAIN);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        headerPanel.add(backLink);
+        headerPanel.add(Box.createVerticalStrut(15));
         headerPanel.add(title);
-        headerPanel.add(subtitle);
 
         return headerPanel;
     }
@@ -137,14 +160,9 @@ public class RiskPreferenceView extends JPanel
      * @return the form panel
      */
     private JPanel createFormPanel() {
-        final JPanel formPanel = new JPanel(
-                new BorderLayout()
-        );
-
-        formPanel.add(
-                createRiskLevelPanel(),
-                BorderLayout.CENTER
-        );
+        final JPanel formPanel = new JPanel(new BorderLayout());
+        formPanel.setBackground(BG_DARK);
+        formPanel.add(createRiskLevelPanel(), BorderLayout.CENTER);
 
         return formPanel;
     }
@@ -156,66 +174,71 @@ public class RiskPreferenceView extends JPanel
      */
     private JPanel createRiskLevelPanel() {
         final JPanel outerPanel = new JPanel(new GridBagLayout());
+        outerPanel.setBackground(BG_DARK);
 
         final JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(CARD_BG);
 
         panel.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createTitledBorder(
-                                "Select Your Risk Tolerance"
-                        ),
-                        BorderFactory.createEmptyBorder(
-                                20, 30, 20, 30
-                        )
+                        BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+                        BorderFactory.createEmptyBorder(25, 30, 25, 30)
                 )
         );
 
-        panel.setPreferredSize(new Dimension(700, 280));
+        panel.setPreferredSize(new Dimension(PANEL_PREFERRED_WIDTH, PANEL_PREFERRED_HEIGHT));
 
-        final JLabel instruction =
-                new JLabel("Choose one option:");
+        final JLabel sectionHeader = new JLabel("SELECT YOUR RISK TOLERANCE");
+        sectionHeader.setFont(new Font("SansSerif", Font.BOLD, 12));
+        sectionHeader.setForeground(TEXT_MUTED);
+        sectionHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        instruction.setFont(
-                new Font("SansSerif", Font.PLAIN, 18)
-        );
-
+        final JLabel instruction = new JLabel("Choose one option:");
+        instruction.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        instruction.setForeground(TEXT_MAIN);
         instruction.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        conservativeButton.setFont(
-                new Font("SansSerif", Font.PLAIN, 18)
-        );
-
-        moderateButton.setFont(
-                new Font("SansSerif", Font.PLAIN, 18)
-        );
-
-        aggressiveButton.setFont(
-                new Font("SansSerif", Font.PLAIN, 18)
-        );
+        // Style Radio Buttons for Dark Theme
+        styleRadioButton(conservativeButton);
+        styleRadioButton(moderateButton);
+        styleRadioButton(aggressiveButton);
 
         final ButtonGroup riskGroup = new ButtonGroup();
-
         riskGroup.add(conservativeButton);
         riskGroup.add(moderateButton);
         riskGroup.add(aggressiveButton);
 
         moderateButton.setSelected(true);
 
+        panel.add(sectionHeader);
+        panel.add(Box.createVerticalStrut(15));
         panel.add(instruction);
         panel.add(Box.createVerticalStrut(20));
 
         panel.add(conservativeButton);
-        panel.add(Box.createVerticalStrut(20));
+        panel.add(Box.createVerticalStrut(12));
 
         panel.add(moderateButton);
-        panel.add(Box.createVerticalStrut(20));
+        panel.add(Box.createVerticalStrut(12));
 
         panel.add(aggressiveButton);
 
         outerPanel.add(panel);
-
         return outerPanel;
+    }
+
+    /**
+     * Helper to style radio buttons for dark mode compatibility.
+     *
+     * @param button the radio button to style
+     */
+    private void styleRadioButton(JRadioButton button) {
+        button.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        button.setForeground(TEXT_MAIN);
+        button.setBackground(CARD_BG);
+        button.setFocusPainted(false);
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
     }
 
     /**
@@ -224,22 +247,29 @@ public class RiskPreferenceView extends JPanel
      * @return the bottom panel
      */
     private JPanel createBottomPanel() {
-        final JPanel bottomPanel = new JPanel(
-                new BorderLayout(10, 10)
-        );
+        final JPanel bottomPanel = new JPanel(new BorderLayout(10, 10));
+        bottomPanel.setBackground(BG_DARK);
 
-        final JPanel statusPanel = new JPanel(
-                new GridLayout(2, 1)
-        );
+        final JPanel statusPanel = new JPanel(new GridLayout(2, 1, 0, 4));
+        statusPanel.setBackground(BG_DARK);
+
+        currentProfileLabel.setForeground(TEXT_MAIN);
+        currentProfileLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        lastUpdatedLabel.setForeground(TEXT_MUTED);
+        lastUpdatedLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
 
         statusPanel.add(currentProfileLabel);
         statusPanel.add(lastUpdatedLabel);
 
         final JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(BG_DARK);
 
-        final JButton backButton =
-                new JButton("Back to Dashboard");
+        final JButton backButton = new JButton("Back to Dashboard");
+        styleSecondaryButton(backButton);
+        stylePrimaryButton(saveButton);
+        styleSecondaryButton(resetButton);
 
+        // Configure button action behaviors
         backButton.addActionListener(event -> {
             viewManagerModel.setState(LOGGED_IN_VIEW_NAME);
             viewManagerModel.firePropertyChanged();
@@ -247,7 +277,6 @@ public class RiskPreferenceView extends JPanel
 
         saveButton.addActionListener(event -> {
             final RiskLevel riskLevel = getSelectedRiskLevel();
-
             controller.execute(riskLevel);
         });
 
@@ -261,6 +290,40 @@ public class RiskPreferenceView extends JPanel
         bottomPanel.add(buttonPanel, BorderLayout.EAST);
 
         return bottomPanel;
+    }
+
+    /**
+     * Applies primary accent styling to the Save button (mint green).
+     *
+     * @param button the button to style
+     */
+    private void stylePrimaryButton(JButton button) {
+        button.setBackground(ACCENT_GREEN);
+        button.setForeground(BG_DARK);
+        button.setFont(new Font("SansSerif", Font.BOLD, 14));
+        button.setFocusPainted(false);
+        button.setOpaque(true);
+        button.setContentAreaFilled(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(9, 16, 9, 16)
+        ));
+    }
+
+    /**
+     * Applies dark styling to secondary buttons.
+     *
+     * @param button the button to style
+     */
+    private void styleSecondaryButton(JButton button) {
+        button.setBackground(BG_DARK);
+        button.setForeground(TEXT_MAIN);
+        button.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(9, 16, 9, 16)
+        ));
     }
 
     /**
@@ -302,6 +365,7 @@ public class RiskPreferenceView extends JPanel
 
         updateFormFromState(state);
 
+        // 1. Handle and display error dialog if present
         if (state.getError() != null && !state.getError().isBlank()) {
             JOptionPane.showMessageDialog(
                     this,
@@ -312,6 +376,7 @@ public class RiskPreferenceView extends JPanel
             return;
         }
 
+        // 2. Update current active risk profile display label
         if (state.getRiskLevel() != null) {
             currentProfileLabel.setText(
                     "Current Risk Profile: "
@@ -319,6 +384,7 @@ public class RiskPreferenceView extends JPanel
             );
         }
 
+        // 3. Format and update the last modification timestamp label
         if (state.getLastUpdated() != null) {
             final DateTimeFormatter formatter =
                     DateTimeFormatter.ofPattern(
@@ -331,6 +397,7 @@ public class RiskPreferenceView extends JPanel
             );
         }
 
+        // 4. Show confirmation success message dialog if present
         if (state.getMessage() != null
                 && !state.getMessage().isBlank()) {
             JOptionPane.showMessageDialog(

@@ -1,6 +1,7 @@
 package app;
 
 
+import data_access.FileUserDataAccessObject;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_watchlist.AddWatchlistController;
 import interface_adapter.add_watchlist.AddWatchlistPresenter;
@@ -28,11 +29,11 @@ import view.WatchlistView;
 
 public final class WatchlistUseCaseFactory {
 
-
-    /** Prevent instantiation. */
+    /**
+     * Prevent instantiation.
+     */
     private WatchlistUseCaseFactory() {
     }
-
 
     /**
      * Creates and returns the fully-wired WatchlistView.
@@ -44,31 +45,30 @@ public final class WatchlistUseCaseFactory {
             StockDataAccessInterface stockDataAccessObject,
             WatchlistDataAccessInterface watchlistDataAccessObject) {
 
-
         final WatchlistController watchlistController = createWatchlistUseCase(
                 viewManagerModel,
                 watchlistViewModel,
+                loggedInViewModel,
                 stockDataAccessObject
         );
 
-
         final AddWatchlistViewModel addWatchlistViewModel = new AddWatchlistViewModel();
-
 
         final AddWatchlistController addWatchlistController = createAddWatchlistUseCase(
                 viewManagerModel,
                 watchlistViewModel,
                 loggedInViewModel,
                 stockDataAccessObject,
-                addWatchlistViewModel
+                addWatchlistViewModel,
+                watchlistDataAccessObject
         );
 
         final DeleteWatchlistController deleteWatchlistController = createDeleteWatchlistUseCase(
                 viewManagerModel,
                 watchlistViewModel,
+                loggedInViewModel,
                 watchlistDataAccessObject
         );
-
 
         return new WatchlistView(
                 watchlistViewModel,
@@ -76,10 +76,10 @@ public final class WatchlistUseCaseFactory {
                 loggedInViewModel,
                 addWatchlistViewModel,
                 addWatchlistController,
-                deleteWatchlistController
+                deleteWatchlistController,
+                watchlistController
         );
     }
-
 
     /**
      * Creates and wires the Controller, Interactor, and Presenter for the Watchlist Use Case.
@@ -87,16 +87,16 @@ public final class WatchlistUseCaseFactory {
     public static WatchlistController createWatchlistUseCase(
             ViewManagerModel viewManagerModel,
             WatchlistViewModel watchlistViewModel,
+            LoggedInViewModel loggedInViewModel,
             StockDataAccessInterface stockDataAccessObject) {
-
 
         final WatchlistOutputBoundary watchlistOutputBoundary =
                 new WatchlistPresenter(viewManagerModel, watchlistViewModel);
 
-
         final WatchlistInputBoundary watchlistInteractor =
                 new WatchlistInteractor(stockDataAccessObject,
-                        watchlistOutputBoundary
+                        watchlistOutputBoundary,
+                        loggedInViewModel
                 );
 
 
@@ -112,7 +112,8 @@ public final class WatchlistUseCaseFactory {
             WatchlistViewModel watchlistViewModel,
             LoggedInViewModel loggedInViewModel,
             StockDataAccessInterface stockDataAccessObject,
-            AddWatchlistViewModel addWatchlistViewModel) {
+            AddWatchlistViewModel addWatchlistViewModel,
+            WatchlistDataAccessInterface watchlistDataAccessObject) {
 
 
         final AddWatchlistOutputBoundary addWatchlistOutputBoundary =
@@ -128,7 +129,8 @@ public final class WatchlistUseCaseFactory {
                 new AddWatchlistInteractor(
                         (StockDailyDataAccessInterface) stockDataAccessObject,
                         addWatchlistOutputBoundary,
-                        loggedInViewModel
+                        loggedInViewModel,
+                        (FileUserDataAccessObject) watchlistDataAccessObject
                 );
 
 
@@ -141,15 +143,23 @@ public final class WatchlistUseCaseFactory {
     private static DeleteWatchlistController createDeleteWatchlistUseCase(
             ViewManagerModel viewManagerModel,
             WatchlistViewModel watchlistViewModel,
+            LoggedInViewModel loggedInViewModel,
             WatchlistDataAccessInterface watchlistDataAccessObject) {
 
         final DeleteWatchlistOutputBoundary deleteWatchlistOutputBoundary =
                 new DeleteWatchlistPresenter(watchlistViewModel, viewManagerModel);
 
-        final DeleteWatchlistInputBoundary deleteWatchlistInteractor =
-                new DeleteWatchlistInteractor(watchlistDataAccessObject, deleteWatchlistOutputBoundary);
+        // Cast to FileUserDataAccessObject so we can call the save(currentUser) method
+        final FileUserDataAccessObject userDataAccessObject =
+                (FileUserDataAccessObject) watchlistDataAccessObject;
 
-        return new DeleteWatchlistController(deleteWatchlistInteractor);
+        final DeleteWatchlistInputBoundary deleteWatchlistInteractor =
+                new DeleteWatchlistInteractor(
+                        userDataAccessObject,
+                        deleteWatchlistOutputBoundary,
+                        loggedInViewModel
+                );
+
+        return new DeleteWatchlistController(deleteWatchlistInteractor, userDataAccessObject);
     }
 }
-

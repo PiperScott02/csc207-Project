@@ -1,6 +1,8 @@
 package use_case.watchlist;
 
 import entity.*;
+import interface_adapter.logged_in.LoggedInState;
+import interface_adapter.logged_in.LoggedInViewModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import use_case.stock.StockDataAccessInterface;
@@ -17,17 +19,22 @@ class WatchlistInteractorTest {
 
     private InMemoryStockDataAccessObject stockDAO;
     private TestWatchlistPresenter presenter;
+    private LoggedInViewModel loggedInViewModel;
 
     @BeforeEach
     void setUp() {
         stockDAO = new InMemoryStockDataAccessObject();
         presenter = new TestWatchlistPresenter();
+        loggedInViewModel = new LoggedInViewModel();
     }
 
     @Test
     void testExecuteNullUserFails() {
+        // State has no user
+        loggedInViewModel.setState(new LoggedInState());
+
         WatchlistInputData inputData = new WatchlistInputData(null);
-        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter);
+        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter, loggedInViewModel);
 
         interactor.execute(inputData);
 
@@ -41,8 +48,12 @@ class WatchlistInteractorTest {
         User user = new CommonUser("Piper", "123");
         user.setPortfolio(null);
 
+        LoggedInState state = new LoggedInState();
+        state.setUser(user);
+        loggedInViewModel.setState(state);
+
         WatchlistInputData inputData = new WatchlistInputData(user);
-        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter);
+        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter, loggedInViewModel);
 
         interactor.execute(inputData);
 
@@ -72,8 +83,12 @@ class WatchlistInteractorTest {
         User user = new CommonUser("Piper", "123");
         user.setPortfolio(portfolio);
 
+        LoggedInState state = new LoggedInState();
+        state.setUser(user);
+        loggedInViewModel.setState(state);
+
         WatchlistInputData inputData = new WatchlistInputData(user);
-        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter);
+        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter, loggedInViewModel);
 
         interactor.execute(inputData);
 
@@ -103,8 +118,12 @@ class WatchlistInteractorTest {
         User user = new CommonUser("Piper", "123");
         user.setPortfolio(portfolio);
 
+        LoggedInState state = new LoggedInState();
+        state.setUser(user);
+        loggedInViewModel.setState(state);
+
         WatchlistInputData inputData = new WatchlistInputData(user);
-        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter);
+        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter, loggedInViewModel);
 
         interactor.execute(inputData);
 
@@ -129,8 +148,12 @@ class WatchlistInteractorTest {
         User user = new CommonUser("Piper", "123");
         user.setPortfolio(portfolio);
 
+        LoggedInState state = new LoggedInState();
+        state.setUser(user);
+        loggedInViewModel.setState(state);
+
         WatchlistInputData inputData = new WatchlistInputData(user);
-        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter);
+        WatchlistInteractor interactor = new WatchlistInteractor(stockDAO, presenter, loggedInViewModel);
 
         interactor.execute(inputData);
 

@@ -80,6 +80,7 @@ public final class WatchlistPilotMain {
         final WatchlistController watchlistController = WatchlistUseCaseFactory.createWatchlistUseCase(
                 viewManagerModel,
                 watchlistViewModel,
+                loggedInViewModel,
                 stockDataAccessObject
         );
 

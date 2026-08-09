@@ -68,6 +68,7 @@ public class MainWithInMemory {
                 loginViewModel,
                 loggedInViewModel,
                 signupViewModel,
+                watchlistViewModel,
                 userDataAccessObject
         );
         views.add(loginView, loginView.getViewName());
