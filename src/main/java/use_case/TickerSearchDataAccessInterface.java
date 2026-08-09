@@ -6,6 +6,6 @@ import java.io.IOException;
 
 public interface TickerSearchDataAccessInterface {
 
-    Stock createBasicStock(String tickerSymbol) throws IOException, InterruptedException;
+    Stock createBasicStock(String tickerSymbol);
 
 }

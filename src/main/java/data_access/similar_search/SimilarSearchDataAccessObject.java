@@ -2,6 +2,8 @@ package data_access.similar_search;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
 
 import java.io.IOException;
@@ -22,38 +24,76 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
     }
 
     @Override
-    public String[][] similarStockInfo(String keywords) throws IOException, InterruptedException {
+    public String[][] similarStockInfo(String keywords) {
         final String query = "?function=" + function +
                 "&keywords=" + keywords +
                 "&apikey=" + api_key;
         final String location = "https://www.alphavantage.co/query" + query;
 
-        HttpRequest request = HttpRequest
-                        .newBuilder()
-                        .uri(URI.create(location))
-                        .build();
-        TimeUnit.SECONDS.sleep(1);
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        try {
+            HttpRequest request = HttpRequest
+                    .newBuilder()
+                    .uri(URI.create(location))
+                    .build();
+            TimeUnit.SECONDS.sleep(1);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        return parseJSON(response.body());
+            final JSONObject responseBody = new JSONObject(response.body());
+
+            checkCommonApiErrors(responseBody);
+
+            return parseJSON(responseBody);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to Connect to AlphaVantage API", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Search Interrupted", e);
+        }
     }
 
-    private static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
+    private String[][] parseJSON(JSONObject responseBody) {
+        final JSONArray responseArray = responseBody.getJSONArray("bestMatches");
 
-    private String[][] parseJSON(String responseBody) {
-        SimilarSearchJSONResponse javaResponse =
-                GSON.fromJson(responseBody, SimilarSearchJSONResponse.class);
+        String[][] similarStocks = new String[responseArray.length()][3];
+        JSONObject responseObject;
+        String symbol;
+        String name;
+        String region;
 
-        String[][] similarStocks = new String[javaResponse.getLength()][3];
+        for (int i = 0; i < responseArray.length(); i++) {
+            responseObject = responseArray.optJSONObject(i);
 
-        for (int i = 0; i < javaResponse.getLength(); i++) {
-            similarStocks[i][0] = javaResponse.getTickerSymbol(i);
-            similarStocks[i][1] = javaResponse.getCompanyName(i);
-            similarStocks[i][2] = javaResponse.getRegion(i);
+            symbol = responseObject.optString("1. symbol");
+            name =  responseObject.optString("2. name");
+            region = responseObject.optString("4. region");
+
+            if (symbol == null || name == null || region == null) {
+                throw new RuntimeException("Missing Similar Search Information");
+            }
+
+            similarStocks[i][0] = symbol;
+            similarStocks[i][1] = name;
+            similarStocks[i][2] = region;
         }
 
         return similarStocks;
+    }
+
+    private void checkCommonApiErrors(JSONObject responseBody) {
+        if (responseBody == null || responseBody.isEmpty()) {
+            throw new RuntimeException("No Similar Search Results");
+        }
+
+        if (responseBody.has("Error Message")) {
+            throw new RuntimeException(responseBody.getString("Error Message"));
+        }
+
+        if (responseBody.has("Information")) {
+            throw new RuntimeException(responseBody.getString("Information"));
+        }
+
+        if (responseBody.has("Note")) {
+            throw new RuntimeException(responseBody.getString("Note"));
+        }
     }
 }

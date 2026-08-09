@@ -3,39 +3,50 @@ package use_case.ticker_search;
 import entity.Stock;
 import use_case.TickerSearchDataAccessInterface;
 
-import java.io.IOException;
-
 /**
  * The Ticker Search Interactor.
  */
 public class TickerSearchInteractor implements TickerSearchInputBoundary {
 
     private final TickerSearchDataAccessInterface tickerSearchDataAccessObject;
-    private final TickerSearchOutputBoundary tickerSearchOutputPresenter;
+    private final TickerSearchOutputBoundary tickerSearchPresenter;
 
     public TickerSearchInteractor(TickerSearchDataAccessInterface tickerSearchDataAccessObject,
                                   TickerSearchOutputBoundary tickerSearchOutputBoundary) {
         this.tickerSearchDataAccessObject = tickerSearchDataAccessObject;
-        this.tickerSearchOutputPresenter = tickerSearchOutputBoundary;
+        this.tickerSearchPresenter = tickerSearchOutputBoundary;
     }
 
     @Override
-    public void execute(TickerSearchInputData tickerSearchInputData) throws IOException, InterruptedException {
+    public void execute(TickerSearchInputData tickerSearchInputData) {
         final String tickerSymbol = tickerSearchInputData.getTickerSymbol();
-        final Stock tickerStock = tickerSearchDataAccessObject.createBasicStock(tickerSymbol);
 
-        if (tickerStock == null) { // TODO: this is meant to check if the tickerSymbol was actually valid
-            tickerSearchOutputPresenter.prepareFailView("No Exact Match for Ticker Symbol");
+        if (tickerSymbol == null || tickerSymbol.trim().isEmpty()) {
+            tickerSearchPresenter.prepareFailView("Please Enter a Stock Ticker.");
+            return;
         }
-        else {
-            final TickerSearchOutputData tickerSearchOutputData =
-                    new TickerSearchOutputData(tickerStock.getTickerSymbol(),
-                            tickerStock.getCompanyName(),
-                            tickerStock.getCountry(),
-                            tickerStock.getIndustry(),
-                            tickerStock.getPreviousClose(),
-                            false);
-            tickerSearchOutputPresenter.prepareSuccessView(tickerSearchOutputData);
+
+        final String cleanTickerSymbol = tickerSymbol.trim().toUpperCase();
+        final Stock tickerStock;
+
+        try {
+            tickerStock = tickerSearchDataAccessObject.createBasicStock(cleanTickerSymbol);
+        } catch (RuntimeException e) {
+            tickerSearchPresenter.prepareFailView(e.getMessage());
+            return;
         }
+
+        if (tickerStock == null) {
+            tickerSearchPresenter.prepareFailView("No Exact Match for : " + cleanTickerSymbol);
+            return;
+        }
+
+        final TickerSearchOutputData tickerSearchOutputData =
+                new TickerSearchOutputData(tickerStock.getTickerSymbol(),
+                        tickerStock.getCompanyName(),
+                        tickerStock.getCountry(),
+                        tickerStock.getIndustry(),
+                        tickerStock.getPreviousClose());
+        tickerSearchPresenter.prepareSuccessView(tickerSearchOutputData);
     }
 }

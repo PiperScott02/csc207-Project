@@ -6,16 +6,29 @@ public class SimilarSearchState {
 
     private SimilarSearchOutputData[] similarSearchOutputData;
     private boolean useCaseFailed;
+    private String errorMessage;
 
     public SimilarSearchOutputData[] getSimilarSearchOutputData() {
         return similarSearchOutputData;
+    }
+
+    public void setSimilarSearchOutputData(SimilarSearchOutputData[] similarSearchOutputData) {
+        this.similarSearchOutputData = similarSearchOutputData;
+    }
+
+    public boolean isUseCaseFailed() {
+        return useCaseFailed;
     }
 
     public void setUseCaseFailed(boolean useCaseFailed) {
         this.useCaseFailed = useCaseFailed;
     }
 
-    public void setSimilarSearchOutputData(SimilarSearchOutputData[] similarSearchOutputData) {
-        this.similarSearchOutputData = similarSearchOutputData;
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

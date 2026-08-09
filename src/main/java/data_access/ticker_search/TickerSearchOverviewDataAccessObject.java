@@ -1,73 +1,95 @@
 package data_access.ticker_search;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import entity.Stock;
-import use_case.TickerSearchDataAccessInterface;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.concurrent.TimeUnit;
 
-public class TickerSearchOverviewDataAccessObject implements TickerSearchDataAccessInterface {
+public class TickerSearchOverviewDataAccessObject {
     private static final String function = "OVERVIEW";
     private static final HttpClient client = HttpClient.newBuilder().build();
-    private static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
 
     private final String api_key;
-    private final TickerSearchDailyDataAccessObject tickerSearchDailyDataAccessObject;
 
     public TickerSearchOverviewDataAccessObject(String api_key) {
         this.api_key = api_key;
-        this.tickerSearchDailyDataAccessObject = new TickerSearchDailyDataAccessObject(this.api_key);
     }
 
-    @Override
-    public Stock createBasicStock(String tickerSymbol) throws IOException, InterruptedException {
+    public Stock createBasicStock(String tickerSymbol) {
         final String query = "?function=" + function +
                 "&symbol=" + tickerSymbol +
                 "&apikey=" + api_key;
         final String location = "https://www.alphavantage.co/query" + query;
 
-        HttpRequest request = HttpRequest
-                .newBuilder()
-                .uri(URI.create(location))
-                .build();
-        TimeUnit.SECONDS.sleep(1);
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        try {
+            HttpRequest request = HttpRequest
+                    .newBuilder()
+                    .uri(URI.create(location))
+                    .build();
+            TimeUnit.SECONDS.sleep(1);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        // AlphaVantage API does not return OVERVIEW information for all stocks
-        if (response.body().equals("{}")) {
-            return tickerSearchDailyDataAccessObject.createBasicStock(tickerSymbol);
+            if (response.statusCode() != 200) {
+                throw new RuntimeException("Alpha Vantage Returned Status Code " + response.statusCode());
+            }
+
+            final JSONObject responseBody = new JSONObject(response.body());
+
+            checkCommonApiErrors(responseBody);
+
+            return parseJSON(responseBody);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to Connect to AlphaVantage API", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Search Interrupted", e);
         }
-        final Stock stock = parseJSON(response.body());
-        if (stock == null) {
-            return tickerSearchDailyDataAccessObject.createBasicStock(tickerSymbol);
+   }
+
+    private Stock parseJSON(JSONObject responseBody) {
+        final Stock stock = new Stock();
+
+        final String tickerSymbol = responseBody.optString("Symbol");
+        final String companyName = responseBody.optString("Name");
+        final String country = responseBody.optString("Country");
+        final String industry = responseBody.optString("Industry");
+        final BigDecimal PERatio = responseBody.optBigDecimal("PERatio", null);
+        final BigDecimal EPS = responseBody.optBigDecimal("EPS", null);
+
+        if (tickerSymbol == null || PERatio == null || EPS == null) {
+            throw new RuntimeException("Overview Missing Important Information");
         }
+
+        stock.setTickerSymbol(tickerSymbol);
+        stock.setCompanyName(companyName);
+        stock.setPreviousClose(EPS.multiply(PERatio));
+        stock.setCountry(country);
+        stock.setIndustry(industry);
+
         return stock;
     }
 
-    private Stock parseJSON(String responseBody) {
-        TickerSearchOverviewJSONResponse javaResponse =
-                GSON.fromJson(responseBody, TickerSearchOverviewJSONResponse.class);
-
-        if (javaResponse.getStockPrice() == null) {
-            return null;
+    private void checkCommonApiErrors(JSONObject responseBody) {
+        if (responseBody == null || responseBody.isEmpty()) {
+            throw new RuntimeException("No Overview Results");
         }
 
-        final Stock stock = new Stock();
+        if (responseBody.has("Error Message")) {
+            throw new RuntimeException(responseBody.getString("Error Message"));
+        }
 
-        stock.setTickerSymbol(javaResponse.getTickerSymbol());
-        stock.setCompanyName(javaResponse.getCompanyName());
-        stock.setPreviousClose(javaResponse.getStockPrice());
-        stock.setCountry(javaResponse.getCountry());
-        stock.setIndustry(javaResponse.getIndustry());
+        if (responseBody.has("Information")) {
+            throw new RuntimeException(responseBody.getString("Information"));
+        }
 
-        return stock;
+        if (responseBody.has("Note")) {
+            throw new RuntimeException(responseBody.getString("Note"));
+        }
     }
 }

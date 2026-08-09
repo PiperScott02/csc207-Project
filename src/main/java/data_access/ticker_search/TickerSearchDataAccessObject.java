@@ -15,11 +15,11 @@ public class TickerSearchDataAccessObject implements TickerSearchDataAccessInter
     }
 
     @Override
-    public Stock createBasicStock(String tickerSymbol) throws IOException, InterruptedException {
-        Stock stock = this.tickerSearchOverviewDataAccessObject.createBasicStock(tickerSymbol);
-        if (stock == null) {
-            stock = this.tickerSearchDailyDataAccessObject.createBasicStock(tickerSymbol);
+    public Stock createBasicStock(String tickerSymbol) {
+        try {
+            return this.tickerSearchOverviewDataAccessObject.createBasicStock(tickerSymbol);
+        } catch (RuntimeException e) {
+            return this.tickerSearchDailyDataAccessObject.createBasicStock(tickerSymbol);
         }
-        return stock;
     }
 }

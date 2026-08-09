@@ -18,7 +18,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 
 public class SearchView extends JPanel implements PropertyChangeListener {
 
@@ -40,7 +39,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final TickerSearchViewModel tickerSearchViewModel;
 
     // Error Message Label
-    private final JLabel searchBarErrorMessage = new JLabel("");
+    private final JLabel tickerSearchErrorMessage = new JLabel("");
+    private final JLabel similarSearchErrorMessage = new JLabel("");
 
     // Stock Navigation Dependencies
     private final StockController stockController;
@@ -67,9 +67,13 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.stockViewModel = stockViewModel;
         this.loggedInViewModel = loggedInViewModel;
 
-        searchBarErrorMessage.setHorizontalAlignment(SwingConstants.CENTER);
-        searchBarErrorMessage.setForeground(Color.RED);
-        searchBarErrorMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+        tickerSearchErrorMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        tickerSearchErrorMessage.setForeground(Color.RED);
+        tickerSearchErrorMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        similarSearchErrorMessage.setHorizontalAlignment(SwingConstants.HORIZONTAL);
+        similarSearchErrorMessage.setForeground(Color.RED);
+        similarSearchErrorMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         tickerSearchViewModel.addPropertyChangeListener(this);
         similarSearchViewModel.addPropertyChangeListener(this);
@@ -131,19 +135,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String searchText = searchInputField.getText();
-                if (searchText.contains(" ") || searchText.isEmpty()) {
-                    searchBarErrorMessage.setText("ERROR: search contains space or search is empty.");
-                } else {
-                    searchBarErrorMessage.setText("");
-                    try {
-                        tickerSearchController.execute(searchInputField.getText());
-                        similarSearchController.execute(searchInputField.getText());
-                    } catch (InterruptedException ex) {
-                        System.out.println("InterruptedException");
-                    } catch (IOException ex) {
-                        System.out.println("IOException");
-                    }
-                }
+                tickerSearchController.execute(searchInputField.getText());
+                similarSearchController.execute(searchInputField.getText());
             }
         });
 
@@ -156,7 +149,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         searchBar.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         searchPanel.add(searchBar);
-        searchPanel.add(searchBarErrorMessage);
+        searchPanel.add(tickerSearchErrorMessage);
+        searchPanel.add(similarSearchErrorMessage);
         searchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         return searchPanel;
@@ -260,17 +254,28 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         if (evt.getPropertyName().equals("ticker search")) {
             TickerSearchState tickerSearchState = (TickerSearchState) evt.getNewValue();
 
-            tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol());
-            tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
-            tickerSearchCountry.setText(tickerSearchState.getCountry());
-            tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());
-            tickerSearchIndustry.setText(tickerSearchState.getIndustry());
+            if (!tickerSearchState.isUseCaseFailed()) {
+                tickerSearchErrorMessage.setText(tickerSearchState.getErrorMessage());
+                tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol());
+                tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
+                tickerSearchCountry.setText(tickerSearchState.getCountry());
+                tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());
+                tickerSearchIndustry.setText(tickerSearchState.getIndustry());
+            } else {
+                tickerSearchErrorMessage.setText("Ticker Search Error: " + tickerSearchState.getErrorMessage());
+            }
 
         } else if (evt.getPropertyName().equals("similar search")) {
             SimilarSearchState similarSearchState = (SimilarSearchState) evt.getNewValue();
-            removeSimilarSearchResults(similarSearchResultsPanel);
-            addSimilarSearchResults(similarSearchResultsPanel,
-                    similarSearchState.getSimilarSearchOutputData());
+
+            if (!similarSearchState.isUseCaseFailed()) {
+                similarSearchErrorMessage.setText(similarSearchState.getErrorMessage());
+                removeSimilarSearchResults(similarSearchResultsPanel);
+                addSimilarSearchResults(similarSearchResultsPanel,
+                        similarSearchState.getSimilarSearchOutputData());
+            } else {
+                similarSearchErrorMessage.setText("Similar Search Error: " + similarSearchState.getErrorMessage());
+            }
         }
     }
 

@@ -1,7 +1,5 @@
 package use_case.similar_search;
 
-import entity.Stock;
-
 import java.math.BigDecimal;
 
 /**
@@ -15,20 +13,16 @@ public class SimilarSearchOutputData {
     private final String industry;
     private final BigDecimal previousClose;
 
-    private final boolean useCaseFailed;
-
     public SimilarSearchOutputData(String tickerSymbol,
                                    String companyName,
                                    String country,
                                    String industry,
-                                   BigDecimal previousClose,
-                                   boolean useCaseFailed) {
+                                   BigDecimal previousClose) {
         this.tickerSymbol = tickerSymbol;
         this.companyName = companyName;
         this.country = country;
         this.previousClose = previousClose;
         this.industry = industry;
-        this.useCaseFailed = useCaseFailed;
     }
 
     public String getTickerSymbol() {
@@ -50,9 +44,4 @@ public class SimilarSearchOutputData {
     public String getIndustry() {
         return this.industry;
     }
-
-    public boolean isUseCaseFailed() {
-        return useCaseFailed;
-    }
-
 }
