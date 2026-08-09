@@ -29,16 +29,18 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
 
     @Override
     public void execute(AddHoldingInputData addHoldingInputData) {
-        // Declare currentUser here so Java knows what it is
+        if (loggedInViewModel.getState() == null || loggedInViewModel.getState().getUser() == null) {
+            userPresenter.prepareFailView("No active user session found.");
+            return;
+        }
+
         User currentUser = loggedInViewModel.getState().getUser();
         Portfolio portfolio = currentUser.getPortfolio();
 
-        // Unpack the DTO carried over from the Add Holding Controller AND force uppercase ticker
         String ticker = addHoldingInputData.getTicker().toUpperCase();
         double shares = addHoldingInputData.getShares();
         LocalDate purchaseDate = addHoldingInputData.getPurchaseDate();
 
-        // Basic Validation & Semantics Checks
         if (ticker == null || ticker.trim().isEmpty()) {
             userPresenter.prepareFailView("Ticker symbol cannot be empty.");
             return;
@@ -55,12 +57,7 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             userPresenter.prepareFailView("Purchase date cannot be in the future.");
             return;
         }
-        if (loggedInViewModel.getState() == null || loggedInViewModel.getState().getUser() == null) {
-            userPresenter.prepareFailView("No active user session found.");
-            return;
-        }
 
-        // Fetch the Stock from Data Access Object (talk to external API)
         Stock stock = null;
         try {
             stock = stockDataAccessObject.createStockAndHistory(ticker);
@@ -73,7 +70,6 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             return;
         }
 
-        // Check if the portfolio already contains a holding for this stock, or create a new one
         StockHolding holding = portfolio.getHoldingByTicker(ticker);
         if (holding == null) {
             holding = new StockHolding();
@@ -81,13 +77,10 @@ public class AddHoldingInteractor implements AddHoldingInputBoundary {
             portfolio.addHolding(holding);
         }
 
-        // Record the purchase transaction using StockHolding method
         holding.makeTransaction(stock, shares, purchaseDate, TransactionType.BUY);
 
-        // Save the changes to disk/database
         userDataAccessObject.save(currentUser);
 
-        // Package results and notify presenter
         AddHoldingOutputData outputData = new AddHoldingOutputData(ticker, shares, portfolio.getHoldings(), false);
         userPresenter.prepareSuccessView(outputData);
     }

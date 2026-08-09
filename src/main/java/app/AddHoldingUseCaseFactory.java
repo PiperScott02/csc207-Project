@@ -4,7 +4,9 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.add_holding.AddHoldingController;
 import interface_adapter.add_holding.AddHoldingPresenter;
 import interface_adapter.add_holding.AddHoldingViewModel;
+import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 import use_case.StockDailyDataAccessInterface;
 import use_case.add_holding.AddHoldingInputBoundary;
 import use_case.add_holding.AddHoldingInteractor;
@@ -26,12 +28,23 @@ public final class AddHoldingUseCaseFactory {
             AddHoldingViewModel addHoldingViewModel,
             LoggedInViewModel loggedInViewModel,
             StockDailyDataAccessInterface stockDataAccessObject,
-            FileUserDataAccessObject userDataAccessObject) {
+            FileUserDataAccessObject userDataAccessObject,
+            BlackLittermanController blackLittermanController,
+            PortfolioHealthController portfolioHealthController) {
 
-        final AddHoldingController addHoldingController =
-                createAddHoldingUseCase(viewManagerModel, addHoldingViewModel, loggedInViewModel, stockDataAccessObject, userDataAccessObject);
+        AddHoldingController addHoldingController = createAddHoldingUseCase(
+                viewManagerModel, addHoldingViewModel, loggedInViewModel,
+                stockDataAccessObject, userDataAccessObject
+        );
 
-        return new AddHoldingView(addHoldingViewModel, addHoldingController, viewManagerModel);
+        return new AddHoldingView(
+                addHoldingViewModel,
+                addHoldingController,
+                viewManagerModel,
+                loggedInViewModel,
+                portfolioHealthController,
+                blackLittermanController
+        );
     }
 
     private static AddHoldingController createAddHoldingUseCase(

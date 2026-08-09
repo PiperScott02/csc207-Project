@@ -23,13 +23,16 @@ import java.time.format.DateTimeFormatter;
 
 public class HoldingsView extends JPanel implements ActionListener, PropertyChangeListener {
 
-    // === DARK MODE UI PALETTE ===
+    /**
+     * Dark UI color palette.
+     */
     private static final Color BG_DARK = new Color(11, 15, 25);
     private static final Color CARD_BG = new Color(17, 24, 39);
     private static final Color BORDER_COLOR = new Color(31, 41, 55);
     private static final Color TEXT_MAIN = new Color(243, 244, 246);
     private static final Color TEXT_MUTED = new Color(156, 163, 175);
     private static final Color ACCENT_GREEN = new Color(16, 185, 129);
+    private static final Color NEG_RED = new Color(239, 68, 68);
 
     private final String viewName = "holdings";
     private final ViewManagerModel viewManagerModel;
@@ -38,11 +41,15 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
     private final PortfolioHealthController portfolioHealthController;
     private final BlackLittermanController blackLittermanController;
 
-    // Dynamic Summary Metric Labels
     private final JLabel portfolioValLabel = new JLabel("$0.00");
     private final JLabel totalPnlValLabel = new JLabel("$0.00");
     private final JLabel todaysChangeValLabel = new JLabel("$0.00");
     private final JLabel costBasisValLabel = new JLabel("$0.00");
+
+    private final JLabel totalPnlSubLabel = new JLabel("+0.00%");
+    private final JLabel todaysChangeSubLabel = new JLabel("vs prev. close");
+    private final JLabel costBasisSubLabel = new JLabel("Total invested");
+
     private final JLabel holdingsCountLabel = new JLabel("0 positions");
     private final JLabel lastUpdatedLabel = new JLabel();
 
@@ -64,7 +71,6 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
-        // Use the shared SidebarHelper component
         add(SidebarHelper.createSidebar("Holdings",
                 this,
                 viewManagerModel,
@@ -86,34 +92,27 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
     private JPanel createMainContentPanel() {
         final JPanel panel = new JPanel(null);
         panel.setBackground(BG_DARK);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+        panel.setBorder(BorderFactory.createEmptyBorder(100, 30, 30, 40));
 
         final JLabel titleLabel = new JLabel("Holdings");
-        titleLabel.setFont(new Font("Serif", Font.BOLD, 26));
+        titleLabel.setFont(new Font("Didot", Font.BOLD, 30));
         titleLabel.setForeground(TEXT_MAIN);
-        titleLabel.setBounds(0, 10, 200, 35);
+        titleLabel.setBounds(30, 25, 195, 35);
 
-        // 4-Column Dynamic Metrics Row
         final JPanel metricsRow = new JPanel(new GridLayout(1, 4, 15, 0));
         metricsRow.setBackground(BG_DARK);
-        metricsRow.setBounds(0, 60, 940, 95);
+        metricsRow.setBounds(30, 85, 940, 95);
 
         metricsRow.add(createMetricCard("PORTFOLIO VALUE", portfolioValLabel, holdingsCountLabel, TEXT_MAIN));
-        metricsRow.add(createMetricCard("TOTAL P&L", totalPnlValLabel, "+12.19%", ACCENT_GREEN));
-        metricsRow.add(createMetricCard("TODAY'S CHANGE", todaysChangeValLabel, "+0.42% vs prev. close", ACCENT_GREEN));
-        metricsRow.add(createMetricCard("COST BASIS", costBasisValLabel, "Total invested", TEXT_MAIN));
-
-        // Section Title & Add Holding Button
-        final JLabel sectionTitle = new JLabel("Your Holdings");
-        sectionTitle.setFont(new Font("Serif", Font.BOLD, 18));
-        sectionTitle.setForeground(TEXT_MAIN);
-        sectionTitle.setBounds(0, 175, 200, 25);
+        metricsRow.add(createMetricCard("TOTAL P&L", totalPnlValLabel, totalPnlSubLabel, ACCENT_GREEN));
+        metricsRow.add(createMetricCard("TODAY'S CHANGE", todaysChangeValLabel, todaysChangeSubLabel, ACCENT_GREEN));
+        metricsRow.add(createMetricCard("COST BASIS", costBasisValLabel, costBasisSubLabel, TEXT_MAIN));
 
         final JButton addHoldingBtn = new JButton("+ Add Holding");
         addHoldingBtn.setBackground(ACCENT_GREEN);
-        addHoldingBtn.setForeground(Color.BLACK);
+        addHoldingBtn.setForeground(Color.WHITE);
         addHoldingBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
-        addHoldingBtn.setBounds(795, 170, 145, 35);
+        addHoldingBtn.setBounds(825, 520, 145, 35);
         addHoldingBtn.setFocusPainted(false);
         addHoldingBtn.setBorderPainted(false);
         addHoldingBtn.setOpaque(true);
@@ -122,12 +121,6 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
             viewManagerModel.setState("add holding");
             viewManagerModel.firePropertyChanged();
         });
-
-        // Detailed Table Panel matching screenshot columns
-        final JPanel tablePanel = new JPanel(new BorderLayout());
-        tablePanel.setBackground(CARD_BG);
-        tablePanel.setBounds(0, 220, 940, 300);
-        tablePanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
         final String[] columnNames = {
                 "TICKER", "COMPANY", "SHARES", "AVG COST", "CURR. PRICE", "GAIN / LOSS", "GAIN %", ""
@@ -148,7 +141,10 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         holdingsTable.getTableHeader().setForeground(TEXT_MUTED);
         holdingsTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 10));
 
-        // === CUSTOM RENDERER: LEFT-ALIGN COMPANY (COL 1), CENTER EVERYTHING ELSE ===
+        holdingsTable.setRowSelectionAllowed(false);
+        holdingsTable.setCellSelectionEnabled(false);
+        holdingsTable.setFocusable(false);
+
         DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -174,7 +170,6 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         holdingsTable.getColumnModel().getColumn(7).setPreferredWidth(40);
         holdingsTable.getColumnModel().getColumn(7).setMaxWidth(50);
 
-        // === SINGLE-CLICK MOUSE LISTENER FOR THE "×" COLUMN ===
         holdingsTable.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mousePressed(java.awt.event.MouseEvent e) {
@@ -201,20 +196,19 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
 
         final JScrollPane scrollPane = new JScrollPane(holdingsTable);
         scrollPane.getViewport().setBackground(CARD_BG);
-        scrollPane.setBorder(null);
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setBounds(30, 200, 940, 300);
+        scrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        scrollPane.setViewportBorder(null);
 
-        // Footer status info
         lastUpdatedLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
         lastUpdatedLabel.setForeground(TEXT_MUTED);
-        lastUpdatedLabel.setBounds(0, 530, 400, 20);
+        lastUpdatedLabel.setBounds(30, 520, 400, 20);
         updateLastUpdatedTime();
 
         panel.add(titleLabel);
         panel.add(metricsRow);
-        panel.add(sectionTitle);
         panel.add(addHoldingBtn);
-        panel.add(tablePanel);
+        panel.add(scrollPane);
         panel.add(lastUpdatedLabel);
 
         return panel;
@@ -242,11 +236,6 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
         card.add(valLbl);
         card.add(subLbl);
         return card;
-    }
-
-    private JPanel createMetricCard(String title, JLabel valLbl, String subText, Color valColor) {
-        final JLabel subLbl = new JLabel(subText);
-        return createMetricCard(title, valLbl, subLbl, valColor);
     }
 
     private void updateLastUpdatedTime() {
@@ -303,23 +292,38 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
                         .multiply(BigDecimal.valueOf(100));
             }
 
+            BigDecimal prevCloseTotal = totalPortfolioValue.subtract(totalDailyChange);
+            BigDecimal dailyPercentage = BigDecimal.ZERO;
+            if (prevCloseTotal.compareTo(BigDecimal.ZERO) > 0) {
+                dailyPercentage = totalDailyChange
+                        .divide(prevCloseTotal, 4, java.math.RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100));
+            }
+
             portfolioValLabel.setText(String.format("$%.2f", totalPortfolioValue.doubleValue()));
+            holdingsCountLabel.setText(state.getHoldings().size() + " positions");
+
             totalPnlValLabel.setText(String.format("$%.2f", totalGainLoss.doubleValue()));
+            totalPnlSubLabel.setText(String.format("%+.2f%%", allTimePercentage.doubleValue()));
             if (totalGainLoss.compareTo(BigDecimal.ZERO) < 0) {
-                totalPnlValLabel.setForeground(new Color(239, 68, 68));
+                totalPnlValLabel.setForeground(NEG_RED);
+                totalPnlSubLabel.setForeground(NEG_RED);
             } else {
                 totalPnlValLabel.setForeground(ACCENT_GREEN);
+                totalPnlSubLabel.setForeground(TEXT_MUTED);
             }
 
             todaysChangeValLabel.setText(String.format("$%.2f", totalDailyChange.doubleValue()));
+            todaysChangeSubLabel.setText(String.format("%+.2f%% vs prev. close", dailyPercentage.doubleValue()));
             if (totalDailyChange.compareTo(BigDecimal.ZERO) < 0) {
-                todaysChangeValLabel.setForeground(new Color(239, 68, 68));
+                todaysChangeValLabel.setForeground(NEG_RED);
+                todaysChangeSubLabel.setForeground(NEG_RED);
             } else {
                 todaysChangeValLabel.setForeground(ACCENT_GREEN);
+                todaysChangeSubLabel.setForeground(TEXT_MUTED);
             }
 
             costBasisValLabel.setText(String.format("$%.2f", totalCostBasis.doubleValue()));
-            holdingsCountLabel.setText(state.getHoldings().size() + " positions");
         }
         updateLastUpdatedTime();
     }

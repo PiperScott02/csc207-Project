@@ -34,13 +34,16 @@ import interface_adapter.portfolio_health.PortfolioHealthController;
  */
 public class    LoggedInView extends JPanel implements PropertyChangeListener {
 
-    // === DARK MODE UI CHANGE ===: Figma color palette variables
-    private static final Color BG_DARK = new Color(11, 15, 25);       // #0B0F19 Main window background
-    private static final Color CARD_BG = new Color(17, 24, 39);       // #111827 Cards & Table background
-    private static final Color BORDER_COLOR = new Color(31, 41, 55);  // #1F2937 Borders
-    private static final Color TEXT_MAIN = new Color(243, 244, 246);  // #F3F4F6 Primary white text
-    private static final Color TEXT_MUTED = new Color(156, 163, 175); // #9CA3AF Muted labels
-    private static final Color ACCENT_GREEN = new Color(16, 185, 129); // #10B981 Gain/Success color
+    /**
+     * Dark UI color palette.
+     */
+    private static final Color BG_DARK = new Color(11, 15, 25);
+    private static final Color CARD_BG = new Color(17, 24, 39);
+    private static final Color BORDER_COLOR = new Color(31, 41, 55);
+    private static final Color TEXT_MAIN = new Color(243, 244, 246);
+    private static final Color TEXT_MUTED = new Color(156, 163, 175);
+    private static final Color ACCENT_GREEN = new Color(16, 185, 129);
+    private static final Color NEG_RED = new Color(239, 68, 68);
 
     private final String viewName = "logged in";
     private final ViewManagerModel viewManagerModel;
@@ -49,7 +52,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
     private final BlackLittermanController blackLittermanController;
 
     private final JLabel welcomeLabel = new JLabel("Welcome");
-    private final JLabel dateLabel = new JLabel();
     private DefaultTableModel holdingsTableModel;
     private DefaultTableModel watchlistTableModel;
     private JLabel lastUpdatedLabel;
@@ -83,7 +85,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
 
         loggedInViewModel.addPropertyChangeListener(this);
 
-        // Split main view into left sidebar and right main content area
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
@@ -95,25 +96,21 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
                 portfolioHealthController), BorderLayout.WEST);
         add(createMainContentPanel(), BorderLayout.CENTER);
 
-        // Populate initial state if already present in the ViewModel
         if (loggedInViewModel.getState() != null) {
             updateViewFromState(loggedInViewModel.getState());
         }
     }
 
-    // Right Main Content Area containing Overview Header, Metrics, and Preview Tables
     private JPanel createMainContentPanel() {
         final JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(BG_DARK);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
 
-        // Top Title "Overview"
         final JLabel overviewTitle = new JLabel("Overview");
-        overviewTitle.setFont(new Font("Serif", Font.BOLD, 26));
+        overviewTitle.setFont(new Font("Didot", Font.BOLD, 30));
         overviewTitle.setForeground(TEXT_MAIN);
         overviewTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        // Scrollable content wrapper for dashboard widgets (without redundant button row)
         final JPanel contentBody = new JPanel();
         contentBody.setBackground(BG_DARK);
         contentBody.setLayout(new BoxLayout(contentBody, BoxLayout.Y_AXIS));
@@ -137,7 +134,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         return mainPanel;
     }
 
-    // Large top card for Total Portfolio Value
     private JPanel createTopPortfolioValueCard() {
         final JPanel card = new JPanel();
         card.setBackground(CARD_BG);
@@ -176,14 +172,12 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         return card;
     }
 
-    // Middle row with 3 metrics cards (Gain/Loss, Daily Change, Total Holdings)
     private JPanel createMiddleMetricsRow() {
         final JPanel row = new JPanel(new GridLayout(1, 3, 15, 0));
         row.setBackground(BG_DARK);
         row.setPreferredSize(new Dimension(0, 95));
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 95));
 
-        // Card 1: Gain / Loss
         final JPanel c1 = new JPanel();
         c1.setBackground(CARD_BG);
         c1.setLayout(null);
@@ -204,7 +198,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         c1.add(totalGainLossValLabel);
         c1.add(totalGainLossSubLabel);
 
-        // Card 2: Daily Change
         final JPanel c2 = new JPanel();
         c2.setBackground(CARD_BG);
         c2.setLayout(null);
@@ -225,7 +218,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         c2.add(dailyChangeValLabel);
         c2.add(dailyChangeSubLabel);
 
-        // Card 3: Total Holdings
         final JPanel c3 = new JPanel();
         c3.setBackground(CARD_BG);
         c3.setLayout(null);
@@ -253,7 +245,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         return row;
     }
 
-    // Holdings & Watchlist bottom cards preview populated dynamically from state
     private JPanel createHoldingsAndWatchlistPreviewPanel() {
         final JPanel panel = new JPanel(new GridLayout(1, 2, 15, 0));
         panel.setBackground(BG_DARK);
@@ -262,7 +253,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
 
         final String[] cols = {"Ticker", "Company", "Price", "Change"};
 
-        // Holdings Preview Card
         final JPanel holdingsCard = new JPanel(new BorderLayout());
         holdingsCard.setBackground(CARD_BG);
         holdingsCard.setBorder(BorderFactory.createCompoundBorder(
@@ -273,6 +263,7 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         final JLabel hTitle = new JLabel("YOUR HOLDINGS");
         hTitle.setFont(new Font("SansSerif", Font.BOLD, 10));
         hTitle.setForeground(TEXT_MUTED);
+        hTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
 
         holdingsTableModel = new DefaultTableModel(cols, 0) {
             @Override
@@ -284,21 +275,18 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         holdingsTable.setForeground(TEXT_MAIN);
         holdingsTable.setGridColor(BORDER_COLOR);
         holdingsTable.setRowHeight(28);
-        // Header is left visible so it matches the watchlist table
 
-        // === PUT HOLDINGS HEADER STYLING HERE ===
         holdingsTable.getTableHeader().setBackground(CARD_BG);
         holdingsTable.getTableHeader().setForeground(TEXT_MUTED);
         holdingsTable.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_COLOR));
 
         final JScrollPane sp1 = new JScrollPane(holdingsTable);
         sp1.getViewport().setBackground(CARD_BG);
-        sp1.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1)); // Replaced null with faint grey border
+        sp1.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
         holdingsCard.add(hTitle, BorderLayout.NORTH);
         holdingsCard.add(sp1, BorderLayout.CENTER);
 
-        // Watchlist Preview Card
         final JPanel watchlistCard = new JPanel(new BorderLayout());
         watchlistCard.setBackground(CARD_BG);
         watchlistCard.setBorder(BorderFactory.createCompoundBorder(
@@ -309,6 +297,7 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         final JLabel wTitle = new JLabel("WATCHLIST");
         wTitle.setFont(new Font("SansSerif", Font.BOLD, 10));
         wTitle.setForeground(TEXT_MUTED);
+        wTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
 
         watchlistTableModel = new DefaultTableModel(cols, 0) {
             @Override
@@ -321,14 +310,13 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
         watchTable.setGridColor(BORDER_COLOR);
         watchTable.setRowHeight(28);
 
-        // === PUT WATCHLIST HEADER STYLING HERE ===
         watchTable.getTableHeader().setBackground(CARD_BG);
         watchTable.getTableHeader().setForeground(TEXT_MUTED);
         watchTable.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_COLOR));
 
         final JScrollPane sp2 = new JScrollPane(watchTable);
         sp2.getViewport().setBackground(CARD_BG);
-        sp2.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1)); // Replaced null with faint grey border
+        sp2.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
         watchlistCard.add(wTitle, BorderLayout.NORTH);
         watchlistCard.add(sp2, BorderLayout.CENTER);
@@ -351,12 +339,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
 
         footer.add(lastUpdatedLabel, BorderLayout.WEST);
         return footer;
-    }
-
-    private void updateDateTimeDisplay() {
-        final LocalDateTime now = LocalDateTime.now();
-        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-        dateLabel.setText(now.format(dateFormatter));
     }
 
     private void updateLastUpdatedTime() {
@@ -410,9 +392,9 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
                 if (dailyChangeValLabel != null) {
                     dailyChangeValLabel.setText(String.format("$%.2f", totalDailyChange.doubleValue()));
                     if (totalDailyChange.compareTo(BigDecimal.ZERO) < 0) {
-                        dailyChangeValLabel.setForeground(new Color(239, 68, 68)); // Red for negative
+                        dailyChangeValLabel.setForeground(new Color(239, 68, 68));
                     } else {
-                        dailyChangeValLabel.setForeground(ACCENT_GREEN); // Green for positive/zero
+                        dailyChangeValLabel.setForeground(ACCENT_GREEN);
                     }
                 }
             }
@@ -423,7 +405,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
                         .multiply(BigDecimal.valueOf(100));
             }
 
-            // Update Overview Metrics dynamically
             if (totalPortfolioValueValLabel != null) {
                 totalPortfolioValueValLabel.setText(String.format("$%.2f", totalPortfolioValue.doubleValue()));
             }
@@ -431,11 +412,9 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
                 allTimePercentageBadge.setText(String.format(" %+.2f%% ALL-TIME ", allTimePercentage.doubleValue()));
 
                 if (allTimePercentage.compareTo(BigDecimal.ZERO) < 0) {
-                    // Negative: Soft red text with a dark red background container
-                    allTimePercentageBadge.setForeground(new Color(239, 68, 68));
+                    allTimePercentageBadge.setForeground(NEG_RED);
                     allTimePercentageBadge.setBackground(new Color(127, 29, 29));
                 } else {
-                    // Positive / Zero: Green text with a dark green background container
                     allTimePercentageBadge.setForeground(ACCENT_GREEN);
                     allTimePercentageBadge.setBackground(new Color(6, 78, 59));
                 }
@@ -446,17 +425,17 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
             if (totalGainLossValLabel != null) {
                 totalGainLossValLabel.setText(String.format("$%.2f", totalGainLoss.doubleValue()));
                 if (totalGainLoss.compareTo(BigDecimal.ZERO) < 0) {
-                    totalGainLossValLabel.setForeground(new Color(239, 68, 68)); // Red for negative
+                    totalGainLossValLabel.setForeground(NEG_RED);
                 } else {
-                    totalGainLossValLabel.setForeground(ACCENT_GREEN); // Green for positive/zero
+                    totalGainLossValLabel.setForeground(ACCENT_GREEN);
                 }
             }
             if (totalGainLossSubLabel != null) {
                 totalGainLossSubLabel.setText(String.format("%+.2f%%", allTimePercentage.doubleValue()));
                 if (allTimePercentage.compareTo(BigDecimal.ZERO) < 0) {
-                    totalGainLossSubLabel.setForeground(new Color(239, 68, 68)); // Red for negative
+                    totalGainLossSubLabel.setForeground(NEG_RED);
                 } else {
-                    totalGainLossSubLabel.setForeground(TEXT_MUTED); // Muted text for positive/zero
+                    totalGainLossSubLabel.setForeground(TEXT_MUTED);
                 }
             }
             if (totalHoldingsValLabel != null) {
@@ -464,7 +443,6 @@ public class    LoggedInView extends JPanel implements PropertyChangeListener {
             }
         }
 
-        // === Populate Watchlist Preview Table ===
         if (watchlistTableModel != null) {
             watchlistTableModel.setRowCount(0);
             if (state.getWatchlist() != null) {

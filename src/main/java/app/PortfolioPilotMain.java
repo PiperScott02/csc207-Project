@@ -324,7 +324,9 @@ public final class PortfolioPilotMain {
                         addHoldingViewModel,
                         loggedInViewModel,
                         stockDailyDataAccessObject,
-                        userDataAccessObject
+                        userDataAccessObject,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(addHoldingView, addHoldingView.getViewName());
 

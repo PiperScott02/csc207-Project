@@ -192,7 +192,7 @@ public class FileUserDataAccessObject
             return;
         }
         if (user.getPortfolio() == null) {
-            return;
+            user.setPortfolio(new Portfolio()); // Initialize portfolio if it's null
         }
         String[] items = holdingsString.split(";");
         for (String item : items) {
@@ -263,10 +263,9 @@ public class FileUserDataAccessObject
             return;
         }
         if (user.getPortfolio() == null) {
-            return;
+            user.setPortfolio(new Portfolio()); // Initialize portfolio if it's null
         }
 
-        // Ensure the watchlist list is not null to prevent NullPointerException
         if (user.getPortfolio().getWatchlist() == null) {
             System.err.println("Warning: Portfolio watchlist list was null for user: " + user.getName());
             return;

@@ -4,6 +4,9 @@ import interface_adapter.add_holding.AddHoldingController;
 import interface_adapter.add_holding.AddHoldingState;
 import interface_adapter.add_holding.AddHoldingViewModel;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
+import interface_adapter.black_litterman.BlackLittermanController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,18 +20,19 @@ import java.time.format.DateTimeParseException;
 public class AddHoldingView extends JPanel implements ActionListener, PropertyChangeListener {
 
     private static final Color BG_DARK = new Color(11, 15, 25);
-    private static final Color SIDEBAR_BG = new Color(7, 10, 17);
     private static final Color CARD_BG = new Color(17, 24, 39);
     private static final Color BORDER_COLOR = new Color(31, 41, 55);
     private static final Color TEXT_MAIN = new Color(243, 244, 246);
     private static final Color TEXT_MUTED = new Color(156, 163, 175);
     private static final Color ACCENT_GREEN = new Color(16, 185, 129);
-    private static final Color SIDEBAR_ACTIVE = new Color(17, 24, 39);
 
     private final String viewName = "add holding";
     private final AddHoldingViewModel addHoldingViewModel;
     private final AddHoldingController addHoldingController;
     private final ViewManagerModel viewManagerModel;
+    private final LoggedInViewModel loggedInViewModel;
+    private final PortfolioHealthController portfolioHealthController;
+    private final BlackLittermanController blackLittermanController;
 
     private final JTextField tickerInputField = new JTextField();
     private final JTextField sharesInputField = new JTextField();
@@ -38,17 +42,31 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
     private JButton backButton;
     private JButton clearButton;
 
-    public AddHoldingView(AddHoldingViewModel addHoldingViewModel, AddHoldingController addHoldingController,
-                          ViewManagerModel viewManagerModel) {
+    public AddHoldingView(AddHoldingViewModel addHoldingViewModel,
+                          AddHoldingController addHoldingController,
+                          ViewManagerModel viewManagerModel,
+                          LoggedInViewModel loggedInViewModel,
+                          PortfolioHealthController portfolioHealthController,
+                          BlackLittermanController blackLittermanController) {
         this.addHoldingViewModel = addHoldingViewModel;
         this.addHoldingController = addHoldingController;
         this.viewManagerModel = viewManagerModel;
+        this.loggedInViewModel = loggedInViewModel;
+        this.portfolioHealthController = portfolioHealthController;
+        this.blackLittermanController = blackLittermanController;
         this.addHoldingViewModel.addPropertyChangeListener(this);
 
         setBackground(BG_DARK);
         setLayout(new BorderLayout());
 
-        add(createSidebarPanel(), BorderLayout.WEST);
+        // Reusing SidebarHelper for the navigation pane
+        add(SidebarHelper.createSidebar("Holdings",
+                this,
+                viewManagerModel,
+                loggedInViewModel,
+                blackLittermanController,
+                portfolioHealthController), BorderLayout.WEST);
+
         add(createMainContentPanel(), BorderLayout.CENTER);
 
         // Action Listeners
@@ -114,128 +132,21 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         });
     }
 
-    private JPanel createSidebarPanel() {
-        final JPanel sidebar = new JPanel();
-        sidebar.setBackground(SIDEBAR_BG);
-        sidebar.setPreferredSize(new Dimension(240, 0));
-        sidebar.setLayout(new BorderLayout());
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
-
-        final JPanel brandPanel = new JPanel();
-        brandPanel.setBackground(SIDEBAR_BG);
-        brandPanel.setPreferredSize(new Dimension(240, 70));
-        brandPanel.setLayout(null);
-
-        final JLabel logoBadge = new JLabel("P", SwingConstants.CENTER);
-        logoBadge.setFont(new Font("SansSerif", Font.BOLD, 14));
-        logoBadge.setForeground(TEXT_MAIN);
-        logoBadge.setBackground(ACCENT_GREEN);
-        logoBadge.setOpaque(true);
-        logoBadge.setBounds(20, 20, 28, 28);
-
-        final JLabel brandLabel = new JLabel("PortfolioPilot");
-        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-        brandLabel.setForeground(TEXT_MAIN);
-        brandLabel.setBounds(58, 20, 150, 28);
-
-        brandPanel.add(logoBadge);
-        brandPanel.add(brandLabel);
-
-        final JPanel navLinksPanel = new JPanel();
-        navLinksPanel.setBackground(SIDEBAR_BG);
-        navLinksPanel.setLayout(new GridLayout(9, 1, 0, 2));
-        navLinksPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        navLinksPanel.add(createSidebarNavLink("Overview", false, e -> {
-            viewManagerModel.setState("logged in");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Holdings", false, e -> {
-            viewManagerModel.setState("holdings");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Watchlist", false, e -> {
-            viewManagerModel.setState("watchlist");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("News & Sentiment", false, e -> {
-            viewManagerModel.setState("news");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Portfolio Health", false, e -> {}));
-        navLinksPanel.add(createSidebarNavLink("Risk Preference", false, e -> {
-            viewManagerModel.setState("risk preference");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Currency", false, e -> {
-            viewManagerModel.setState("currency conversion");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Search Stocks", false, e -> {
-            viewManagerModel.setState("search");
-            viewManagerModel.firePropertyChanged();
-        }));
-        navLinksPanel.add(createSidebarNavLink("Black-Litterman", false, e -> {}));
-
-        sidebar.add(brandPanel, BorderLayout.NORTH);
-        sidebar.add(navLinksPanel, BorderLayout.CENTER);
-
-        return sidebar;
-    }
-
-    private JButton createSidebarNavLink(String text, boolean isActive, ActionListener action) {
-        final JButton button = new JButton(text);
-        button.setFont(new Font("SansSerif", isActive ? Font.BOLD : Font.PLAIN, 13));
-        button.setForeground(isActive ? TEXT_MAIN : TEXT_MUTED);
-        button.setBackground(isActive ? SIDEBAR_ACTIVE : SIDEBAR_BG);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
-        button.addActionListener(action);
-        return button;
-    }
-
     private JPanel createMainContentPanel() {
         final JPanel panel = new JPanel(null);
         panel.setBackground(BG_DARK);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+        panel.setBorder(BorderFactory.createEmptyBorder(100, 30, 30, 40));
 
-        // Back link button
-        final JButton topBackLink = new JButton("← Back to Dashboard");
-        topBackLink.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        topBackLink.setForeground(TEXT_MUTED);
-        topBackLink.setContentAreaFilled(false);
-        topBackLink.setBorderPainted(false);
-        topBackLink.setFocusPainted(false);
-        topBackLink.setHorizontalAlignment(SwingConstants.LEFT);
-        topBackLink.setBounds(0, 15, 180, 20);
-        topBackLink.addActionListener(e -> {
-            viewManagerModel.setState("logged in");
-            viewManagerModel.firePropertyChanged();
-        });
-
-        // Title
+        // Title matching HoldingsView style and Didot font
         final JLabel titleLabel = new JLabel("Add New Holding");
-        titleLabel.setFont(new Font("Serif", Font.BOLD, 26));
+        titleLabel.setFont(new Font("Didot", Font.BOLD, 30));
         titleLabel.setForeground(TEXT_MAIN);
-        titleLabel.setBounds(0, 45, 300, 35);
-
-        // Subtitle labels
-        final JLabel subtitleLabel = new JLabel("Enter the details of the stock you own. Historical closing price on the specified");
-        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        subtitleLabel.setForeground(TEXT_MUTED);
-        subtitleLabel.setBounds(0, 80, 500, 20);
-
-        final JLabel subtitleLabel2 = new JLabel("date will be retrieved automatically.");
-        subtitleLabel2.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        subtitleLabel2.setForeground(TEXT_MUTED);
-        subtitleLabel2.setBounds(0, 98, 500, 20);
+        titleLabel.setBounds(30, 85, 300, 35);
 
         // Form Card Container
         final JPanel card = new JPanel(null);
         card.setBackground(CARD_BG);
-        card.setBounds(0, 135, 545, 450);
+        card.setBounds(30, 140, 545, 430);
         card.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
         // Ticker input field elements
@@ -271,7 +182,7 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         noteLbl.setForeground(TEXT_MUTED);
         noteLbl.setBounds(25, 230, 200, 15);
 
-        final JTextArea noteArea = new JTextArea("Historical closing price on the specified date will be retrieved automatically.");
+        final JTextArea noteArea = new JTextArea("Enter the details of the stock you own. Historical closing price on the specified date will be retrieved automatically.");
         noteArea.setFont(new Font("SansSerif", Font.PLAIN, 12));
         noteArea.setForeground(TEXT_MUTED);
         noteArea.setBackground(CARD_BG);
@@ -283,15 +194,15 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         // Styled buttons
         backButton = new JButton("Back to Dashboard");
         styleSecondaryButton(backButton);
-        backButton.setBounds(25, 375, 155, 38);
+        backButton.setBounds(25, 355, 155, 38);
 
-        addHoldingButton = new JButton("Add Holding");
-        styleSecondaryButton(addHoldingButton);
-        addHoldingButton.setBounds(190, 375, 140, 38);
+        addHoldingButton = new JButton("+ Add Holding");
+        stylePrimaryButton(addHoldingButton); // Using ACCENT_GREEN primary style
+        addHoldingButton.setBounds(190, 355, 140, 38);
 
         clearButton = new JButton("Clear");
         styleSecondaryButton(clearButton);
-        clearButton.setBounds(340, 375, 90, 38);
+        clearButton.setBounds(340, 355, 90, 38);
 
         card.add(tickerLbl);
         card.add(tickerInputField);
@@ -305,10 +216,7 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         card.add(addHoldingButton);
         card.add(clearButton);
 
-        panel.add(topBackLink);
         panel.add(titleLabel);
-        panel.add(subtitleLabel);
-        panel.add(subtitleLabel2);
         panel.add(card);
 
         return panel;
@@ -331,6 +239,16 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
         button.setFont(new Font("SansSerif", Font.BOLD, 12));
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+    }
+
+    private void stylePrimaryButton(JButton button) {
+        button.setBackground(ACCENT_GREEN);
+        button.setForeground(BG_DARK);
+        button.setFont(new Font("SansSerif", Font.BOLD, 12));
+        button.setOpaque(true);
+        button.setContentAreaFilled(true);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
     }
 
     @Override

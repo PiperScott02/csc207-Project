@@ -43,8 +43,8 @@ public class NewsView extends JPanel implements PropertyChangeListener {
 
     public static final String VIEW_NAME = "news";
 
-    /*
-     * The same dark colour palette used by the Overview page.
+    /**
+     * Dark UI color palette.
      */
     private static final Color BG_DARK = new Color(11, 15, 25);
     private static final Color CARD_BG = new Color(17, 24, 39);
