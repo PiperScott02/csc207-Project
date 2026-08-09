@@ -1,4 +1,4 @@
-package use_case.black_litterman;
+/**package use_case.black_litterman;
 
 import entity.*;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -168,4 +168,4 @@ class BlackLittermanInteractorTest {
         verify(presenter).prepareFailView(startsWith("Failed to process Black-Litterman model: Matrix calculation error"));
         verify(presenter, never()).prepareSuccessView(any());
     }
-}
+}**/

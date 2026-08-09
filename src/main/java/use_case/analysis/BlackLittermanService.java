@@ -91,6 +91,7 @@ public class BlackLittermanService {
         }
 
         RealMatrix weightsMatrix = new Array2DRowRealMatrix(weightsArray);
+        System.out.println("Stock Covariance: " + covarianceMatrix.getEntry(0,0));
         return covarianceMatrix.multiply(weightsMatrix).scalarMultiply(RISK_AVERSION_COEFFICIENT);
     }
 

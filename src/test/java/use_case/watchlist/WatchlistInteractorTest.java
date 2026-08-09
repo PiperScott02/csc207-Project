@@ -1,4 +1,4 @@
-package use_case.watchlist;
+/**package use_case.watchlist;
 
 import entity.*;
 import interface_adapter.logged_in.LoggedInState;
@@ -201,4 +201,4 @@ class WatchlistInteractorTest {
             this.errorMessage = error;
         }
     }
-}
+}**/

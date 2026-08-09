@@ -34,25 +34,46 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
 
             List<StockHolding> holdings = user.getPortfolio().getHoldings();
 
+            if (holdings == null || holdings.isEmpty()) {
+                System.out.println("DEBUG - Portfolio is empty (new user). Skipping Black-Litterman calculation.");
+                return;
+            }
+
             // === SAFE HYDRATION & FILTERING ===
             List<StockHolding> validHoldings = new ArrayList<>();
             for (StockHolding holding : holdings) {
                 if (holding.getStock() != null && holding.getStock().getTickerSymbol() != null) {
                     String ticker = holding.getStock().getTickerSymbol();
+                    System.out.println("DEBUG - Processing ticker: " + ticker);
                     try {
                         Stock fullStock = blackLittermanDataAccessObject.get(ticker);
                         if (fullStock != null) {
                             holding.setStock(fullStock);
                             validHoldings.add(holding);
+                            System.out.println("DEBUG - Successfully fetched and added full stock for: " + ticker);
+                        } else {
+                            System.out.println("DEBUG - DAO returned null for ticker: " + ticker);
+                            // Fallback to existing stock data if it has historical timeline or time series data loaded
+                            Stock existingStock = holding.getStock();
+                            if ((existingStock.getHistoricalTimeline() != null && !existingStock.getHistoricalTimeline().isEmpty()) ||
+                                    (existingStock.getTimeSeries() != null && !existingStock.getTimeSeries().isEmpty())) {
+                                validHoldings.add(holding);
+                                System.out.println("DEBUG - Using fallback existing stock data for: " + ticker);
+                            } else {
+                                System.out.println("DEBUG - Existing stock also lacks historical timeline/time series data.");
+                            }
                         }
                     } catch (Exception e) {
                         System.err.println("FAILED to fetch historical data for ticker: " + ticker);
                         e.printStackTrace();
                     }
+                } else {
+                    System.out.println("DEBUG - Holding had a null stock or null ticker symbol.");
                 }
             }
 
             if (validHoldings.isEmpty()) {
+                System.out.println("DEBUG - validHoldings is empty! Triggering fail view.");
                 blackLittermanPresenter.prepareFailView("Portfolio contains no stocks with valid historical data.");
                 return;
             }
