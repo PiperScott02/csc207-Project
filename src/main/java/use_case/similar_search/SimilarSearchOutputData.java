@@ -1,7 +1,5 @@
 package use_case.similar_search;
 
-import entity.Stock;
-
 import java.math.BigDecimal;
 
 /**
@@ -9,50 +7,87 @@ import java.math.BigDecimal;
  */
 public class SimilarSearchOutputData {
 
-    private final String tickerSymbol;
-    private final String companyName;
-    private final String country;
-    private final String industry;
-    private final BigDecimal previousClose;
+    private final SimilarSearchStockInfo[] similarSearchOutputData;
 
-    private final boolean useCaseFailed;
-
-    public SimilarSearchOutputData(String tickerSymbol,
-                                   String companyName,
-                                   String country,
-                                   String industry,
-                                   BigDecimal previousClose,
-                                   boolean useCaseFailed) {
-        this.tickerSymbol = tickerSymbol;
-        this.companyName = companyName;
-        this.country = country;
-        this.previousClose = previousClose;
-        this.industry = industry;
-        this.useCaseFailed = useCaseFailed;
+    public SimilarSearchOutputData(int numResults) {
+        this.similarSearchOutputData = new SimilarSearchStockInfo[numResults];
     }
 
-    public String getTickerSymbol() {
-        return tickerSymbol;
+    public void setSimilarSearchStockInfo(int i,
+                                          String tickerSymbol,
+                                          String companyName,
+                                          String country,
+                                          String industry,
+                                          BigDecimal previousClose) {
+        this.similarSearchOutputData[i] = new SimilarSearchStockInfo(tickerSymbol,
+                companyName,
+                country,
+                industry,
+                previousClose);
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public String getTickerSymbol(int i) {
+        return this.similarSearchOutputData[i].getTickerSymbol();
     }
 
-    public BigDecimal getPreviousClose() {
-        return previousClose;
+    public String getCompanyName(int i) {
+        return this.similarSearchOutputData[i].getCompanyName();
     }
 
-    public String getCountry() {
-        return country;
+    public String getCountry(int i) {
+        return this.similarSearchOutputData[i].getCountry();
     }
 
-    public String getIndustry() {
-        return this.industry;
+    public String getIndustry(int i) {
+        return this.similarSearchOutputData[i].getIndustry();
     }
 
-    public boolean isUseCaseFailed() {
-        return useCaseFailed;
+    public BigDecimal getPreviousClose(int i) {
+        return this.similarSearchOutputData[i].getPreviousClose();
     }
 
+    public int getLength() {
+        return this.similarSearchOutputData.length;
+    }
+
+    static private class SimilarSearchStockInfo {
+
+        private final String tickerSymbol;
+        private final String companyName;
+        private final String country;
+        private final String industry;
+        private final BigDecimal previousClose;
+
+        public SimilarSearchStockInfo(String tickerSymbol,
+                                       String companyName,
+                                       String country,
+                                       String industry,
+                                       BigDecimal previousClose) {
+            this.tickerSymbol = tickerSymbol;
+            this.companyName = companyName;
+            this.country = country;
+            this.previousClose = previousClose;
+            this.industry = industry;
+        }
+
+        public String getTickerSymbol() {
+            return tickerSymbol;
+        }
+
+        public String getCompanyName() {
+            return companyName;
+        }
+
+        public BigDecimal getPreviousClose() {
+            return previousClose;
+        }
+
+        public String getCountry() {
+            return country;
+        }
+
+        public String getIndustry() {
+            return this.industry;
+        }
+    }
 }

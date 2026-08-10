@@ -91,7 +91,6 @@ public class BlackLittermanService {
         }
 
         RealMatrix weightsMatrix = new Array2DRowRealMatrix(weightsArray);
-        System.out.println("Stock Covariance: " + covarianceMatrix.getEntry(0,0));
         return covarianceMatrix.multiply(weightsMatrix).scalarMultiply(RISK_AVERSION_COEFFICIENT);
     }
 
@@ -256,6 +255,9 @@ public class BlackLittermanService {
         RealMatrix omega = omegaMatrix(holdings, activeViewTickers, confidenceLevels, sigma);
         RealMatrix q = userViews(userViewsMap, activeViewTickers);
 
+        System.out.println("DEBUG - Pi matrix entry [0,0]: " + pi.getEntry(0, 0));
+        System.out.println("DEBUG - User View Q array entry [0,0]: " + q.getEntry(0, 0));
+
         // Black-Litterman Matrix Calculations
         RealMatrix tauSigma = sigma.scalarMultiply(DEFAULT_TAU);
         RealMatrix tauSigmaInv = new LUDecomposition(tauSigma).getSolver().getInverse();
@@ -277,6 +279,7 @@ public class BlackLittermanService {
         for (int i = 0; i < orderedStocks.size(); i++) {
             String ticker = orderedStocks.get(i).getTickerSymbol();
             double dailyReturn = blReturnsDaily.getEntry(i, 0);
+            System.out.println("DEBUG - BL Daily Return for " + ticker + ": " + dailyReturn);
 
             double annualReturn = Math.pow(1.0 + dailyReturn, 252.0) - 1.0;
             adjustedReturns.put(ticker, annualReturn);

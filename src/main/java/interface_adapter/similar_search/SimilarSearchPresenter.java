@@ -4,6 +4,9 @@ import interface_adapter.ViewManagerModel;
 import use_case.similar_search.SimilarSearchOutputBoundary;
 import use_case.similar_search.SimilarSearchOutputData;
 
+/**
+ * Presenter for the Similar Search Use Case.
+ */
 public class SimilarSearchPresenter implements SimilarSearchOutputBoundary {
 
     private final ViewManagerModel viewManagerModel;
@@ -16,11 +19,14 @@ public class SimilarSearchPresenter implements SimilarSearchOutputBoundary {
     }
 
     @Override
-    public void prepareSuccessView(SimilarSearchOutputData[] similarSearchOutputList) {
+    public void prepareSuccessView(SimilarSearchOutputData similarSearchOutputList) {
         final SimilarSearchState state = similarSearchViewModel.getState();
+
         state.setSimilarSearchOutputData(similarSearchOutputList);
         state.setUseCaseFailed(false);
-        this.similarSearchViewModel.setState(state);
+        state.setErrorMessage("");
+
+        similarSearchViewModel.setState(state);
         similarSearchViewModel.firePropertyChanged("similar search");
 
         viewManagerModel.setState(similarSearchViewModel.getViewName());
@@ -30,12 +36,14 @@ public class SimilarSearchPresenter implements SimilarSearchOutputBoundary {
     @Override
     public void prepareFailView(String errorMessage) {
         final SimilarSearchState state = similarSearchViewModel.getState();
+
         state.setUseCaseFailed(true);
-        this.similarSearchViewModel.setState(state);
-        similarSearchViewModel.firePropertyChanged();
+        state.setErrorMessage(errorMessage);
+        similarSearchViewModel.setState(state);
+        similarSearchViewModel.firePropertyChanged("similar search");
 
         viewManagerModel.setState(similarSearchViewModel.getViewName());
-        viewManagerModel.firePropertyChanged();
+        viewManagerModel.firePropertyChanged("similar search");
     }
 
 }

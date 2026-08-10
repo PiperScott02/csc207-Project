@@ -4,6 +4,9 @@ import interface_adapter.ViewManagerModel;
 import use_case.ticker_search.TickerSearchOutputBoundary;
 import use_case.ticker_search.TickerSearchOutputData;
 
+/**
+ * The Presenter for the Ticker Search Use Case.
+ */
 public class TickerSearchPresenter implements TickerSearchOutputBoundary {
 
     private final ViewManagerModel viewManagerModel;
@@ -18,9 +21,12 @@ public class TickerSearchPresenter implements TickerSearchOutputBoundary {
     @Override
     public void prepareSuccessView(TickerSearchOutputData tickerSearchOutputData) {
         final TickerSearchState state = tickerSearchViewModel.getState();
+
         state.setTickerSearchOutputData(tickerSearchOutputData);
         state.setUseCaseFailed(false);
-        this.tickerSearchViewModel.setState(state);
+        state.setErrorMessage("");
+
+        tickerSearchViewModel.setState(state);
         tickerSearchViewModel.firePropertyChanged("ticker search");
 
         viewManagerModel.setState(tickerSearchViewModel.getViewName());
@@ -30,12 +36,15 @@ public class TickerSearchPresenter implements TickerSearchOutputBoundary {
     @Override
     public void prepareFailView(String errorMessage) {
         final TickerSearchState state = tickerSearchViewModel.getState();
+
         state.setUseCaseFailed(true);
-        this.tickerSearchViewModel.setState(state);
-        tickerSearchViewModel.firePropertyChanged();
+        state.setErrorMessage(errorMessage);
+
+        tickerSearchViewModel.setState(state);
+        tickerSearchViewModel.firePropertyChanged("ticker search");
 
         viewManagerModel.setState(tickerSearchViewModel.getViewName());
-        viewManagerModel.firePropertyChanged();
+        viewManagerModel.firePropertyChanged("ticker search");
     }
 
 }

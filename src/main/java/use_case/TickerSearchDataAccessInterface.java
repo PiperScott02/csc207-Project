@@ -2,10 +2,13 @@ package use_case;
 
 import entity.Stock;
 
-import java.io.IOException;
-
 public interface TickerSearchDataAccessInterface {
 
-    Stock createBasicStock(String tickerSymbol) throws IOException, InterruptedException;
+    /**
+     * Create a Stock with the basic information about the given tickerSymbol.
+     * @param tickerSymbol ticker to create a stock entity for
+     * @return Stock with the basic information about the given tickerSymbol
+     */
+    Stock createBasicStock(String tickerSymbol);
 
 }
