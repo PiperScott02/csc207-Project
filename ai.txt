@@ -1,0 +1,1 @@
+AI was used in proofreading of our code, as well as for some debugging and automation of tasks we had already completed, such as completing repetitive Javadoc when we had already written similar or identical Javadoc and needed to extend it to other classes, as well as for assistance during merge conflict resolving. 
