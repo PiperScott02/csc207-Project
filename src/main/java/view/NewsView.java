@@ -58,8 +58,8 @@ public class NewsView extends JPanel implements PropertyChangeListener {
      * Project sentiment mapping: bearish = green, neutral = white,
      * and bullish = red.
      */
-    private static final Color BEARISH_COLOR = new Color(28, 135, 64);
-    private static final Color BULLISH_COLOR = new Color(198, 40, 40);
+    private static final Color BEARISH_COLOR = new Color(198, 40, 40);
+    private static final Color BULLISH_COLOR = new Color(28, 135, 64);
     private static final Color NEUTRAL_COLOR = Color.WHITE;
     private static final Color NEUTRAL_TEXT_COLOR = new Color(31, 41, 55);
 
@@ -423,7 +423,7 @@ public class NewsView extends JPanel implements PropertyChangeListener {
 
         final JButton openButton = new JButton("Open article ↗");
         openButton.setFont(new Font("SansSerif", Font.BOLD, 11));
-        openButton.setForeground(ACCENT_GREEN);
+        openButton.setForeground(Color.WHITE);
         openButton.setContentAreaFilled(false);
         openButton.setBorderPainted(false);
         openButton.setFocusPainted(false);
