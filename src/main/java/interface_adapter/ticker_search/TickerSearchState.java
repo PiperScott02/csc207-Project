@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class TickerSearchState {
     private TickerSearchOutputData tickerSearchOutputData;
     private boolean useCaseFailed;
+    private String errorMessage;
 
     public TickerSearchOutputData getTickerSearchOutputData() {
         return tickerSearchOutputData;
@@ -23,6 +24,14 @@ public class TickerSearchState {
 
     public void setUseCaseFailed(boolean useCaseFailed) {
         this.useCaseFailed = useCaseFailed;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public String getTickerSymbol() {

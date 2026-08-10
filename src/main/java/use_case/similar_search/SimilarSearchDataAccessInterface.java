@@ -14,6 +14,6 @@ public interface SimilarSearchDataAccessInterface {
      * @throws IOException
      * @throws InterruptedException
      */
-    String[][] similarStockInfo(String tickerSymbol) throws IOException, InterruptedException;
+    String[][] similarStockInfo(String tickerSymbol);
 
 }

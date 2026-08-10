@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.math.BigDecimal;
 
-public class TickerSearchJSONResponse {
+public class TickerSearchOverviewJSONResponse {
     @SerializedName("Symbol")
     private String tickerSymbol;
 

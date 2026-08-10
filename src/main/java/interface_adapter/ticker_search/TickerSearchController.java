@@ -13,7 +13,7 @@ public class TickerSearchController {
         this.tickerSearchInputBoundary = tickerSearchInputBoundary;
     }
 
-    public void execute(String tickerSymbol) throws InterruptedException, IOException {
+    public void execute(String tickerSymbol) {
         final TickerSearchInputData tickerSearchInputData = new TickerSearchInputData(tickerSymbol);
         tickerSearchInputBoundary.execute(tickerSearchInputData);
     }
