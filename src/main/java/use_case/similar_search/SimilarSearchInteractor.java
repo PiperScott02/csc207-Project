@@ -21,8 +21,10 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
         this.similarSearchPresenter = similarSearchOutputBoundary;
     }
 
-    /*
-     * Returns a list of Stock objects that AlphaVantage API listed as similar to tickerSymbol.
+    /**
+     * Calls presenter to update similar search area with list of Stock objects that are listed as similar to ticker
+     * symbol in similarSearchInputData, or call fail view if a RuntimeException occurs when fetching this data.
+     * @param similarSearchInputData contains the ticker symbol used to find similar tickers
      */
     @Override
     public void execute(SimilarSearchInputData similarSearchInputData) {

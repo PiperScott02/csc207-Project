@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  */
 public class SimilarSearchOutputData {
 
-    private SimilarSearchStockInfo[] similarSearchOutputData;
+    private final SimilarSearchStockInfo[] similarSearchOutputData;
 
     public SimilarSearchOutputData(int numResults) {
         this.similarSearchOutputData = new SimilarSearchStockInfo[numResults];

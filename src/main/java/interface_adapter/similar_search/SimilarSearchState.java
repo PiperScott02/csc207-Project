@@ -2,6 +2,9 @@ package interface_adapter.similar_search;
 
 import use_case.similar_search.SimilarSearchOutputData;
 
+/**
+ * The state for the Similar Search View Model.
+ */
 public class SimilarSearchState {
 
     private SimilarSearchOutputData similarSearchOutputData;

@@ -7,13 +7,13 @@ public interface TickerSearchOutputBoundary {
 
     /**
      * Prepares the success view for the Ticker Search Use Case.
-     * @param tickerSearchOutputData
+     * @param tickerSearchOutputData stock information to be displayed by view
      */
     void prepareSuccessView(TickerSearchOutputData tickerSearchOutputData);
 
     /**
      * Prepares the success view for the Ticker Search Use Case.
-     * @param errorMessage
+     * @param errorMessage the message to display for the given error
      */
     void prepareFailView(String errorMessage);
 }

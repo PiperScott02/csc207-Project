@@ -19,6 +19,9 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+/**
+ * View for Search Use Cases.
+ */
 public class SearchView extends JPanel implements PropertyChangeListener {
 
     private static final String SEARCH_VIEW_NAME = "search";
@@ -117,6 +120,10 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         add(southPanel, BorderLayout.SOUTH);
     }
 
+    /**
+     * Create JPanel containing title of Search View.
+     * @return JPanel containing title of Search View
+     */
     private JPanel createHeader() {
         final JPanel headerPanel = new JPanel();
 
@@ -127,6 +134,10 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         return headerPanel;
     }
 
+    /**
+     * Create Search Panel containing space for search input and error message fields.
+     * @return search panel
+     */
     private JPanel createSearchBar() {
         final JTextField searchInputField = new JTextField(50);
 
@@ -156,6 +167,11 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         return searchPanel;
     }
 
+    /**
+     * Creates Similar Search Panel containing results and labels.
+     * @param similarSearchResultsPanel results panel for similar search
+     * @return similar search panel
+     */
     private JPanel createSimilarSearchPanel(JPanel similarSearchResultsPanel) {
         final JPanel similarSearchPanel = new JPanel();
         similarSearchPanel.setLayout(new BoxLayout(similarSearchPanel, BoxLayout.Y_AXIS));
@@ -177,6 +193,10 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         return similarSearchPanel;
     }
 
+    /**
+     * Create Ticker Search Results Panel.
+     * @return ticker search results panel
+     */
     public JPanel tickerSearchResult() {
         final JPanel tickerSearchResultPanel = new JPanel();
         tickerSearchResultPanel.setLayout(
@@ -208,6 +228,10 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         return tickerSearchResultPanel;
     }
 
+    /**
+     * Create similar search results panel.
+     * @return similar search results panel
+     */
     private JPanel createSimilarSearchResultsPanel() {
         final JPanel similarSearchResultPanel = new JPanel();
         similarSearchResultPanel.setLayout(
@@ -216,12 +240,21 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         return similarSearchResultPanel;
     }
 
+    /**
+     * Remove displayed results from similarSearchResultsPanel.
+     * @param similarSearchResultsPanel results panel that will have its results removed
+     */
     private void removeSimilarSearchResults(JPanel similarSearchResultsPanel) {
         similarSearchResultsPanel.removeAll();
         similarSearchResultsPanel.revalidate();
         similarSearchResultsPanel.repaint();
     }
 
+    /**
+     * Populate similarSearchResultsPanel with stock info from similarSearchOutputData.
+     * @param similarSearchResultsPanel results panel to populate
+     * @param similarSearchOutputData stock info
+     */
     private void addSimilarSearchResults(JPanel similarSearchResultsPanel,
                                          SimilarSearchOutputData similarSearchOutputData) {
         for (int i = 0; i < similarSearchOutputData.getLength(); i++) {
@@ -250,6 +283,11 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         }
     }
 
+    /**
+     * Update Search View based on evt.
+     * @param evt A PropertyChangeEvent object describing the event source
+     *          and the property that has changed.
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("ticker search")) {
@@ -285,8 +323,11 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         }
     }
 
+    /**
+     * Return the view's name.
+     * @return this view's name
+     */
     public String getViewName() {
         return SEARCH_VIEW_NAME;
     }
-
 }

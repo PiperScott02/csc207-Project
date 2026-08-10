@@ -4,6 +4,9 @@ import interface_adapter.ViewManagerModel;
 import use_case.ticker_search.TickerSearchOutputBoundary;
 import use_case.ticker_search.TickerSearchOutputData;
 
+/**
+ * The Presenter for the Ticker Search Use Case.
+ */
 public class TickerSearchPresenter implements TickerSearchOutputBoundary {
 
     private final ViewManagerModel viewManagerModel;

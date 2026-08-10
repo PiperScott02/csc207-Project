@@ -5,6 +5,9 @@ import use_case.ticker_search.TickerSearchOutputData;
 
 import java.math.BigDecimal;
 
+/**
+ * The state for the Ticker Search ViewModel.
+ */
 public class TickerSearchState {
     private TickerSearchOutputData tickerSearchOutputData;
     private boolean useCaseFailed;

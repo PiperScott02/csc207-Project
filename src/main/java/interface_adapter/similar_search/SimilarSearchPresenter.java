@@ -4,6 +4,9 @@ import interface_adapter.ViewManagerModel;
 import use_case.similar_search.SimilarSearchOutputBoundary;
 import use_case.similar_search.SimilarSearchOutputData;
 
+/**
+ * Presenter for the Similar Search Use Case.
+ */
 public class SimilarSearchPresenter implements SimilarSearchOutputBoundary {
 
     private final ViewManagerModel viewManagerModel;
