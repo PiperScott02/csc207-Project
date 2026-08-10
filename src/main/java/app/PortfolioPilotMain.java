@@ -33,6 +33,8 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.similar_search.SimilarSearchViewModel;
 import interface_adapter.stock.StockController;
 import interface_adapter.stock.StockViewModel;
+import interface_adapter.stress_test.StressTestController;
+import interface_adapter.stress_test.StressTestViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistViewModel;
@@ -103,11 +105,12 @@ public final class PortfolioPilotMain {
         final AddWatchlistViewModel addWatchlistViewModel = new AddWatchlistViewModel();
         final CurrencyConversionViewModel currencyConversionViewModel =
                 new CurrencyConversionViewModel();
+        final StressTestViewModel stressTestViewModel = new StressTestViewModel();
 
         /*
          * Alpha Vantage API key
          */
-        final String apiKey = "API_KEY_PLACEHOLDER";
+        final String apiKey = "NKH8SNZW8I690AJQ";
 
         // ==========================================
         // 2. Data Access Objects
@@ -195,6 +198,12 @@ public final class PortfolioPilotMain {
         final CurrencyConversionController currencyConversionController =
                 CurrencyConversionUseCaseFactory.create(
                         currencyConversionViewModel
+                );
+
+        final StressTestController stressTestController =
+                StressTestUseCaseFactory.create(
+                        stressTestViewModel,
+                        loggedInViewModel
                 );
 
         // ==========================================
@@ -355,8 +364,19 @@ public final class PortfolioPilotMain {
         );
         views.add(holdingsView, holdingsView.getViewName());
 
+        // 14. Stress Test View
+        final StressTestView stressTestView = new StressTestView(
+                viewManagerModel,
+                loggedInViewModel,
+                stressTestViewModel,
+                stressTestController,
+                blackLittermanController,
+                portfolioHealthController
+        );
+        views.add(stressTestView, stressTestView.getViewName());
+
         // ==========================================
-        // 14. Startup Configuration
+        // 15. Startup Configuration
         // ==========================================
         viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChanged();

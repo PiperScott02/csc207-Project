@@ -114,6 +114,10 @@ public class SidebarHelper {
             viewManagerModel.setState("Black-Litterman view");
             viewManagerModel.firePropertyChanged();
         }));
+        navLinksPanel.add(createSidebarNavLink("Stress Test", "Stress Test".equals(activeViewName), e -> {
+            viewManagerModel.setState("stress test");
+            viewManagerModel.firePropertyChanged();
+        }));
 
         final JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(SIDEBAR_BG);

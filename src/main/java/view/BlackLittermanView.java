@@ -189,6 +189,10 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         }));
         navLinksPanel.add(createSidebarNavLink("Black-Litterman", true, e -> {
         }));
+        navLinksPanel.add(createSidebarNavLink("Stress Test", false, e -> {
+            viewManagerModel.setState("stress test");
+            viewManagerModel.firePropertyChanged();
+        }));
 
         final JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(SIDEBAR_BG);
