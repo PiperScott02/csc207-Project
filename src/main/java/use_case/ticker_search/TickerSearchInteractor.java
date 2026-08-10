@@ -17,6 +17,11 @@ public class TickerSearchInteractor implements TickerSearchInputBoundary {
         this.tickerSearchPresenter = tickerSearchOutputBoundary;
     }
 
+    /**
+     * Sends presenter information of stock information for the ticker from tickerSearchInputData, or tell presenter
+     * what error occurred in process of trying to do so.
+     * @param tickerSearchInputData input data for ticker search
+     */
     @Override
     public void execute(TickerSearchInputData tickerSearchInputData) {
         final String tickerSymbol = tickerSearchInputData.getTickerSymbol();

@@ -1,7 +1,5 @@
 package use_case.ticker_search;
 
-import entity.Stock;
-
 import java.math.BigDecimal;
 
 /**
