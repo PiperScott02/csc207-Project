@@ -146,19 +146,14 @@
          * @return the weighted news score between 0.0 and 25.0
          */
         public static double calculateNewsScore(Portfolio portfolio, NewsDataAccessInterface newsDataAccess) {
-            System.out.println("Calculating news score.");
             if (portfolio == null || newsDataAccess == null) return NEUTRAL_NEWS_SCORE;
-            System.out.println("Portfolio not null and newsDataAccess not null");
 
             List<StockHolding> holdings = portfolio.getHoldings();
             if (holdings == null || holdings.isEmpty()) return NEUTRAL_NEWS_SCORE;
 
-            System.out.println("Holdings not null or empty.");
-
             BigDecimal totalPortfolioValue = portfolio.calculateTotalPortfolioValue();
             if (totalPortfolioValue.compareTo(BigDecimal.ZERO) <= 0) return NEUTRAL_NEWS_SCORE;
 
-            System.out.println("Total portfolio value is " + totalPortfolioValue);
 
             double weightedPortfolioNewsScore = 0.0;
 
@@ -176,11 +171,9 @@
                 }
                 double stockNewsPoints = computeStockNewsPoints(ticker, newsDataAccess);
 
-                System.out.println(ticker + "'s score is " + stockNewsPoints);
 
                 weightedPortfolioNewsScore += weight * stockNewsPoints;
 
-                System.out.println("The weighted portfolio score is " + weightedPortfolioNewsScore);
             }
 
             return weightedPortfolioNewsScore;
@@ -189,15 +182,12 @@
         private static double computeStockNewsPoints(String ticker, NewsDataAccessInterface newsDataAccess) {
             try {
                 List<NewsArticle> articles = newsDataAccess.getNews(ticker);
-                System.out.println ("Number of articles = " + articles.toArray().length);
 
                 // 1. Get raw score (-1.0 to +1.0) from shared calculator
                 double rawSentiment = NewsSentimentCalculator.calculateRawSentiment(articles);
 
-                System.out.println("Sentiment of articles is " + rawSentiment);
 
                 // 2. Map raw sentiment [-1.0, +1.0] to points [0.0, 25.0]
-                System.out.println("Individual News Score: " + (NEUTRAL_NEWS_SCORE + (NEUTRAL_NEWS_SCORE * rawSentiment)));
                 return NEUTRAL_NEWS_SCORE + (NEUTRAL_NEWS_SCORE * rawSentiment);
 
             } catch (Exception e) {

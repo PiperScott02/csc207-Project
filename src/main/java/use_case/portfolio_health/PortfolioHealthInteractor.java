@@ -49,7 +49,6 @@ public class PortfolioHealthInteractor implements PortfolioHealthInputBoundary {
             Double divScore = PortfolioHealthScoringService.calculateDiversificationScore(cdr);
             Double newsScore = PortfolioHealthScoringService.calculateNewsScore(portfolio, newsDataAccessObject);
 
-            System.out.println("CDR " + cdr);
             Double portfolioHealthScore = sharpeScore + riskScore + divScore + newsScore;
             String portfolioHealthScoreString = portfolioHealthScore.toString();
 
