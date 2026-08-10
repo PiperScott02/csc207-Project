@@ -1,32 +1,29 @@
-package data_access.similar_search;
+package data_access.ticker_search;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.json.JSONArray;
+import entity.Stock;
 import org.json.JSONObject;
-import use_case.similar_search.SimilarSearchDataAccessInterface;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.concurrent.TimeUnit;
 
-public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInterface {
-    public static final String function = "SYMBOL_SEARCH";
-    public static final HttpClient client = HttpClient.newBuilder().build();
+public class TickerSearchOverviewDataAccessObject {
+    private static final String function = "OVERVIEW";
+    private static final HttpClient client = HttpClient.newBuilder().build();
 
-    public final String api_key;
+    private final String api_key;
 
-    public SimilarSearchDataAccessObject(String api_key) {
+    public TickerSearchOverviewDataAccessObject(String api_key) {
         this.api_key = api_key;
     }
 
-    @Override
-    public String[][] similarStockInfo(String keywords) {
+    public Stock createBasicStock(String tickerSymbol) {
         final String query = "?function=" + function +
-                "&keywords=" + keywords +
+                "&symbol=" + tickerSymbol +
                 "&apikey=" + api_key;
         final String location = "https://www.alphavantage.co/query" + query;
 
@@ -37,6 +34,10 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
                     .build();
             TimeUnit.SECONDS.sleep(1);
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new RuntimeException("Alpha Vantage Returned Status Code " + response.statusCode());
+            }
 
             final JSONObject responseBody = new JSONObject(response.body());
 
@@ -49,39 +50,34 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
             Thread.currentThread().interrupt();
             throw new RuntimeException("Search Interrupted", e);
         }
-    }
+   }
 
-    private String[][] parseJSON(JSONObject responseBody) {
-        final JSONArray responseArray = responseBody.getJSONArray("bestMatches");
+    private Stock parseJSON(JSONObject responseBody) {
+        final Stock stock = new Stock();
 
-        String[][] similarStocks = new String[responseArray.length()][3];
-        JSONObject responseObject;
-        String symbol;
-        String name;
-        String region;
+        final String tickerSymbol = responseBody.optString("Symbol");
+        final String companyName = responseBody.optString("Name");
+        final String country = responseBody.optString("Country");
+        final String industry = responseBody.optString("Industry");
+        final BigDecimal PERatio = responseBody.optBigDecimal("PERatio", null);
+        final BigDecimal EPS = responseBody.optBigDecimal("EPS", null);
 
-        for (int i = 0; i < responseArray.length(); i++) {
-            responseObject = responseArray.optJSONObject(i);
-
-            symbol = responseObject.optString("1. symbol");
-            name =  responseObject.optString("2. name");
-            region = responseObject.optString("4. region");
-
-            if (symbol == null || name == null || region == null) {
-                throw new RuntimeException("Missing Similar Search Information");
-            }
-
-            similarStocks[i][0] = symbol;
-            similarStocks[i][1] = name;
-            similarStocks[i][2] = region;
+        if (tickerSymbol == null || PERatio == null || EPS == null) {
+            throw new RuntimeException("Overview Missing Important Information");
         }
 
-        return similarStocks;
+        stock.setTickerSymbol(tickerSymbol);
+        stock.setCompanyName(companyName);
+        stock.setPreviousClose(EPS.multiply(PERatio));
+        stock.setCountry(country);
+        stock.setIndustry(industry);
+
+        return stock;
     }
 
     private void checkCommonApiErrors(JSONObject responseBody) {
         if (responseBody == null || responseBody.isEmpty()) {
-            throw new RuntimeException("No Similar Search Results");
+            throw new RuntimeException("No Overview Results");
         }
 
         if (responseBody.has("Error Message")) {

@@ -18,7 +18,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 
 public class SearchView extends JPanel implements PropertyChangeListener {
 
@@ -38,6 +37,10 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final SimilarSearchViewModel similarSearchViewModel;
     private final TickerSearchController tickerSearchController;
     private final TickerSearchViewModel tickerSearchViewModel;
+
+    // Error Message Label
+    private final JLabel tickerSearchErrorMessage = new JLabel("");
+    private final JLabel similarSearchErrorMessage = new JLabel("");
 
     // Stock Navigation Dependencies
     private final StockController stockController;
@@ -63,6 +66,14 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.viewManagerModel = viewManagerModel;
         this.stockViewModel = stockViewModel;
         this.loggedInViewModel = loggedInViewModel;
+
+        tickerSearchErrorMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        tickerSearchErrorMessage.setForeground(Color.RED);
+        tickerSearchErrorMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        similarSearchErrorMessage.setHorizontalAlignment(SwingConstants.HORIZONTAL);
+        similarSearchErrorMessage.setForeground(Color.RED);
+        similarSearchErrorMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         tickerSearchViewModel.addPropertyChangeListener(this);
         similarSearchViewModel.addPropertyChangeListener(this);
@@ -123,22 +134,24 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    tickerSearchController.execute(searchInputField.getText());
-                    similarSearchController.execute(searchInputField.getText());
-                } catch (InterruptedException ex) {
-                    System.out.println("InterruptedException");
-                } catch (IOException ex) {
-                    System.out.println("IOException");
-                }
-                System.out.println("YOU SEARCHED: " + searchInputField.getText());
+                String searchText = searchInputField.getText();
+                tickerSearchController.execute(searchInputField.getText());
+                similarSearchController.execute(searchInputField.getText());
             }
         });
 
         final JPanel searchPanel = new JPanel();
-        searchPanel.add(searchButton);
-        searchPanel.add(searchInputField);
-        searchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
+
+        final JPanel searchBar = new JPanel();
+        searchBar.add(searchButton);
+        searchBar.add(searchInputField);
+        searchBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        searchPanel.add(searchBar);
+        searchPanel.add(tickerSearchErrorMessage);
+        searchPanel.add(similarSearchErrorMessage);
+        searchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         return searchPanel;
     }
@@ -146,7 +159,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private JPanel createSimilarSearchPanel(JPanel similarSearchResultsPanel) {
         final JPanel similarSearchPanel = new JPanel();
         similarSearchPanel.setLayout(new BoxLayout(similarSearchPanel, BoxLayout.Y_AXIS));
-        similarSearchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        similarSearchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         similarSearchPanel.add(new JLabel("Similar Search Results"));
 
@@ -168,7 +181,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         final JPanel tickerSearchResultPanel = new JPanel();
         tickerSearchResultPanel.setLayout(
                 new BoxLayout(tickerSearchResultPanel, BoxLayout.Y_AXIS));
-        tickerSearchResultPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        tickerSearchResultPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         final JPanel tickerSearchValuesPanel = new JPanel();
         tickerSearchValuesPanel.setLayout(new GridLayout(2, 5));
@@ -241,17 +254,28 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         if (evt.getPropertyName().equals("ticker search")) {
             TickerSearchState tickerSearchState = (TickerSearchState) evt.getNewValue();
 
-            tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol()); // TODO: add toUpperCase()
-            tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
-            tickerSearchCountry.setText(tickerSearchState.getCountry());
-            tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());
-            tickerSearchIndustry.setText(tickerSearchState.getIndustry());
+            if (!tickerSearchState.isUseCaseFailed()) {
+                tickerSearchErrorMessage.setText(tickerSearchState.getErrorMessage());
+                tickerSearchSymbol.setText(tickerSearchState.getTickerSymbol());
+                tickerSearchCompanyName.setText(tickerSearchState.getCompanyName());
+                tickerSearchCountry.setText(tickerSearchState.getCountry());
+                tickerSearchPreviousClose.setText(tickerSearchState.getPreviousClose().toPlainString());
+                tickerSearchIndustry.setText(tickerSearchState.getIndustry());
+            } else {
+                tickerSearchErrorMessage.setText("Ticker Search Error: " + tickerSearchState.getErrorMessage());
+            }
 
         } else if (evt.getPropertyName().equals("similar search")) {
             SimilarSearchState similarSearchState = (SimilarSearchState) evt.getNewValue();
-            removeSimilarSearchResults(similarSearchResultsPanel);
-            addSimilarSearchResults(similarSearchResultsPanel,
-                    similarSearchState.getSimilarSearchOutputData());
+
+            if (!similarSearchState.isUseCaseFailed()) {
+                similarSearchErrorMessage.setText(similarSearchState.getErrorMessage());
+                removeSimilarSearchResults(similarSearchResultsPanel);
+                addSimilarSearchResults(similarSearchResultsPanel,
+                        similarSearchState.getSimilarSearchOutputData());
+            } else {
+                similarSearchErrorMessage.setText("Similar Search Error: " + similarSearchState.getErrorMessage());
+            }
         }
     }
 
