@@ -7,14 +7,14 @@ public interface SimilarSearchOutputBoundary {
 
     /**
      * Prepares the success view for the Similar Search Use Case.
-     * @param similarSearchOutputList
+     * @param similarSearchOutputList list of similar search output data to be displayed
      */
-    public void prepareSuccessView(SimilarSearchOutputData[] similarSearchOutputList);
+    void prepareSuccessView(SimilarSearchOutputData similarSearchOutputList);
 
     /**
      * Prepares the failure view for the Similar Search Use Case.
-     * @param errorMessage
+     * @param errorMessage the message to display for the given error
      */
-    public void prepareFailView(String errorMessage);
+    void prepareFailView(String errorMessage);
 
 }

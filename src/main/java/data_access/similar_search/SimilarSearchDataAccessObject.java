@@ -1,7 +1,6 @@
 package data_access.similar_search;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import entity.SimilarStocks;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
@@ -24,7 +23,7 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
     }
 
     @Override
-    public String[][] similarStockInfo(String keywords) {
+    public SimilarStocks similarStockInfo(String keywords) {
         final String query = "?function=" + function +
                 "&keywords=" + keywords +
                 "&apikey=" + api_key;
@@ -51,10 +50,10 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
         }
     }
 
-    private String[][] parseJSON(JSONObject responseBody) {
+    private SimilarStocks parseJSON(JSONObject responseBody) {
         final JSONArray responseArray = responseBody.getJSONArray("bestMatches");
 
-        String[][] similarStocks = new String[responseArray.length()][3];
+        SimilarStocks similarStocks = new SimilarStocks(responseArray.length());
         JSONObject responseObject;
         String symbol;
         String name;
@@ -71,9 +70,7 @@ public class SimilarSearchDataAccessObject implements SimilarSearchDataAccessInt
                 throw new RuntimeException("Missing Similar Search Information");
             }
 
-            similarStocks[i][0] = symbol;
-            similarStocks[i][1] = name;
-            similarStocks[i][2] = region;
+            similarStocks.setSimilarStock(i, symbol, name, region);
         }
 
         return similarStocks;
