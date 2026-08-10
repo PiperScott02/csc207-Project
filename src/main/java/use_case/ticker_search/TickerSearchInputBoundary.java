@@ -13,6 +13,6 @@ public interface TickerSearchInputBoundary {
      * @throws IOException
      * @throws InterruptedException
      */
-    void execute(TickerSearchInputData tickerSearchInputData) throws IOException, InterruptedException;
+    void execute(TickerSearchInputData tickerSearchInputData);
 
 }

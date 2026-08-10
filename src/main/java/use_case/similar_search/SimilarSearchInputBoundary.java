@@ -13,6 +13,6 @@ public interface SimilarSearchInputBoundary {
      * @throws IOException
      * @throws InterruptedException
      */
-    void execute(SimilarSearchInputData similarSearchInputData) throws IOException, InterruptedException;
+    void execute(SimilarSearchInputData similarSearchInputData);
 
 }
