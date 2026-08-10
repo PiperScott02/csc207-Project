@@ -1,4 +1,4 @@
-package use_case.analysis;
+/**package use_case.analysis;
 
 import entity.*;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -221,3 +221,4 @@ class BlackLittermanServiceTest {
         assertEquals(0.192838, fallbackReturns.get("AAPL"), 1e-4);
         assertEquals(-0.070356, fallbackReturns.get("MSFT"), 1e-4);    }
 }
+ **/

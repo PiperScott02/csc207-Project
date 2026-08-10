@@ -178,9 +178,12 @@ public class PortfolioFinancialService {
         if (Boolean.TRUE.equals(portfolio.hasCustomViews())) {
             double portfolioDailyVolatility = Math.sqrt(calculatePortfolioVariance(portfolio));
             double portfolioAnnualVolatility = portfolioDailyVolatility * Math.sqrt(252.0);
+            System.out.println("Portfolio Annual Volatility: " + portfolioAnnualVolatility);
 
             double annualPortfolioReturn = calculateCustomPortfolioReturnsNumber(portfolio, portfolio.getCustomViews());
+            System.out.println("Annual Portfolio Return: " + annualPortfolioReturn);
             double annualizedRiskFreeRate = Math.pow(1.0 + RISK_FREE_RATE, 252.0) - 1.0;
+            System.out.println("Annualized Risk Free Rate: " + annualizedRiskFreeRate);
 
             return (portfolioAnnualVolatility == 0) ? 0.0 : (annualPortfolioReturn - annualizedRiskFreeRate) / portfolioAnnualVolatility;
         } else {
@@ -297,7 +300,8 @@ public class PortfolioFinancialService {
             if (customExpectedReturns != null && customExpectedReturns.containsKey(ticker)) {
                 expectedReturn = customExpectedReturns.get(ticker);
             } else {
-                expectedReturn = StatisticsService.calculateMean(StockFinancialService.returnRatios(stock));
+                double dailyMean = StatisticsService.calculateMean(StockFinancialService.returnRatios(stock));
+                expectedReturn = dailyMean * 252.0;
             }
 
             double holdingWeight = portfolio.getHoldingShare(stockHolding);

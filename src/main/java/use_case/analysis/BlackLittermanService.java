@@ -178,7 +178,7 @@ public class BlackLittermanService {
         for (int i = 0; i < numViews; i++) {
             String ticker = viewTickers.get(i);
 
-            double annualReturnDecimal = userViews.getOrDefault(ticker, 0.0) / 100.0;
+            double annualReturnDecimal = userViews.getOrDefault(ticker, 0.0);
             double dailyReturnDecimal = Math.pow(1.0 + annualReturnDecimal, 1.0 / 252.0) - 1.0;
 
             qArray[i][0] = dailyReturnDecimal;
