@@ -252,6 +252,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         ));
         tickerSearchValuesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        tickerSearchValuesPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 95));
+
         addHeaderLabel(tickerSearchValuesPanel, "TICKER SYMBOL");
         addHeaderLabel(tickerSearchValuesPanel, "COUNTRY");
         addHeaderLabel(tickerSearchValuesPanel, "COMPANY NAME");
@@ -304,7 +306,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         sectionLabel.setForeground(TEXT_MUTED);
         sectionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        final JPanel tableCard = new JPanel(new BorderLayout());
+        final JPanel tableCard = new JPanel();
+        tableCard.setLayout(new BoxLayout(tableCard, BoxLayout.Y_AXIS));
         tableCard.setBackground(CARD_BG);
         tableCard.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER_COLOR, 1),
@@ -314,15 +317,19 @@ public class SearchView extends JPanel implements PropertyChangeListener {
 
         final JPanel topOfSimilarSearchPanel = new JPanel(new GridLayout(1, 5, 10, 0));
         topOfSimilarSearchPanel.setBackground(CARD_BG);
+
+        topOfSimilarSearchPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        topOfSimilarSearchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+
         addHeaderLabel(topOfSimilarSearchPanel, "TICKER SYMBOL");
         addHeaderLabel(topOfSimilarSearchPanel, "COUNTRY");
         addHeaderLabel(topOfSimilarSearchPanel, "COMPANY NAME");
         addHeaderLabel(topOfSimilarSearchPanel, "INDUSTRY");
         addHeaderLabel(topOfSimilarSearchPanel, "PREVIOUS CLOSE");
 
-        tableCard.add(topOfSimilarSearchPanel, BorderLayout.NORTH);
-        tableCard.add(Box.createVerticalStrut(10), BorderLayout.CENTER);
-        tableCard.add(similarSearchResultsPanel, BorderLayout.SOUTH);
+        tableCard.add(topOfSimilarSearchPanel);
+        tableCard.add(Box.createVerticalStrut(10));
+        tableCard.add(similarSearchResultsPanel);
 
         similarSearchPanel.add(sectionLabel);
         similarSearchPanel.add(Box.createVerticalStrut(8));
