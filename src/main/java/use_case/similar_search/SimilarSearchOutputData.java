@@ -39,7 +39,7 @@ public class SimilarSearchOutputData {
     }
 
     public String getIndustry(int i) {
-        return this.similarSearchOutputData[i].getCountry();
+        return this.similarSearchOutputData[i].getIndustry();
     }
 
     public BigDecimal getPreviousClose(int i) {

@@ -166,7 +166,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         final JPanel topOfSimilarSearchPanel = new JPanel();
         topOfSimilarSearchPanel.setLayout(new GridLayout(1, 5));
         topOfSimilarSearchPanel.add(new JLabel("Ticker Symbol"));
-        topOfSimilarSearchPanel.add(new JLabel("Country"));
+        topOfSimilarSearchPanel.add(new JLabel("Country/Region"));
         topOfSimilarSearchPanel.add(new JLabel("Company Name"));
         topOfSimilarSearchPanel.add(new JLabel("Industry"));
         topOfSimilarSearchPanel.add(new JLabel("Previous Close"));
@@ -187,7 +187,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         tickerSearchValuesPanel.setLayout(new GridLayout(2, 5));
 
         tickerSearchValuesPanel.add(new JLabel("Ticker Symbol"));
-        tickerSearchValuesPanel.add(new JLabel("Country"));
+        tickerSearchValuesPanel.add(new JLabel("Country/Region"));
         tickerSearchValuesPanel.add(new JLabel("Company Name"));
         tickerSearchValuesPanel.add(new JLabel("Industry"));
         tickerSearchValuesPanel.add(new JLabel("Previous Close"));
@@ -264,6 +264,11 @@ public class SearchView extends JPanel implements PropertyChangeListener {
                 tickerSearchIndustry.setText(tickerSearchState.getIndustry());
             } else {
                 tickerSearchErrorMessage.setText("Ticker Search Error: " + tickerSearchState.getErrorMessage());
+                tickerSearchSymbol.setText("N/A");
+                tickerSearchCompanyName.setText("N/A");
+                tickerSearchCountry.setText("N/A");
+                tickerSearchPreviousClose.setText("N/A");
+                tickerSearchIndustry.setText("N/A");
             }
 
         } else if (evt.getPropertyName().equals("similar search")) {
