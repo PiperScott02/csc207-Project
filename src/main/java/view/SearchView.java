@@ -195,19 +195,25 @@ public class SearchView extends JPanel implements PropertyChangeListener {
      * @return search panel
      */
     private JPanel createSearchBar() {
-        final JPanel searchPanel = new JPanel(null);
+        final JPanel searchPanel = new JPanel();
+        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
         searchPanel.setBackground(CARD_BG);
-        searchPanel.setPreferredSize(new Dimension(750, 95));
-        searchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 95));
         searchPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER_COLOR, 1),
                 BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
+        searchPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        searchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 160));
+
+        final JPanel inputRow = new JPanel(null);
+        inputRow.setBackground(CARD_BG);
+        inputRow.setPreferredSize(new Dimension(710, 65));
+        inputRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
 
         final JLabel queryLabel = new JLabel("QUERY");
         queryLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
         queryLabel.setForeground(TEXT_MUTED);
-        queryLabel.setBounds(20, 12, 100, 15);
+        queryLabel.setBounds(0, 0, 100, 15);
 
         searchInputField.setBackground(BG_DARK);
         searchInputField.setForeground(TEXT_MAIN);
@@ -217,7 +223,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
                 BorderFactory.createLineBorder(BORDER_COLOR, 1),
                 BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
-        searchInputField.setBounds(20, 32, 590, 36);
+        searchInputField.setBounds(0, 20, 590, 36);
 
         searchButton.setBackground(ACCENT_GREEN);
         searchButton.setForeground(Color.BLACK);
@@ -226,7 +232,7 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         searchButton.setBorderPainted(false);
         searchButton.setOpaque(true);
         searchButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        searchButton.setBounds(625, 32, 100, 36);
+        searchButton.setBounds(605, 20, 100, 36);
 
         searchButton.addActionListener(new ActionListener() {
             @Override
@@ -240,13 +246,19 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             searchInputField.addActionListener(searchButton.getActionListeners()[0]);
         }
 
-        searchPanel.add(queryLabel);
-        searchPanel.add(searchInputField);
-        searchPanel.add(searchButton);
+        inputRow.add(queryLabel);
+        inputRow.add(searchInputField);
+        inputRow.add(searchButton);
+
+        // Add error messages
+        searchPanel.add(inputRow);
+        searchPanel.add(Box.createVerticalStrut(8));
+        searchPanel.add(tickerSearchErrorMessage);
+        searchPanel.add(Box.createVerticalStrut(4));
+        searchPanel.add(similarSearchErrorMessage);
 
         return searchPanel;
     }
-
 
     /**
      * Create Ticker Search Results Panel.
