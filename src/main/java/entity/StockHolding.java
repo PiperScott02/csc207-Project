@@ -33,6 +33,7 @@ public class StockHolding {
     public double getQuantityOnDate(LocalDate date) {
         double quantity = 0;
         for (Transaction transaction: transactions) {
+            System.out.println(getStock() + "getQuantityOnDate transaction date" +  transaction.getDate() );
             if (!transaction.getDate().isAfter(date)) {
                 if (transaction.getType() == TransactionType.BUY)
                     quantity += transaction.getNumberOfShares();

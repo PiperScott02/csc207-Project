@@ -189,6 +189,10 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
         }));
         navLinksPanel.add(createSidebarNavLink("Black-Litterman", true, e -> {
         }));
+        navLinksPanel.add(createSidebarNavLink("Stress Test", false, e -> {
+            viewManagerModel.setState("stress test");
+            viewManagerModel.firePropertyChanged();
+        }));
 
         final JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(SIDEBAR_BG);
@@ -484,7 +488,10 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             BlackLittermanState state = (BlackLittermanState) evt.getNewValue();
             if (state != null) {
                 if (state.getErrorMessage() != null && !state.getErrorMessage().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, state.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    // Pop up if we are currently looking at the Black-Litterman view
+                    if (viewName.equals(viewManagerModel.getState())) {
+                        JOptionPane.showMessageDialog(this, state.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                     return;
                 }
                 updateStockRows(state);
@@ -496,17 +503,21 @@ public class BlackLittermanView extends JPanel implements PropertyChangeListener
             revalidate();
             repaint();
 
-            if (blackLittermanController != null && loggedInViewModel.getState() != null
-                    && loggedInViewModel.getState().getUser() != null) {
-                User user = loggedInViewModel.getState().getUser();
+            // If the user just navigated TO the Black-Litterman view, trigger data loading/checking immediately
+            // so that any empty portfolio error fires right as they land on the page.
+            if (viewName.equals(viewManagerModel.getState())) {
+                if (blackLittermanController != null && loggedInViewModel.getState() != null
+                        && loggedInViewModel.getState().getUser() != null) {
+                    User user = loggedInViewModel.getState().getUser();
 
-                new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() {
-                        blackLittermanController.loadMarketData(user);
-                        return null;
-                    }
-                }.execute();
+                    new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() {
+                            blackLittermanController.loadMarketData(user);
+                            return null;
+                        }
+                    }.execute();
+                }
             }
         }
     }
