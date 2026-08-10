@@ -15,7 +15,7 @@ public class SimilarSearchPresenter implements SimilarSearchOutputBoundary {
     }
 
     @Override
-    public void prepareSuccessView(SimilarSearchOutputData[] similarSearchOutputList) {
+    public void prepareSuccessView(SimilarSearchOutputData similarSearchOutputList) {
         final SimilarSearchState state = similarSearchViewModel.getState();
 
         state.setSimilarSearchOutputData(similarSearchOutputList);

@@ -223,25 +223,26 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     }
 
     private void addSimilarSearchResults(JPanel similarSearchResultsPanel,
-                                         SimilarSearchOutputData[] similarSearchOutputData) {
-        for (SimilarSearchOutputData outputData : similarSearchOutputData) {
+                                         SimilarSearchOutputData similarSearchOutputData) {
+        for (int i = 0; i < similarSearchOutputData.getLength(); i++) {
             JPanel outputDataPanel = new JPanel();
             outputDataPanel.setLayout(new GridLayout(1, 5));
             outputDataPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-            JButton symbolButton = new JButton(outputData.getTickerSymbol());
+            JButton symbolButton = new JButton(similarSearchOutputData.getTickerSymbol(i));
             // Click similar search symbol button -> Execute StockUseCase & Switch to Stock View
+            int finalI = i;
             symbolButton.addActionListener(e -> {
-                this.stockController.execute(outputData.getTickerSymbol());
+                this.stockController.execute(similarSearchOutputData.getTickerSymbol(finalI));
                 this.viewManagerModel.setState(this.stockViewModel.getViewName());
                 this.viewManagerModel.firePropertyChanged();
             });
 
             outputDataPanel.add(symbolButton);
-            outputDataPanel.add(new JLabel(outputData.getCountry()));
-            outputDataPanel.add(new JLabel(outputData.getCompanyName()));
-            outputDataPanel.add(new JLabel(outputData.getIndustry()));
-            outputDataPanel.add(new JLabel(outputData.getPreviousClose().toPlainString()));
+            outputDataPanel.add(new JLabel(similarSearchOutputData.getCountry(i)));
+            outputDataPanel.add(new JLabel(similarSearchOutputData.getCompanyName(i)));
+            outputDataPanel.add(new JLabel(similarSearchOutputData.getIndustry(i)));
+            outputDataPanel.add(new JLabel(similarSearchOutputData.getPreviousClose(i).toPlainString()));
 
             similarSearchResultsPanel.add(outputDataPanel);
             similarSearchResultsPanel.revalidate();
