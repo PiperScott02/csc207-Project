@@ -12,10 +12,20 @@ import data_access.FileStockDataAccessObject;
 import data_access.FileUserDataAccessObject;
 import entity.*;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.add_watchlist.AddWatchlistViewModel;
+import interface_adapter.black_litterman.BlackLittermanController;
+import interface_adapter.black_litterman.BlackLittermanViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
+import interface_adapter.portfolio_health.PortfolioHealthViewModel;
 import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistViewModel;
+import use_case.analysis.BlackLittermanService;
+import use_case.black_litterman.BlackLittermanDataAccessInterface;
+import use_case.news.NewsDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
+import view.BlackLittermanView;
+import view.PortfolioHealthView;
 import view.ViewManager;
 import view.WatchlistView;
 
@@ -57,6 +67,10 @@ public final class WatchlistPilotMain {
          */
         final WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
         final LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
+        final AddWatchlistViewModel addWatchlistViewModel = new AddWatchlistViewModel();
+        final BlackLittermanViewModel blackLittermanViewModel = new BlackLittermanViewModel();
+        final PortfolioHealthViewModel portfolioHealthViewModel = new PortfolioHealthViewModel();
+        final BlackLittermanService blackLittermanService = new BlackLittermanService();
 
         /*
          * Instantiate the Data Access Objects.
@@ -64,12 +78,63 @@ public final class WatchlistPilotMain {
         final StockDataAccessInterface stockDataAccessObject =
                 new FileStockDataAccessObject();
 
+        final FileUserDataAccessObject userDataAccessObject;
+        try {
+            userDataAccessObject = new FileUserDataAccessObject(
+                    "data/users.csv",
+                    new CommonUserFactory()
+            );
+        } catch (java.io.IOException exception) {
+            throw new RuntimeException("Unable to initialize user storage.", exception);
+        }
+
+        /*
+         * Instantiate Sidebar Controllers via their respective UseCaseFactories.
+         */
+        // --- Black-Litterman ---
+        // 1. Get the controller (using createBlackLittermanUseCase)
+        final BlackLittermanController blackLittermanController = BlackLittermanUseCaseFactory.createBlackLittermanUseCase(
+                viewManagerModel,
+                blackLittermanViewModel,
+                (BlackLittermanDataAccessInterface) stockDataAccessObject,
+                blackLittermanService
+        );
+
+        // 2. Create the view (using create)
+        final BlackLittermanView blackLittermanView = BlackLittermanUseCaseFactory.create(
+                viewManagerModel,
+                blackLittermanViewModel,
+                (BlackLittermanDataAccessInterface) stockDataAccessObject,
+                blackLittermanService,
+                loggedInViewModel
+        );
+        views.add(blackLittermanView, "black litterman");
+
+        // --- Portfolio Health ---
+        // 3. Get the controller (using createPortfolioHealthUseCase)
+        final PortfolioHealthController portfolioHealthController = PortfolioHealthUseCaseFactory.createPortfolioHealthUseCase(
+                viewManagerModel,
+                portfolioHealthViewModel,
+                stockDataAccessObject,
+                (NewsDataAccessInterface) stockDataAccessObject
+        );
+
+        // 4. Create the view (using create)
+        final PortfolioHealthView portfolioHealthView = PortfolioHealthUseCaseFactory.create(
+                viewManagerModel,
+                portfolioHealthViewModel,
+                loggedInViewModel,
+                portfolioHealthController
+        );
+        views.add(portfolioHealthView, "portfolio health");
+
         /*
          * Manually wire the Clean Architecture layers using the Factory.
          */
         final WatchlistController watchlistController = WatchlistUseCaseFactory.createWatchlistUseCase(
                 viewManagerModel,
                 watchlistViewModel,
+                loggedInViewModel,
                 stockDataAccessObject
         );
 
@@ -80,7 +145,11 @@ public final class WatchlistPilotMain {
                 viewManagerModel,
                 watchlistViewModel,
                 loggedInViewModel,
-                stockDataAccessObject
+                addWatchlistViewModel,
+                stockDataAccessObject,
+                userDataAccessObject,
+                blackLittermanController,
+                portfolioHealthController
         );
 
         /*

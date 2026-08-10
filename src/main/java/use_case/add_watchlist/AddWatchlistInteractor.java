@@ -1,7 +1,9 @@
 package use_case.add_watchlist;
 
+import data_access.FileUserDataAccessObject;
 import entity.Portfolio;
 import entity.Stock;
+import entity.User;
 import entity.WatchlistStockItem;
 import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.StockDailyDataAccessInterface;
@@ -13,16 +15,20 @@ import java.math.BigDecimal;
  * The Interactor for the Add Watchlist Item Use Case.
  */
 public class AddWatchlistInteractor implements AddWatchlistInputBoundary {
+
     private final StockDailyDataAccessInterface stockDataAccessObject;
     private final AddWatchlistOutputBoundary userPresenter;
     private final LoggedInViewModel loggedInViewModel;
+    private final FileUserDataAccessObject userDataAccessObject;
 
     public AddWatchlistInteractor(StockDailyDataAccessInterface stockDataAccessObject,
                                   AddWatchlistOutputBoundary userPresenter,
-                                  LoggedInViewModel loggedInViewModel) {
+                                  LoggedInViewModel loggedInViewModel,
+                                  FileUserDataAccessObject userDataAccessObject) {
         this.stockDataAccessObject = stockDataAccessObject;
         this.userPresenter = userPresenter;
         this.loggedInViewModel = loggedInViewModel;
+        this.userDataAccessObject = userDataAccessObject;
     }
 
     @Override
@@ -41,6 +47,7 @@ public class AddWatchlistInteractor implements AddWatchlistInputBoundary {
             userPresenter.prepareFailView("No active user session found.");
             return;
         }
+        User currentUser = loggedInViewModel.getState().getUser();
         Portfolio portfolio = loggedInViewModel.getState().getUser().getPortfolio();
 
         // Check if already in the watchlist
@@ -79,6 +86,9 @@ public class AddWatchlistInteractor implements AddWatchlistInputBoundary {
         );
 
         portfolio.addWatchlist(newItem);
+
+        // Save to CSV disk file
+        userDataAccessObject.save(currentUser);
 
         // 6. Package results and notify presenter
         AddWatchlistOutputData outputData = new AddWatchlistOutputData(ticker, portfolio.getWatchlist(), false);

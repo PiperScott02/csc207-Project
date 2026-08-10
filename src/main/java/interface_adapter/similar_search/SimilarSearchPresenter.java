@@ -12,7 +12,8 @@ public class SimilarSearchPresenter implements SimilarSearchOutputBoundary {
     private final ViewManagerModel viewManagerModel;
     private final SimilarSearchViewModel similarSearchViewModel;
 
-    public SimilarSearchPresenter(ViewManagerModel viewManagerModel, SimilarSearchViewModel similarSearchViewModel) {
+    public SimilarSearchPresenter(ViewManagerModel viewManagerModel,
+                                  SimilarSearchViewModel similarSearchViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.similarSearchViewModel = similarSearchViewModel;
     }

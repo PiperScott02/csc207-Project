@@ -1,16 +1,26 @@
 package data_access;
 
+
 import data_access.stock_daily.StockService;
 import entity.Stock;
+import use_case.StockDailyDataAccessInterface;
 import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
 
+
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 
 public class FileStockDataAccessObject implements
         StockDataAccessInterface,
-        BlackLittermanDataAccessInterface {
+        BlackLittermanDataAccessInterface,
+        StockDailyDataAccessInterface {
+
+    // === ADDED: Local cache to store fetched stocks and avoid redundant network calls ===
+    private final Map<String, Stock> stockCache = new HashMap<>();
 
     /**
      * Checks whether a stock with the ticker identifier exists in the APIs' data.
@@ -29,6 +39,7 @@ public class FileStockDataAccessObject implements
         }
     }
 
+
     /**
      * Tries to create a stock object for the given ticker.
      * @param ticker the stock ticker symbol.
@@ -36,11 +47,33 @@ public class FileStockDataAccessObject implements
      */
     @Override
     public Stock get(String ticker) {
+        // === MODIFIED: Return from cache immediately if already downloaded ===
+        if (stockCache.containsKey(ticker)) {
+            return stockCache.get(ticker);
+        }
         try {
             StockService stockService = new StockService();
-            return stockService.createStockAndHistory(ticker);
+            Stock stock = stockService.createStockAndHistory(ticker);
+            if (stock != null) {
+                stockCache.put(ticker, stock); // Store in cache for next time
+            }
+            return stock;
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Failed to fetch stock data for: " + ticker, e);
         }
     }
+
+
+    /**
+     * Creates and returns a stock object and its history for the given ticker symbol.
+     * @param tickerSymbol the stock ticker symbol.
+     * @return the Stock object associated with tickerSymbol.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @Override
+    public Stock createStockAndHistory(String tickerSymbol) throws IOException, InterruptedException {
+        return get(tickerSymbol); // Route through cache
+    }
 }
+

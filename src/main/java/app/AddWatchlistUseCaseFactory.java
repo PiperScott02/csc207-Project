@@ -1,5 +1,6 @@
 package app;
 
+import data_access.FileUserDataAccessObject;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_watchlist.AddWatchlistController;
 import interface_adapter.add_watchlist.AddWatchlistPresenter;
@@ -10,6 +11,7 @@ import use_case.StockDailyDataAccessInterface;
 import use_case.add_watchlist.AddWatchlistInputBoundary;
 import use_case.add_watchlist.AddWatchlistInteractor;
 import use_case.add_watchlist.AddWatchlistOutputBoundary;
+import use_case.watchlist.WatchlistDataAccessInterface;
 import view.AddWatchlistView;
 
 /**
@@ -24,16 +26,18 @@ public class AddWatchlistUseCaseFactory {
     public static AddWatchlistView create(
             ViewManagerModel viewManagerModel,
             AddWatchlistViewModel addWatchlistViewModel,
-            WatchlistViewModel watchlistViewModel, // Added parameter
+            WatchlistViewModel watchlistViewModel,
             LoggedInViewModel loggedInViewModel,
-            StockDailyDataAccessInterface stockDataAccessObject) {
+            StockDailyDataAccessInterface stockDataAccessObject,
+            WatchlistDataAccessInterface watchlistDataAccessObject) {
 
         AddWatchlistController addWatchlistController = createWatchlistUseCase(
                 viewManagerModel,
                 addWatchlistViewModel,
-                watchlistViewModel, // Pass down
+                watchlistViewModel,
                 loggedInViewModel,
-                stockDataAccessObject
+                stockDataAccessObject,
+                watchlistDataAccessObject
         );
 
         return new AddWatchlistView(addWatchlistViewModel, addWatchlistController, viewManagerModel);
@@ -42,9 +46,10 @@ public class AddWatchlistUseCaseFactory {
     private static AddWatchlistController createWatchlistUseCase(
             ViewManagerModel viewManagerModel,
             AddWatchlistViewModel addWatchlistViewModel,
-            WatchlistViewModel watchlistViewModel, // Added parameter
+            WatchlistViewModel watchlistViewModel,
             LoggedInViewModel loggedInViewModel,
-            StockDailyDataAccessInterface stockDataAccessObject) {
+            StockDailyDataAccessInterface stockDataAccessObject,
+            WatchlistDataAccessInterface watchlistDataAccessObject) {
 
         AddWatchlistOutputBoundary addWatchlistOutputBoundary = new AddWatchlistPresenter(
                 addWatchlistViewModel,
@@ -56,7 +61,8 @@ public class AddWatchlistUseCaseFactory {
         AddWatchlistInputBoundary addWatchlistInteractor = new AddWatchlistInteractor(
                 stockDataAccessObject,
                 addWatchlistOutputBoundary,
-                loggedInViewModel
+                loggedInViewModel,
+                (FileUserDataAccessObject) watchlistDataAccessObject
         );
 
         return new AddWatchlistController(addWatchlistInteractor);

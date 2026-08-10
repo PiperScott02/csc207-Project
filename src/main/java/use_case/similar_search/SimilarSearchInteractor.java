@@ -14,10 +14,10 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
     private final SimilarSearchOutputBoundary similarSearchPresenter;
 
     public SimilarSearchInteractor(SimilarSearchDataAccessInterface similarSearchAccessInterface,
-                                   TickerSearchDataAccessInterface tickerSearchDataAccessObject,
+                                   TickerSearchDataAccessInterface tickerSearchDataAccessInterface,
                                    SimilarSearchOutputBoundary similarSearchOutputBoundary) {
         this.similarSearchDataAccessObject = similarSearchAccessInterface;
-        this.tickerSearchDataAccessObject = tickerSearchDataAccessObject;
+        this.tickerSearchDataAccessObject = tickerSearchDataAccessInterface;
         this.similarSearchPresenter = similarSearchOutputBoundary;
     }
 

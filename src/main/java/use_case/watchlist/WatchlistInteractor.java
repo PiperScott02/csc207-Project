@@ -3,6 +3,7 @@ package use_case.watchlist;
 import entity.Stock;
 import entity.User;
 import entity.WatchlistStockItem;
+import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.stock.StockDataAccessInterface;
 
 import java.util.ArrayList;
@@ -12,16 +13,25 @@ import java.util.List;
 public class WatchlistInteractor implements WatchlistInputBoundary {
     private final StockDataAccessInterface stockDataAccessObject;
     private final WatchlistOutputBoundary watchlistPresenter;
+    private final LoggedInViewModel loggedInViewModel;
 
     public WatchlistInteractor(StockDataAccessInterface stockDataAccessObject,
-                               WatchlistOutputBoundary watchlistPresenter) {
+                               WatchlistOutputBoundary watchlistPresenter,
+                               LoggedInViewModel loggedInViewModel) {
         this.stockDataAccessObject = stockDataAccessObject;
         this.watchlistPresenter = watchlistPresenter;
+        this.loggedInViewModel = loggedInViewModel;
     }
 
     @Override
     public void execute(WatchlistInputData watchlistInputData) {
-        User user = watchlistInputData.getUser();
+        // Grab the user straight from the active session ViewModel
+        if (loggedInViewModel.getState() == null || loggedInViewModel.getState().getUser() == null) {
+            watchlistPresenter.prepareFailView("No active user session found.");
+            return;
+        }
+
+        User user = loggedInViewModel.getState().getUser();
 
         if (user == null || user.getPortfolio() == null) {
             watchlistPresenter.prepareFailView("User or portfolio not found.");

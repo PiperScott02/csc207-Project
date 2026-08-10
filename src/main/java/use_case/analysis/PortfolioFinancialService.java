@@ -333,9 +333,7 @@ public class PortfolioFinancialService {
             List<Double> stockRatios = StockFinancialService.returnRatios(stock);
             double variance = StatisticsService.calculateVariance(stockRatios);
             Double standardDeviation = Math.sqrt(variance);
-            System.out.println("Standard Deviation " + standardDeviation);
             weightVolatilitySum += portfolio.getHoldingShare(holding) * standardDeviation;
-            System.out.println("Weight volatility Sum " + weightVolatilitySum);
         }
 
         if (portfolioStandardDeviation == 0) {

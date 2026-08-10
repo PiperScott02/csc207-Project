@@ -195,7 +195,6 @@ public class StockFinancialService {
 
                 double corr = covariance / (std_i * std_j);
 
-                System.out.println("Corr(" + i + "," + j + ") = " + corr);
                 covariancesArray[i][j] = covariance;
                 covariancesArray[j][i] = covariance; // Mirror the value across the diagonal
             }

@@ -13,6 +13,7 @@ import data_access.FileUserDataAccessObject;
 import data_access.similar_search.SimilarSearchDataAccessObject;
 import data_access.stock_daily.StockService;
 import data_access.ticker_search.TickerSearchDataAccessObject;
+import data_access.FileWatchlistDataAccessObject;
 import entity.CommonUserFactory;
 
 import interface_adapter.ViewManagerModel;
@@ -35,6 +36,7 @@ import interface_adapter.stock.StockViewModel;
 import interface_adapter.ticker_search.TickerSearchViewModel;
 import interface_adapter.watchlist.WatchlistController;
 import interface_adapter.watchlist.WatchlistViewModel;
+import interface_adapter.delete_holding.DeleteHoldingController;
 
 import use_case.StockDailyDataAccessInterface;
 import use_case.TickerSearchDataAccessInterface;
@@ -43,6 +45,7 @@ import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.news.NewsDataAccessInterface;
 import use_case.similar_search.SimilarSearchDataAccessInterface;
 import use_case.stock.StockDataAccessInterface;
+import use_case.watchlist.WatchlistDataAccessInterface;
 
 import view.*;
 
@@ -104,7 +107,7 @@ public final class PortfolioPilotMain {
         /*
          * Alpha Vantage API key
          */
-        final String apiKey = "API_KEY_HERE";
+        final String apiKey = "API_KEY_PLACEHOLDER";
 
         // ==========================================
         // 2. Data Access Objects
@@ -140,6 +143,9 @@ public final class PortfolioPilotMain {
         final NewsDataAccessInterface newsDataAccessObject =
                 new AlphaVantageNewsDataAccessObject(apiKey);
 
+        final WatchlistDataAccessInterface watchlistDataAccessObject =
+                new FileWatchlistDataAccessObject("data/watchlist.csv");
+
         // ==========================================
         // 3. Controllers
         // ==========================================
@@ -162,7 +168,14 @@ public final class PortfolioPilotMain {
                 WatchlistUseCaseFactory.createWatchlistUseCase(
                         viewManagerModel,
                         watchlistViewModel,
+                        loggedInViewModel,
                         stockDataAccessObject
+                );
+
+        final DeleteHoldingController deleteHoldingController =
+                DeleteHoldingUseCaseFactory.create(
+                        loggedInViewModel,
+                        userDataAccessObject
                 );
 
         // Instantiate dependencies for Black-Litterman
@@ -204,6 +217,7 @@ public final class PortfolioPilotMain {
                 loginViewModel,
                 loggedInViewModel,
                 signupViewModel,
+                watchlistViewModel,
                 userDataAccessObject
         );
         views.add(loginView, loginView.getViewName());
@@ -223,7 +237,8 @@ public final class PortfolioPilotMain {
                 PortfolioHealthUseCaseFactory.create(
                         viewManagerModel,
                         portfolioHealthViewModel,
-                        loggedInViewModel
+                        loggedInViewModel,
+                        portfolioHealthController
                 );
         views.add(portfolioHealthView, portfolioHealthView.viewName);
 
@@ -232,6 +247,9 @@ public final class PortfolioPilotMain {
                 NewsUseCaseFactory.create(
                         newsViewModel,
                         viewManagerModel,
+                        loggedInViewModel,
+                        blackLittermanController,
+                        portfolioHealthController,
                         apiKey
                 );
         views.add(newsView, newsView.getViewName());
@@ -246,7 +264,9 @@ public final class PortfolioPilotMain {
                         tickerSearchDataAccessObject,
                         similarSearchDataAccessObject,
                         stockController,
-                        loggedInViewModel
+                        loggedInViewModel,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(searchView, searchView.getViewName());
 
@@ -265,7 +285,10 @@ public final class PortfolioPilotMain {
                 RiskPreferenceUseCaseFactory.create(
                         viewManagerModel,
                         riskPreferenceViewModel,
-                        userDataAccessObject
+                        userDataAccessObject,
+                        loggedInViewModel,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(riskPreferenceView, riskPreferenceView.getViewName());
 
@@ -275,7 +298,11 @@ public final class PortfolioPilotMain {
                         viewManagerModel,
                         watchlistViewModel,
                         loggedInViewModel,
-                        stockDataAccessObject
+                        addWatchlistViewModel,
+                        stockDataAccessObject,
+                        userDataAccessObject,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(watchlistView, watchlistView.getViewName());
 
@@ -285,7 +312,8 @@ public final class PortfolioPilotMain {
                         viewManagerModel,
                         blackLittermanViewModel,
                         blackLittermanDataAccessObject,
-                        blackLittermanService
+                        blackLittermanService,
+                        loggedInViewModel
                 );
         views.add(blackLittermanView, blackLittermanView.getViewName());
 
@@ -296,43 +324,39 @@ public final class PortfolioPilotMain {
                         addHoldingViewModel,
                         loggedInViewModel,
                         stockDailyDataAccessObject,
-                        userDataAccessObject
+                        userDataAccessObject,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(addHoldingView, addHoldingView.getViewName());
 
-        // 12. Add Watchlist View
-        final AddWatchlistView addWatchlistView =
-                AddWatchlistUseCaseFactory.create(
-                        viewManagerModel,
-                        addWatchlistViewModel,
-                        watchlistViewModel,
-                        loggedInViewModel,
-                        stockDailyDataAccessObject
-                );
-        views.add(addWatchlistView, addWatchlistView.viewName);
-
-        // 13. Currency Conversion View
+        // 12. Currency Conversion View
         final CurrencyConversionView currencyConversionView =
                 new CurrencyConversionView(
                         viewManagerModel,
                         currencyConversionController,
                         currencyConversionViewModel,
-                        loggedInViewModel
+                        loggedInViewModel,
+                        blackLittermanController,
+                        portfolioHealthController
                 );
         views.add(
                 currencyConversionView,
                 currencyConversionView.getViewName()
         );
 
-        // 14. Holdings View
+        // 13. Holdings View
         final HoldingsView holdingsView = new HoldingsView(
                 viewManagerModel,
-                loggedInViewModel
+                loggedInViewModel,
+                deleteHoldingController,
+                portfolioHealthController,
+                blackLittermanController
         );
         views.add(holdingsView, holdingsView.getViewName());
 
         // ==========================================
-        // 15. Startup Configuration
+        // 14. Startup Configuration
         // ==========================================
         viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChanged();

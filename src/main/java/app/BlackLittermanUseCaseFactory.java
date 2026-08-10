@@ -4,6 +4,7 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.black_litterman.BlackLittermanPresenter;
 import interface_adapter.black_litterman.BlackLittermanViewModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.analysis.BlackLittermanService;
 import use_case.black_litterman.BlackLittermanDataAccessInterface;
 import use_case.black_litterman.BlackLittermanInputBoundary;
@@ -23,18 +24,20 @@ public final class BlackLittermanUseCaseFactory {
      * @param blackLittermanViewModel  the view model containing the black-litterman state
      * @param dataAccessInterface      the data access interface
      * @param blackLittermanService    the service handling the quantitative matrix math
+     * @param loggedInViewModel        the logged-in view model for sidebar session data
      * @return a fully constructed BlackLittermanView
      */
     public static BlackLittermanView create(
             ViewManagerModel viewManagerModel,
             BlackLittermanViewModel blackLittermanViewModel,
             BlackLittermanDataAccessInterface dataAccessInterface,
-            BlackLittermanService blackLittermanService) {
+            BlackLittermanService blackLittermanService,
+            LoggedInViewModel loggedInViewModel) {
 
         final BlackLittermanController blackLittermanController =
                 createBlackLittermanUseCase(viewManagerModel, blackLittermanViewModel, dataAccessInterface, blackLittermanService);
 
-        return new BlackLittermanView(viewManagerModel, blackLittermanViewModel, blackLittermanController);
+        return new BlackLittermanView(viewManagerModel, blackLittermanViewModel, blackLittermanController, loggedInViewModel);
     }
 
     /**

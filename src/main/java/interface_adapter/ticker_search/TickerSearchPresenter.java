@@ -12,7 +12,8 @@ public class TickerSearchPresenter implements TickerSearchOutputBoundary {
     private final ViewManagerModel viewManagerModel;
     private final TickerSearchViewModel tickerSearchViewModel;
 
-    public TickerSearchPresenter(ViewManagerModel viewManagerModel, TickerSearchViewModel tickerSearchViewModel) {
+    public TickerSearchPresenter(ViewManagerModel viewManagerModel,
+                                 TickerSearchViewModel tickerSearchViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.tickerSearchViewModel = tickerSearchViewModel;
     }

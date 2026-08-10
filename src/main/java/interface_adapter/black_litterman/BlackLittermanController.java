@@ -4,6 +4,7 @@ import entity.User;
 import use_case.black_litterman.BlackLittermanInputBoundary;
 import use_case.black_litterman.BlackLittermanInputData;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -23,7 +24,7 @@ public class BlackLittermanController {
      */
     public void loadMarketData(User user) {
         // Pass empty views/confidence levels to fetch base market returns and top tickers
-        final BlackLittermanInputData inputData = new BlackLittermanInputData(user, Map.of(), Map.of());
+        BlackLittermanInputData inputData = new BlackLittermanInputData(user, new HashMap<>(), new HashMap<>());
         blackLittermanUseCaseInteractor.execute(inputData);
     }
 

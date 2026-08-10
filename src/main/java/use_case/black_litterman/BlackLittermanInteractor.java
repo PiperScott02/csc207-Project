@@ -34,6 +34,50 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
 
             List<StockHolding> holdings = user.getPortfolio().getHoldings();
 
+            if (holdings == null || holdings.isEmpty()) {
+                System.out.println("DEBUG - Portfolio is empty (new user). Skipping Black-Litterman calculation.");
+                return;
+            }
+
+            // === SAFE HYDRATION & FILTERING ===
+            List<StockHolding> validHoldings = new ArrayList<>();
+            for (StockHolding holding : holdings) {
+                if (holding.getStock() != null && holding.getStock().getTickerSymbol() != null) {
+                    String ticker = holding.getStock().getTickerSymbol();
+                    System.out.println("DEBUG - Processing ticker: " + ticker);
+                    try {
+                        Stock fullStock = blackLittermanDataAccessObject.get(ticker);
+                        if (fullStock != null) {
+                            holding.setStock(fullStock);
+                            validHoldings.add(holding);
+                            System.out.println("DEBUG - Successfully fetched and added full stock for: " + ticker);
+                        } else {
+                            System.out.println("DEBUG - DAO returned null for ticker: " + ticker);
+                            // Fallback to existing stock data if it has historical timeline or time series data loaded
+                            Stock existingStock = holding.getStock();
+                            if ((existingStock.getHistoricalTimeline() != null && !existingStock.getHistoricalTimeline().isEmpty()) ||
+                                    (existingStock.getTimeSeries() != null && !existingStock.getTimeSeries().isEmpty())) {
+                                validHoldings.add(holding);
+                                System.out.println("DEBUG - Using fallback existing stock data for: " + ticker);
+                            } else {
+                                System.out.println("DEBUG - Existing stock also lacks historical timeline/time series data.");
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("FAILED to fetch historical data for ticker: " + ticker);
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("DEBUG - Holding had a null stock or null ticker symbol.");
+                }
+            }
+
+            if (validHoldings.isEmpty()) {
+                System.out.println("DEBUG - validHoldings is empty! Triggering fail view.");
+                blackLittermanPresenter.prepareFailView("Portfolio contains no stocks with valid historical data.");
+                return;
+            }
+
             // 1. Compute market weight caps and determine top 5 heavily weighted stocks
             Map<String, Double> marketWeightCaps = blackLittermanService.computeMarketWeightCaps(holdings);
             List<Map.Entry<String, Double>> sortedWeights = new ArrayList<>(marketWeightCaps.entrySet());
@@ -66,11 +110,17 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
             // 3. Compute adjusted returns if user views are provided
             Map<String, Double> adjustedReturns = new HashMap<>();
             if (inputData.getUserViews() != null && !inputData.getUserViews().isEmpty()) {
+                System.out.println("DEBUG - User Views Received: " + inputData.getUserViews());
+                System.out.println("DEBUG - Confidence Levels Received: " + inputData.getConfidenceLevels());
+
                 adjustedReturns = blackLittermanService.computeAdjustedReturns(
                         holdings,
                         inputData.getUserViews(),
                         inputData.getConfidenceLevels()
                 );
+                System.out.println("DEBUG - Computed Adjusted Returns: " + adjustedReturns);
+            } else {
+                System.out.println("DEBUG - User views were empty or null!");
             }
 
 
@@ -82,6 +132,9 @@ public class BlackLittermanInteractor implements BlackLittermanInputBoundary {
                 user.getPortfolio().setCustomViews(null);
                 user.getPortfolio().setHasCustomViews(false);
             }
+
+            System.out.println("DEBUG - Top Tickers found: " + topTickers);
+            System.out.println("DEBUG - Market Returns: " + marketReturns);
 
             // 4. Package into output data
             BlackLittermanOutputData outputData = new BlackLittermanOutputData(

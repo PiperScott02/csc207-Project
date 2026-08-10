@@ -1,7 +1,9 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.black_litterman.BlackLittermanController;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.portfolio_health.PortfolioHealthController;
 import interface_adapter.similar_search.SimilarSearchController;
 import interface_adapter.similar_search.SimilarSearchState;
 import interface_adapter.similar_search.SimilarSearchViewModel;
@@ -25,15 +27,24 @@ import java.beans.PropertyChangeListener;
 public class SearchView extends JPanel implements PropertyChangeListener {
 
     private static final String SEARCH_VIEW_NAME = "search";
+    private static final String LOGGED_IN_VIEW_NAME = "logged in";
 
-    // The Display Text Fields for the Ticker Search Result
+    // === DARK MODE UI PALETTE ===
+    private static final Color BG_DARK = new Color(11, 15, 25);
+    private static final Color CARD_BG = new Color(17, 24, 39);
+    private static final Color BORDER_COLOR = new Color(31, 41, 55);
+    private static final Color TEXT_MAIN = new Color(243, 244, 246);
+    private static final Color TEXT_MUTED = new Color(156, 163, 175);
+    private static final Color ACCENT_GREEN = new Color(16, 185, 129);
+
+    private final JButton searchButton = new JButton("Search");
     private final JButton tickerSearchSymbol = new JButton("N/A");
     private final JLabel tickerSearchCompanyName = new JLabel("N/A");
     private final JLabel tickerSearchCountry = new JLabel("N/A");
     private final JLabel tickerSearchIndustry = new JLabel("N/A");
     private final JLabel tickerSearchPreviousClose = new JLabel("N/A");
+    private final JTextField searchInputField = new JTextField(30);
 
-    // Similar Search Panel
     private final JPanel similarSearchResultsPanel = createSimilarSearchResultsPanel();
 
     private final SimilarSearchController similarSearchController;
@@ -49,9 +60,9 @@ public class SearchView extends JPanel implements PropertyChangeListener {
     private final StockController stockController;
     private final ViewManagerModel viewManagerModel;
     private final StockViewModel stockViewModel;
-
-    // Return to Portfolio Dependency
     private final LoggedInViewModel loggedInViewModel;
+    private final BlackLittermanController blackLittermanController;
+    private final PortfolioHealthController portfolioHealthController;
 
     public SearchView(SimilarSearchController similarSearchController,
                       SimilarSearchViewModel similarSearchViewModel,
@@ -60,7 +71,9 @@ public class SearchView extends JPanel implements PropertyChangeListener {
                       StockController stockController,
                       ViewManagerModel viewManagerModel,
                       StockViewModel stockViewModel,
-                      LoggedInViewModel loggedInViewModel) {
+                      LoggedInViewModel loggedInViewModel,
+                      BlackLittermanController blackLittermanController,
+                      PortfolioHealthController portfolioHealthController) {
         this.similarSearchController = similarSearchController;
         this.similarSearchViewModel = similarSearchViewModel;
         this.tickerSearchController = tickerSearchController;
@@ -69,6 +82,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         this.viewManagerModel = viewManagerModel;
         this.stockViewModel = stockViewModel;
         this.loggedInViewModel = loggedInViewModel;
+        this.blackLittermanController = blackLittermanController;
+        this.portfolioHealthController = portfolioHealthController;
 
         tickerSearchErrorMessage.setHorizontalAlignment(SwingConstants.CENTER);
         tickerSearchErrorMessage.setForeground(Color.RED);
@@ -80,8 +95,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
 
         tickerSearchViewModel.addPropertyChangeListener(this);
         similarSearchViewModel.addPropertyChangeListener(this);
+        loggedInViewModel.addPropertyChangeListener(this);
 
-        // Click main ticker button -> Execute StockUseCase & Switch to Stock View
         tickerSearchSymbol.addActionListener(e -> {
             String ticker = tickerSearchSymbol.getText();
             if (!ticker.equals("N/A") && !ticker.trim().isEmpty()) {
@@ -91,33 +106,44 @@ public class SearchView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        setLayout(new BorderLayout(15, 15));
+        setBackground(BG_DARK);
+        setLayout(new BorderLayout());
 
-        add(createHeader(), BorderLayout.NORTH);
+        add(SidebarHelper.createSidebar("Search Stocks",
+                this,
+                viewManagerModel,
+                loggedInViewModel,
+                blackLittermanController,
+                portfolioHealthController), BorderLayout.WEST);
+        add(createMainContentPanel(), BorderLayout.CENTER);
+    }
 
-        final JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.add(createSearchBar());
-        centerPanel.add(Box.createVerticalStrut(2));
-        centerPanel.add(tickerSearchResult());
-        centerPanel.add(Box.createVerticalStrut(2));
-        centerPanel.add(createSimilarSearchPanel(similarSearchResultsPanel));
+    private JPanel createMainContentPanel() {
+        final JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
+        mainPanel.setBackground(BG_DARK);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
-        add(centerPanel, BorderLayout.CENTER);
+        mainPanel.add(createHeader(), BorderLayout.NORTH);
 
-        // Adding Buffer around Left and Right of Search View
-        add(new JPanel(), BorderLayout.WEST);
-        add(new JPanel(), BorderLayout.EAST);
+        final JPanel centerContainer = new JPanel();
+        centerContainer.setLayout(new BoxLayout(centerContainer, BoxLayout.Y_AXIS));
+        centerContainer.setBackground(BG_DARK);
 
-        // Adding Button to return to Portfolio View (a.k.a Logged in View)
-        final JPanel southPanel = new JPanel();
-        final JButton backButton = new JButton("Return to Portfolio View");
-        backButton.addActionListener(e -> {
-            this.viewManagerModel.setState(this.loggedInViewModel.getViewName());
-            this.viewManagerModel.firePropertyChanged();
-        });
-        southPanel.add(backButton);
-        add(southPanel, BorderLayout.SOUTH);
+        centerContainer.add(createSearchBar());
+        centerContainer.add(Box.createVerticalStrut(20));
+        centerContainer.add(tickerSearchResult());
+        centerContainer.add(Box.createVerticalStrut(20));
+        centerContainer.add(createSimilarSearchPanel(similarSearchResultsPanel));
+
+        final JScrollPane scrollPane = new JScrollPane(centerContainer);
+        scrollPane.setBackground(BG_DARK);
+        scrollPane.getViewport().setBackground(BG_DARK);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        return mainPanel;
     }
 
     /**
@@ -126,10 +152,40 @@ public class SearchView extends JPanel implements PropertyChangeListener {
      */
     private JPanel createHeader() {
         final JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setBackground(BG_DARK);
 
-        final JLabel title = new JLabel("Search", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 28));
+        final JLabel backButton = new JLabel("← Return to Portfolio View");
+        backButton.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        backButton.setForeground(TEXT_MUTED);
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        backButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                viewManagerModel.setState(LOGGED_IN_VIEW_NAME);
+                viewManagerModel.firePropertyChanged();
+            }
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                backButton.setForeground(TEXT_MAIN);
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                backButton.setForeground(TEXT_MUTED);
+            }
+        });
+
+        final JLabel title = new JLabel("Search Stocks");
+        title.setFont(new Font("Serif", Font.BOLD, 28));
+        title.setForeground(TEXT_MAIN);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        headerPanel.add(backButton);
+        headerPanel.add(Box.createVerticalStrut(15));
         headerPanel.add(title);
+        headerPanel.add(Box.createVerticalStrut(15));
 
         return headerPanel;
     }
@@ -139,59 +195,58 @@ public class SearchView extends JPanel implements PropertyChangeListener {
      * @return search panel
      */
     private JPanel createSearchBar() {
-        final JTextField searchInputField = new JTextField(50);
+        final JPanel searchPanel = new JPanel(null);
+        searchPanel.setBackground(CARD_BG);
+        searchPanel.setPreferredSize(new Dimension(750, 95));
+        searchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 95));
+        searchPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
 
-        final JButton searchButton = new JButton("Search");
+        final JLabel queryLabel = new JLabel("QUERY");
+        queryLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
+        queryLabel.setForeground(TEXT_MUTED);
+        queryLabel.setBounds(20, 12, 100, 15);
+
+        searchInputField.setBackground(BG_DARK);
+        searchInputField.setForeground(TEXT_MAIN);
+        searchInputField.setCaretColor(TEXT_MAIN);
+        searchInputField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        searchInputField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        searchInputField.setBounds(20, 32, 590, 36);
+
+        searchButton.setBackground(ACCENT_GREEN);
+        searchButton.setForeground(Color.BLACK);
+        searchButton.setFont(new Font("SansSerif", Font.BOLD, 13));
+        searchButton.setFocusPainted(false);
+        searchButton.setBorderPainted(false);
+        searchButton.setOpaque(true);
+        searchButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        searchButton.setBounds(625, 32, 100, 36);
+
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String searchText = searchInputField.getText();
                 tickerSearchController.execute(searchInputField.getText());
                 similarSearchController.execute(searchInputField.getText());
             }
         });
 
-        final JPanel searchPanel = new JPanel();
-        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
+        if (searchInputField.getActionListeners().length == 0) {
+            searchInputField.addActionListener(searchButton.getActionListeners()[0]);
+        }
 
-        final JPanel searchBar = new JPanel();
-        searchBar.add(searchButton);
-        searchBar.add(searchInputField);
-        searchBar.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        searchPanel.add(searchBar);
-        searchPanel.add(tickerSearchErrorMessage);
-        searchPanel.add(similarSearchErrorMessage);
-        searchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        searchPanel.add(queryLabel);
+        searchPanel.add(searchInputField);
+        searchPanel.add(searchButton);
 
         return searchPanel;
     }
 
-    /**
-     * Creates Similar Search Panel containing results and labels.
-     * @param similarSearchResultsPanel results panel for similar search
-     * @return similar search panel
-     */
-    private JPanel createSimilarSearchPanel(JPanel similarSearchResultsPanel) {
-        final JPanel similarSearchPanel = new JPanel();
-        similarSearchPanel.setLayout(new BoxLayout(similarSearchPanel, BoxLayout.Y_AXIS));
-        similarSearchPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-
-        similarSearchPanel.add(new JLabel("Similar Search Results"));
-
-        final JPanel topOfSimilarSearchPanel = new JPanel();
-        topOfSimilarSearchPanel.setLayout(new GridLayout(1, 5));
-        topOfSimilarSearchPanel.add(new JLabel("Ticker Symbol"));
-        topOfSimilarSearchPanel.add(new JLabel("Country/Region"));
-        topOfSimilarSearchPanel.add(new JLabel("Company Name"));
-        topOfSimilarSearchPanel.add(new JLabel("Industry"));
-        topOfSimilarSearchPanel.add(new JLabel("Previous Close"));
-
-        similarSearchPanel.add(topOfSimilarSearchPanel);
-        similarSearchPanel.add(similarSearchResultsPanel);
-
-        return similarSearchPanel;
-    }
 
     /**
      * Create Ticker Search Results Panel.
@@ -201,16 +256,43 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         final JPanel tickerSearchResultPanel = new JPanel();
         tickerSearchResultPanel.setLayout(
                 new BoxLayout(tickerSearchResultPanel, BoxLayout.Y_AXIS));
-        tickerSearchResultPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
-        final JPanel tickerSearchValuesPanel = new JPanel();
-        tickerSearchValuesPanel.setLayout(new GridLayout(2, 5));
+        tickerSearchResultPanel.setBackground(BG_DARK);
+        tickerSearchResultPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        tickerSearchValuesPanel.add(new JLabel("Ticker Symbol"));
-        tickerSearchValuesPanel.add(new JLabel("Country/Region"));
-        tickerSearchValuesPanel.add(new JLabel("Company Name"));
-        tickerSearchValuesPanel.add(new JLabel("Industry"));
-        tickerSearchValuesPanel.add(new JLabel("Previous Close"));
+        final JLabel tickerSearchLabel = new JLabel("TICKER SEARCH RESULTS");
+        tickerSearchLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
+        tickerSearchLabel.setForeground(TEXT_MUTED);
+        tickerSearchLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        final JPanel tickerSearchValuesPanel = new JPanel(new GridLayout(2, 5, 10, 5));
+        tickerSearchValuesPanel.setBackground(CARD_BG);
+        tickerSearchValuesPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        tickerSearchValuesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        tickerSearchValuesPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 95));
+
+        addHeaderLabel(tickerSearchValuesPanel, "TICKER SYMBOL");
+        addHeaderLabel(tickerSearchValuesPanel, "COUNTRY");
+        addHeaderLabel(tickerSearchValuesPanel, "COMPANY NAME");
+        addHeaderLabel(tickerSearchValuesPanel, "INDUSTRY");
+        addHeaderLabel(tickerSearchValuesPanel, "PREVIOUS CLOSE");
+
+        tickerSearchSymbol.setBackground(CARD_BG);
+        tickerSearchSymbol.setForeground(ACCENT_GREEN);
+        tickerSearchSymbol.setFont(new Font("SansSerif", Font.BOLD, 13));
+        tickerSearchSymbol.setBorderPainted(false);
+        tickerSearchSymbol.setFocusPainted(false);
+        tickerSearchSymbol.setHorizontalAlignment(SwingConstants.LEFT);
+        tickerSearchSymbol.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        styleResultLabel(tickerSearchCountry);
+        styleResultLabel(tickerSearchCompanyName);
+        styleResultLabel(tickerSearchIndustry);
+        styleResultLabel(tickerSearchPreviousClose);
 
         tickerSearchValuesPanel.add(tickerSearchSymbol);
         tickerSearchValuesPanel.add(tickerSearchCountry);
@@ -218,11 +300,8 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         tickerSearchValuesPanel.add(tickerSearchIndustry);
         tickerSearchValuesPanel.add(tickerSearchPreviousClose);
 
-        tickerSearchValuesPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-        final JLabel tickerSearchLabel = new JLabel("Ticker Search Results");
-
         tickerSearchResultPanel.add(tickerSearchLabel);
+        tickerSearchResultPanel.add(Box.createVerticalStrut(8));
         tickerSearchResultPanel.add(tickerSearchValuesPanel);
 
         return tickerSearchResultPanel;
@@ -236,14 +315,54 @@ public class SearchView extends JPanel implements PropertyChangeListener {
         final JPanel similarSearchResultPanel = new JPanel();
         similarSearchResultPanel.setLayout(
                 new BoxLayout(similarSearchResultPanel, BoxLayout.Y_AXIS));
-
+        similarSearchResultPanel.setBackground(CARD_BG);
+        similarSearchResultPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         return similarSearchResultPanel;
     }
 
-    /**
-     * Remove displayed results from similarSearchResultsPanel.
-     * @param similarSearchResultsPanel results panel that will have its results removed
-     */
+    private JPanel createSimilarSearchPanel(JPanel similarSearchResultsPanel) {
+        final JPanel similarSearchPanel = new JPanel();
+        similarSearchPanel.setLayout(new BoxLayout(similarSearchPanel, BoxLayout.Y_AXIS));
+        similarSearchPanel.setBackground(BG_DARK);
+        similarSearchPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        final JLabel sectionLabel = new JLabel("SIMILAR SEARCH RESULTS");
+        sectionLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
+        sectionLabel.setForeground(TEXT_MUTED);
+        sectionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        final JPanel tableCard = new JPanel();
+        tableCard.setLayout(new BoxLayout(tableCard, BoxLayout.Y_AXIS));
+        tableCard.setBackground(CARD_BG);
+        tableCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        tableCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        final JPanel topOfSimilarSearchPanel = new JPanel(new GridLayout(1, 5, 10, 0));
+        topOfSimilarSearchPanel.setBackground(CARD_BG);
+
+        topOfSimilarSearchPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        topOfSimilarSearchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+
+        addHeaderLabel(topOfSimilarSearchPanel, "TICKER SYMBOL");
+        addHeaderLabel(topOfSimilarSearchPanel, "COUNTRY");
+        addHeaderLabel(topOfSimilarSearchPanel, "COMPANY NAME");
+        addHeaderLabel(topOfSimilarSearchPanel, "INDUSTRY");
+        addHeaderLabel(topOfSimilarSearchPanel, "PREVIOUS CLOSE");
+
+        tableCard.add(topOfSimilarSearchPanel);
+        tableCard.add(Box.createVerticalStrut(10));
+        tableCard.add(similarSearchResultsPanel);
+
+        similarSearchPanel.add(sectionLabel);
+        similarSearchPanel.add(Box.createVerticalStrut(8));
+        similarSearchPanel.add(tableCard);
+
+        return similarSearchPanel;
+    }
+
     private void removeSimilarSearchResults(JPanel similarSearchResultsPanel) {
         similarSearchResultsPanel.removeAll();
         similarSearchResultsPanel.revalidate();
@@ -257,30 +376,64 @@ public class SearchView extends JPanel implements PropertyChangeListener {
      */
     private void addSimilarSearchResults(JPanel similarSearchResultsPanel,
                                          SimilarSearchOutputData similarSearchOutputData) {
-        for (int i = 0; i < similarSearchOutputData.getLength(); i++) {
-            JPanel outputDataPanel = new JPanel();
-            outputDataPanel.setLayout(new GridLayout(1, 5));
-            outputDataPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        if (similarSearchOutputData == null) {
+            return;
+        }
 
-            JButton symbolButton = new JButton(similarSearchOutputData.getTickerSymbol(i));
-            // Click similar search symbol button -> Execute StockUseCase & Switch to Stock View
-            int finalI = i;
+        for (int i = 0; i < similarSearchOutputData.getLength(); i++) {
+            final JPanel outputDataPanel = new JPanel(new GridLayout(1, 5, 10, 5));
+            outputDataPanel.setBackground(CARD_BG);
+            outputDataPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
+            outputDataPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+
+            final JButton symbolButton = new JButton(similarSearchOutputData.getTickerSymbol(i));
+            symbolButton.setBackground(CARD_BG);
+            symbolButton.setForeground(ACCENT_GREEN);
+            symbolButton.setFont(new Font("SansSerif", Font.BOLD, 13));
+            symbolButton.setBorderPainted(false);
+            symbolButton.setFocusPainted(false);
+            symbolButton.setHorizontalAlignment(SwingConstants.LEFT);
+            symbolButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            final int finalI = i;
             symbolButton.addActionListener(e -> {
                 this.stockController.execute(similarSearchOutputData.getTickerSymbol(finalI));
                 this.viewManagerModel.setState(this.stockViewModel.getViewName());
                 this.viewManagerModel.firePropertyChanged();
             });
 
+            final JLabel countryLabel = new JLabel(similarSearchOutputData.getCountry(i));
+            final JLabel companyLabel = new JLabel(similarSearchOutputData.getCompanyName(i));
+            final JLabel industryLabel = new JLabel(similarSearchOutputData.getIndustry(i));
+            final JLabel priceLabel = new JLabel(similarSearchOutputData.getPreviousClose(i).toPlainString());
+
+            styleResultLabel(countryLabel);
+            styleResultLabel(companyLabel);
+            styleResultLabel(industryLabel);
+            styleResultLabel(priceLabel);
+
             outputDataPanel.add(symbolButton);
-            outputDataPanel.add(new JLabel(similarSearchOutputData.getCountry(i)));
-            outputDataPanel.add(new JLabel(similarSearchOutputData.getCompanyName(i)));
-            outputDataPanel.add(new JLabel(similarSearchOutputData.getIndustry(i)));
-            outputDataPanel.add(new JLabel(similarSearchOutputData.getPreviousClose(i).toPlainString()));
+            outputDataPanel.add(countryLabel);
+            outputDataPanel.add(companyLabel);
+            outputDataPanel.add(industryLabel);
+            outputDataPanel.add(priceLabel);
 
             similarSearchResultsPanel.add(outputDataPanel);
-            similarSearchResultsPanel.revalidate();
-            similarSearchResultsPanel.repaint();
         }
+        similarSearchResultsPanel.revalidate();
+        similarSearchResultsPanel.repaint();
+    }
+
+    private void addHeaderLabel(JPanel panel, String text) {
+        final JLabel label = new JLabel(text);
+        label.setFont(new Font("SansSerif", Font.BOLD, 10));
+        label.setForeground(TEXT_MUTED);
+        panel.add(label);
+    }
+
+    private void styleResultLabel(JLabel label) {
+        label.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        label.setForeground(TEXT_MAIN);
     }
 
     /**

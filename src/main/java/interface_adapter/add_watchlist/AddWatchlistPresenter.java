@@ -42,11 +42,16 @@ public class AddWatchlistPresenter implements AddWatchlistOutputBoundary {
         // 2. Map entity WatchlistStockItems to WatchlistState items and update WatchlistViewModel
         List<WatchlistState.WatchlistStockItem> stateItems = new ArrayList<>();
         for (entity.WatchlistStockItem item : outputData.getWatchlist()) {
+
+            // Handle potentially null prices/changes safely
+            String closeStr = (item.closePrice() != null) ? item.closePrice().toString() : "—";
+            String changeStr = (item.dailyPriceChange() != null) ? item.dailyPriceChange().toString() : "—";
+
             stateItems.add(new WatchlistState.WatchlistStockItem(
                     item.ticker(),
-                    item.companyName(),
-                    item.closePrice().toString(),
-                    item.dailyPriceChange().toString()
+                    item.companyName() != null ? item.companyName() : "",
+                    closeStr,
+                    changeStr
             ));
         }
         WatchlistState watchlistState = new WatchlistState();

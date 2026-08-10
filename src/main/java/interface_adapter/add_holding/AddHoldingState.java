@@ -18,13 +18,13 @@ public class AddHoldingState {
 
     public AddHoldingState() {}
 
-    // Getters and Setters
     public String getTicker() {
         return ticker;
     }
 
-    public void setTicker(String ticker) { this.ticker = ticker; }
-
+    public void setTicker(String ticker) {
+        this.ticker = ticker;
+    }
 
     public String getShares() {
         return shares;
@@ -34,13 +34,13 @@ public class AddHoldingState {
         this.shares = shares;
     }
 
-
-    public String getPurchaseDate() { return purchaseDate; }
+    public String getPurchaseDate() {
+        return purchaseDate;
+    }
 
     public void setPurchaseDate(String purchaseDate) {
         this.purchaseDate = purchaseDate;
     }
-
 
     public String getAddHoldingError() {
         return addHoldingError;

@@ -12,6 +12,7 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.watchlist.WatchlistViewModel;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
@@ -51,6 +52,7 @@ public class MainWithDB {
         final LoginViewModel loginViewModel = new LoginViewModel();
         final LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
         final SignupViewModel signupViewModel = new SignupViewModel();
+        final WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
 
         // TODO Task 1.1 in a copy of this file, change this line to use the in-memory DAO.
         final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(new CommonUserFactory());
@@ -64,6 +66,7 @@ public class MainWithDB {
                 loginViewModel,
                 loggedInViewModel,
                 signupViewModel,
+                watchlistViewModel,
                 userDataAccessObject
         );
         views.add(loginView, loginView.getViewName());
