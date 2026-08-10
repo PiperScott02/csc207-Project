@@ -110,7 +110,7 @@ public class HoldingsView extends JPanel implements ActionListener, PropertyChan
 
         final JButton addHoldingBtn = new JButton("+ Add Holding");
         addHoldingBtn.setBackground(ACCENT_GREEN);
-        addHoldingBtn.setForeground(Color.WHITE);
+        addHoldingBtn.setForeground(BG_DARK);
         addHoldingBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
         addHoldingBtn.setBounds(825, 520, 145, 35);
         addHoldingBtn.setFocusPainted(false);
