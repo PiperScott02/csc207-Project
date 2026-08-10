@@ -4,6 +4,7 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.stress_test.StressTestController;
 import interface_adapter.stress_test.StressTestViewModel;
 import interface_adapter.stress_test.StressTestPresenter;
+import use_case.TickerSearchDataAccessInterface;
 import use_case.stress_test.StressTestInputBoundary;
 import use_case.stress_test.StressTestInteractor;
 import use_case.stress_test.StressTestOutputBoundary;
@@ -19,7 +20,8 @@ public final class StressTestUseCaseFactory {
 
     public static StressTestController create(
             StressTestViewModel stressTestViewModel,
-            LoggedInViewModel loggedInViewModel) {
+            LoggedInViewModel loggedInViewModel,
+            TickerSearchDataAccessInterface tickerSearchDataAccessObject) {
 
         final StressTestOutputBoundary stressTestOutputBoundary =
                 new StressTestPresenter(stressTestViewModel);
@@ -27,7 +29,8 @@ public final class StressTestUseCaseFactory {
         final StressTestInputBoundary stressTestInteractor =
                 new StressTestInteractor(
                         stressTestOutputBoundary,
-                        loggedInViewModel
+                        loggedInViewModel,
+                        tickerSearchDataAccessObject
                 );
 
         return new StressTestController(stressTestInteractor);

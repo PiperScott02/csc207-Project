@@ -203,7 +203,8 @@ public final class PortfolioPilotMain {
         final StressTestController stressTestController =
                 StressTestUseCaseFactory.create(
                         stressTestViewModel,
-                        loggedInViewModel
+                        loggedInViewModel,
+                        tickerSearchDataAccessObject
                 );
 
         // ==========================================

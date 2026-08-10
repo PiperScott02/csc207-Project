@@ -61,6 +61,7 @@ public class StressTestView extends JPanel implements ActionListener, PropertyCh
     private final JLabel progressTotalLabel = new JLabel("of $0.00");
 
     private DefaultTableModel holdingImpactTableModel;
+    private StressScenario currentScenario = null;
 
     public StressTestView(ViewManagerModel viewManagerModel,
                           LoggedInViewModel loggedInViewModel,
@@ -294,8 +295,8 @@ public class StressTestView extends JPanel implements ActionListener, PropertyCh
             @Override
             public void mousePressed(java.awt.event.MouseEvent e) {
                 BigDecimal shockDecimal = parseShockToDecimal(shock);
-                StressScenario scenario = new StressScenario(title, timeline.split("•")[0].trim(), desc, shockDecimal);
-                stressTestController.execute(scenario);
+                currentScenario = new StressScenario(title, timeline.split("•")[0].trim(), desc, shockDecimal);
+                stressTestController.execute(currentScenario);
             }
         });
 
@@ -330,53 +331,26 @@ public class StressTestView extends JPanel implements ActionListener, PropertyCh
         return card;
     }
 
-    private void updateViewFromLoggedInState(LoggedInState state) {
-        if (state != null && state.getHoldings() != null && holdingImpactTableModel != null) {
+    private void updateViewFromStressState(StressTestState state) {
+        if (state != null && holdingImpactTableModel != null) {
             holdingImpactTableModel.setRowCount(0);
-            for (HoldingInfoWrapper wrapper : getHoldingImpactData(state)) {
+            java.util.List<String> tickers = state.getTickers();
+            java.util.List<String> sectors = state.getSectors();
+            java.util.List<BigDecimal> currPrices = state.getCurrentPrices();
+            java.util.List<BigDecimal> stressedPrices = state.getStressedPrices();
+            java.util.List<BigDecimal> currValues = state.getCurrentValues();
+            java.util.List<BigDecimal> estLosses = state.getEstimatedLosses();
+
+            for (int i = 0; i < tickers.size(); i++) {
                 holdingImpactTableModel.addRow(new Object[]{
-                        wrapper.ticker,
-                        wrapper.sector,
-                        String.format("$%.2f", wrapper.currPrice),
-                        String.format("$%.2f", wrapper.stressedPrice),
-                        String.format("$%.2f", wrapper.currVal),
-                        String.format("$%.2f", wrapper.estLoss)
+                        tickers.get(i),
+                        sectors.get(i),
+                        String.format("$%.2f", currPrices.get(i)),
+                        String.format("$%.2f", stressedPrices.get(i)),
+                        String.format("$%.2f", currValues.get(i)),
+                        String.format("$%.2f", estLosses.get(i))
                 });
             }
-        }
-    }
-
-    private java.util.List<HoldingInfoWrapper> getHoldingImpactData(LoggedInState state) {
-        java.util.List<HoldingInfoWrapper> list = new java.util.ArrayList<>();
-        if (state.getHoldings() == null) return list;
-
-        BigDecimal impactPct = BigDecimal.ZERO;
-        if (stressTestViewModel.getState() != null && stressTestViewModel.getState().getImpactPercentage() != null) {
-            impactPct = stressTestViewModel.getState().getImpactPercentage().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
-        }
-
-        for (StockHolding holding : state.getHoldings()) {
-            Stock stock = holding.getStock();
-            String ticker = stock != null ? stock.getTickerSymbol() : "UNKNOWN";
-            String sector = "Technology"; // Safe fallback since Stock entity has no getSector() method
-            double shares = holding.getNumberOfShares(); // Fixed: changed int to double
-            BigDecimal currVal = holding.calculateTotalValue();
-            BigDecimal currPrice = shares > 0 ? currVal.divide(BigDecimal.valueOf(shares), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-
-            BigDecimal stressedPrice = currPrice.multiply(BigDecimal.ONE.add(impactPct));
-            BigDecimal stressedVal = currVal.multiply(BigDecimal.ONE.add(impactPct));
-            BigDecimal estLoss = stressedVal.subtract(currVal);
-
-            list.add(new HoldingInfoWrapper(ticker, sector, currPrice, stressedPrice, currVal, estLoss));
-        }
-        return list;
-    }
-
-    private static class HoldingInfoWrapper {
-        String ticker, sector;
-        BigDecimal currPrice, stressedPrice, currVal, estLoss;
-        HoldingInfoWrapper(String t, String s, BigDecimal cp, BigDecimal sp, BigDecimal cv, BigDecimal el) {
-            this.ticker = t; this.sector = s; this.currPrice = cp; this.stressedPrice = sp; this.currVal = cv; this.estLoss = el;
         }
     }
 
@@ -408,9 +382,7 @@ public class StressTestView extends JPanel implements ActionListener, PropertyCh
                     progressBar.setValue(Math.max(0, Math.min(100, pct)));
                 }
 
-                if (loggedInViewModel.getState() != null) {
-                    updateViewFromLoggedInState(loggedInViewModel.getState());
-                }
+                updateViewFromStressState(state);
 
                 if (state.getEstimatedLoss().compareTo(BigDecimal.ZERO) < 0) {
                     lossLabel.setForeground(NEG_RED);
@@ -420,7 +392,15 @@ public class StressTestView extends JPanel implements ActionListener, PropertyCh
                     impactLabel.setForeground(ACCENT_GREEN);
                 }
             } else if (evt.getNewValue() instanceof LoggedInState) {
-                updateViewFromLoggedInState((LoggedInState) evt.getNewValue());
+                if (currentScenario == null) {
+                    currentScenario = new StressScenario(
+                            "COVID-19 Crash",
+                            "Feb - Mar 2020",
+                            "Fastest bear market in history.",
+                            new BigDecimal("-0.34")
+                    );
+                }
+                stressTestController.execute(currentScenario);
             }
         }
     }

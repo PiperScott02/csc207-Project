@@ -19,6 +19,14 @@ public class StressTestPresenter implements StressTestOutputBoundary {
         state.setEstimatedLoss(outputData.getEstimatedLoss());
         state.setImpactPercentage(outputData.getPortfolioImpactPercentage());
 
+        // Pass the real lists containing actual sectors and calculations
+        state.setTickers(outputData.getTickers());
+        state.setSectors(outputData.getSectors());
+        state.setCurrentPrices(outputData.getCurrentPrices());
+        state.setStressedPrices(outputData.getStressedPrices());
+        state.setCurrentValues(outputData.getCurrentValues());
+        state.setEstimatedLosses(outputData.getEstimatedLosses());
+
         viewModel.firePropertyChanged();
     }
 

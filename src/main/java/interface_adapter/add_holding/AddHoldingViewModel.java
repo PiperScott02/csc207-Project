@@ -1,6 +1,8 @@
 package interface_adapter.add_holding;
 
 import interface_adapter.ViewModel;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
 
 public class AddHoldingViewModel extends ViewModel {
 
@@ -14,6 +16,7 @@ public class AddHoldingViewModel extends ViewModel {
     public static final String CLEAR_BUTTON_LABEL = "Clear";
 
     private AddHoldingState state = new AddHoldingState();
+    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
     public AddHoldingViewModel() {
         super("add holding");
@@ -25,5 +28,13 @@ public class AddHoldingViewModel extends ViewModel {
 
     public AddHoldingState getState() {
         return state;
+    }
+
+    public void firePropertyChanged() {
+        support.firePropertyChange("state", null, this.state);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        support.addPropertyChangeListener(listener);
     }
 }

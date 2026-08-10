@@ -69,6 +69,25 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
 
         add(createMainContentPanel(), BorderLayout.CENTER);
 
+        // Ensures text fields sync with the state every time this view is shown/switched to
+        addAncestorListener(new javax.swing.event.AncestorListener() {
+            @Override
+            public void ancestorAdded(javax.swing.event.AncestorEvent event) {
+                AddHoldingState state = addHoldingViewModel.getState();
+                if (state != null) {
+                    tickerInputField.setText(state.getTicker());
+                    sharesInputField.setText(state.getShares());
+                    dateInputField.setText(state.getPurchaseDate());
+                }
+            }
+
+            @Override
+            public void ancestorRemoved(javax.swing.event.AncestorEvent event) {}
+
+            @Override
+            public void ancestorMoved(javax.swing.event.AncestorEvent event) {}
+        });
+
         // Action Listeners
         addHoldingButton.addActionListener(new ActionListener() {
             @Override
@@ -256,15 +275,15 @@ public class AddHoldingView extends JPanel implements ActionListener, PropertyCh
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof AddHoldingState) {
+        if ("state".equals(evt.getPropertyName())) {
             AddHoldingState state = (AddHoldingState) evt.getNewValue();
             if (state != null) {
+                tickerInputField.setText(state.getTicker());
+                sharesInputField.setText(state.getShares());
+                dateInputField.setText(state.getPurchaseDate());
+
                 if (state.getAddHoldingError() != null) {
                     JOptionPane.showMessageDialog(this, state.getAddHoldingError());
-                } else {
-                    JOptionPane.showMessageDialog(this, "Holding successfully added!");
-                    viewManagerModel.setState("holdings");
-                    viewManagerModel.firePropertyChanged();
                 }
             }
         }

@@ -105,16 +105,46 @@ public class SidebarHelper {
         navLinksPanel.add(createSidebarNavLink("Black-Litterman", "Black-Litterman".equals(activeViewName), e -> {
             LoggedInState state = loggedInViewModel != null ? loggedInViewModel.getState() : null;
             if (state != null && state.getUser() != null) {
+                if (state.getUser().getPortfolio() == null ||
+                        state.getUser().getPortfolio().getHoldings() == null ||
+                        state.getUser().getPortfolio().getHoldings().isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            parentComponent,
+                            "Portfolio contains no stocks with valid historical data.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
                 if (blackLittermanController != null) {
                     blackLittermanController.loadMarketData(state.getUser());
                 }
             } else {
                 JOptionPane.showMessageDialog(parentComponent, "No active user session found.");
+                return;
             }
             viewManagerModel.setState("Black-Litterman view");
             viewManagerModel.firePropertyChanged();
         }));
+
         navLinksPanel.add(createSidebarNavLink("Stress Test", "Stress Test".equals(activeViewName), e -> {
+            LoggedInState state = loggedInViewModel != null ? loggedInViewModel.getState() : null;
+            if (state != null && state.getUser() != null) {
+                if (state.getUser().getPortfolio() == null ||
+                        state.getUser().getPortfolio().getHoldings() == null ||
+                        state.getUser().getPortfolio().getHoldings().isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            parentComponent,
+                            "Portfolio contains no stocks with valid historical data.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+            } else {
+                JOptionPane.showMessageDialog(parentComponent, "No active user session found.");
+                return;
+            }
             viewManagerModel.setState("stress test");
             viewManagerModel.firePropertyChanged();
         }));
