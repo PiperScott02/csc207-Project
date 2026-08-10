@@ -1,5 +1,7 @@
 package use_case.similar_search;
 
+import entity.SimilarStocks;
+
 import java.io.IOException;
 
 /**
@@ -14,6 +16,6 @@ public interface SimilarSearchDataAccessInterface {
      * @throws IOException
      * @throws InterruptedException
      */
-    String[][] similarStockInfo(String tickerSymbol);
+    SimilarStocks similarStockInfo(String tickerSymbol);
 
 }

@@ -1,5 +1,6 @@
 package use_case.similar_search;
 
+import entity.SimilarStocks;
 import entity.Stock;
 import use_case.TickerSearchDataAccessInterface;
 
@@ -33,7 +34,7 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
         }
 
         final String cleanTickerSymbol = tickerSymbol.trim().toUpperCase();
-        final String[][] similarStockInfo;
+        final SimilarStocks similarStockInfo;
 
         try {
             similarStockInfo = similarSearchDataAccessObject.similarStockInfo(tickerSymbol);
@@ -42,15 +43,16 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
             return;
         }
 
-        if (similarStockInfo == null || similarStockInfo.length == 0) {
+        if (similarStockInfo == null || similarStockInfo.getLength() == 0) {
             similarSearchPresenter.prepareFailView("No Similar Items for " + cleanTickerSymbol);
             return;
         }
 
-        Stock[] similarStocks = new Stock[similarStockInfo.length];
-        for (int i = 0; i < similarStockInfo.length; i++) {
+        Stock[] similarStocks = new Stock[similarStockInfo.getLength()];
+        for (int i = 0; i < similarStockInfo.getLength(); i++) {
             try {
-                similarStocks[i] = tickerSearchDataAccessObject.createBasicStock(similarStockInfo[i][0]);
+                similarStocks[i] = tickerSearchDataAccessObject
+                        .createBasicStock(similarStockInfo.getSymbol(i));
             } catch (RuntimeException e) {
                 similarSearchPresenter.prepareFailView(e.getMessage());
                 return;
@@ -58,13 +60,13 @@ public class SimilarSearchInteractor implements SimilarSearchInputBoundary{
         }
 
         SimilarSearchOutputData[] similarSearchOutputList =
-                new SimilarSearchOutputData[similarStockInfo.length];
-        for (int i = 0; i < similarStockInfo.length; i++) {
+                new SimilarSearchOutputData[similarStockInfo.getLength()];
+        for (int i = 0; i < similarStockInfo.getLength(); i++) {
             similarSearchOutputList[i] =
                     new SimilarSearchOutputData(
-                            similarStockInfo[i][0],
-                            similarStockInfo[i][1],
-                            similarStockInfo[i][2],
+                            similarStockInfo.getSymbol(i),
+                            similarStockInfo.getName(i),
+                            similarStockInfo.getRegion(i),
                             similarStocks[i].getIndustry(),
                             similarStocks[i].getPreviousClose());
         }
