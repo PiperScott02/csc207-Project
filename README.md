@@ -504,14 +504,6 @@ Interactor tests use test doubles for data-access and output-boundary interfaces
 
 Confirm that `PortfolioPilotMain` receives a valid key and that the key has not exceeded Alpha Vantage's request limit.
 
-### Incorrect `users.csv` header
-
-Make sure the first line of `data/users.csv` is:
-
-```csv
-username,password,holdings
-```
-
 ### Generated files block a Git pull
 
 The `target/` directory contains compiled Maven output. Do not intentionally edit `.class` files. If the repository still tracks generated files, restore them before pulling rather than committing local build output.
