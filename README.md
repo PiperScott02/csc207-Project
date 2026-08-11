@@ -18,6 +18,10 @@ The project was developed for **CSC207: Software Design** and is organized using
 - [External APIs](#external-apis)
 - [Requirements](#requirements)
 - [Setup](#setup)
+- [Testing](#testing)
+- [Common Problems](#common-problems)
+- [Technologies](#technologies)
+- [Repository](#repository)
 
 ## Features
 
