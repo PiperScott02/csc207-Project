@@ -22,6 +22,8 @@ The project was developed for **CSC207: Software Design** and is organized using
 - [Common Problems](#common-problems)
 - [Technologies](#technologies)
 - [Repository](#repository)
+- [Risk Preference](#risk-preference)
+- [Currency Conversion](#currency-conversion)
 
 ## Features
 
@@ -283,6 +285,33 @@ If there are no exact matches for your ticker, then an error message will appear
 Similarly, if there are no similar matches to your input, then another error message will appear under the search bar listed as atc **Similar Search** error.
 
 For any given result (either a exact ticker match or a similar stock), there will be a button on the ticker symbol which links to its [stock analysis](#stock-analysis) page.
+
+## Risk Preference
+
+The Risk Preference feature allows users to select and save their investment risk level.
+
+Users can choose from three risk levels:
+- **Conservative (Low Risk)**
+- **Moderate (Medium Risk)**
+- **Aggressive (High Risk)**
+
+To use this feature, select **Risk Preference** from the sidebar, choose a risk level, and save the selection.
+
+The selected risk preference is stored with the user's account so that it can be loaded again after the user logs in.
+
+
+## Currency Conversion
+
+The Currency Conversion feature allows users to view their total portfolio value in a different currency.
+
+To use this feature, select **Currency** from the sidebar. The user can select a currency and click 
+**Convert Portfolio Value** to view the converted portfolio value.
+
+The available currencies include:
+- CAD
+- USD
+- 
+Currency exchange rates are retrieved using the Frankfurter API. This feature does not require an Alpha Vantage API key.
 
 ## External APIs
 
