@@ -17,6 +17,8 @@ The project was developed for **CSC207: Software Design** and is organized using
   - [Search](#search)
   - [Risk Preference](#risk-preference)
   - [Currency Conversion](#currency-conversion)
+  - [Add Holding](#add-holding)
+  - [Stress Testing](#stress-testing)
 - [External APIs](#external-apis)
 - [Requirements](#requirements)
 - [Setup](#setup)
@@ -37,6 +39,7 @@ The project was developed for **CSC207: Software Design** and is organized using
 - **Risk preference** — record the user's investment goals, risk level, and time horizon.
 - **Black–Litterman analysis** — generate portfolio-allocation results using market data and investor views.
 - **Currency conversion** — convert monetary values using current exchange-rate data.
+- **Portfolio stress testing** — simulate portfolio performance and asset valuation under adverse market shocks or percentage drops.
 
 
 ## Portfolio Health
@@ -312,6 +315,33 @@ The available currencies include:
 - USD
 
 Currency exchange rates are retrieved using the Frankfurter API. This feature does not require an Alpha Vantage API key.
+
+## Add Holding
+
+The Add Holding use case allows users to record new stock transactions and add holdings directly to their portfolio.
+
+Users can specify:
+- The stock ticker symbol (e.g., `AAPL`, `MSFT`).
+- The transaction quantity (number of shares).
+- The transaction date.
+- The transaction type (e.g., `BUY`).
+
+The interactor interfaces with data-access layers to fetch required daily pricing and stock configuration data, updates the portfolio state, and ensures that the newly added holding is immediately reflected across the portfolio overview, tracking tools, and analytics calculations.
+
+## Stress Testing
+
+The Stress Testing use case allows users to evaluate portfolio resilience by simulating performance under adverse market conditions, economic downturns, or custom shock scenarios.
+
+The stress test applies user-defined or predefined percentage shocks (such as a -10%, -20%, or -30% market drop) to individual assets or the broader portfolio universe.
+
+For each stock holding, the application:
+1. Retrieves the current stock valuation or closing price from historical data or time series.
+2. Applies the specified shock multiplier ($1 + \text{shock percentage}$) to model asset value decline.
+3. Recalculates individual asset values and computes the aggregate portfolio valuation post-shock.
+4. Determines the absolute monetary loss and percentage drop to quantify overall portfolio downside risk.
+
+This feature gives users clear visibility into potential extreme market exposure, allowing them to test downside resilience before adjusting their investment strategy.
+
 
 ## External APIs
 
