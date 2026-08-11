@@ -1,8 +1,23 @@
-# PortfolioPilot
+# **PortfolioPilot**
 
-PortfolioPilot is a Java Swing application for tracking investments and exploring financial information. It combines portfolio-management tools, market data, financial analysis, and company-news sentiment in one desktop interface.
+**Authors**: Piper, Hana, Selina, Diyako, and Sam.
+
+**Purpose**: PortfolioPilot is a Java Swing application for tracking investments and exploring financial information. It combines portfolio-management tools, market data, financial analysis, and company-news sentiment in one desktop interface.
 
 The project was developed for **CSC207: Software Design** and is organized using **Clean Architecture**. Each use case separates entities, application rules, interface adapters, data access, and the user interface.
+
+## Table Of Contents
+
+- [Features](#features)
+  - [Portfolio Health](#portfolio-health)
+  - [Black Litterman](#black-litterman)
+  - [Stock Analysis](#stock-analysis)
+  - [Watchlist](#watchlist)
+  - [News Sentiment](#news-sentiment)
+  - [Search](#search)
+- [External APIs](#external-apis)
+- [Requirements](#requirements)
+- [Setup](#setup)
 
 ## Features
 
@@ -10,7 +25,7 @@ The project was developed for **CSC207: Software Design** and is organized using
 - **Portfolio overview** — view holdings, watchlist items, gains/losses, and daily changes.
 - **Holdings management** — add stocks and quantities to a portfolio.
 - **Watchlist** — save stocks for later monitoring.
-- **Stock search** — search by ticker or company and view stock information.
+- **Stock search** — search by ticker or company and view stock information, and see similar results to input.
 - **News and sentiment** — retrieve company news, group articles as bearish, neutral, or bullish, and calculate an overall sentiment.
 - **Portfolio health** — evaluate portfolio performance and diversification.
 - **Risk preference** — record the user's investment goals, risk level, and time horizon.
@@ -247,6 +262,23 @@ If no useful relevance scores are available, the application falls back to a sim
 | Between the thresholds | Neutral |
 
 The overall conclusion is calculated from the same articles shown on the page, allowing the user to inspect the evidence behind it.
+
+## Search
+
+To access the search use case, from the home portfolio click on the **Search Stocks** button on the left hand side.
+
+Within the text field under **Query**, you can input a ticker symbol or keyword.
+Pressing the **Search** button will begin the search for the given input.
+Note that this may take up to 20 seconds depending on how many results will appear.
+
+If there exists an exact match for the given ticker symbol you have searched, the relevant information will show up in the **Ticker Search** results panel.
+
+If there exists stocks with similar company names or tickers for your search query, these will be listed in the **Similar Search** panel, with their relevant information.
+
+If there are no exact matches for your ticker, then an error message will appear under the search bar listed as a **Ticker Search** error.
+Similarly, if there are no similar matches to your input, then another error message will appear under the search bar listed as atc **Similar Search** error.
+
+For any given result (either a exact ticker match or a similar stock), there will be a button on the ticker symbol which links to its [stock analysis](#stock-analysis) page.
 
 ## External APIs
 
