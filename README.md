@@ -15,6 +15,8 @@ The project was developed for **CSC207: Software Design** and is organized using
   - [Watchlist](#watchlist)
   - [News Sentiment](#news-sentiment)
   - [Search](#search)
+  - [Risk Preference](#risk-preference)
+  - [Currency Conversion](#currency-conversion)
 - [External APIs](#external-apis)
 - [Requirements](#requirements)
 - [Setup](#setup)
@@ -22,8 +24,6 @@ The project was developed for **CSC207: Software Design** and is organized using
 - [Common Problems](#common-problems)
 - [Technologies](#technologies)
 - [Repository](#repository)
-- [Risk Preference](#risk-preference)
-- [Currency Conversion](#currency-conversion)
 
 ## Features
 
@@ -310,7 +310,7 @@ To use this feature, select **Currency** from the sidebar. The user can select a
 The available currencies include:
 - CAD
 - USD
-- 
+
 Currency exchange rates are retrieved using the Frankfurter API. This feature does not require an Alpha Vantage API key.
 
 ## External APIs
