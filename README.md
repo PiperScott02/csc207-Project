@@ -359,6 +359,8 @@ Alpha Vantage functions used by the project include:
 
 API-specific HTTP and JSON code is kept inside data-access objects. The use-case interactors depend on interfaces rather than directly depending on either API.
 
+Note that we used a student API key for Alpha Vantage, that is, it was an api key we emailed them for, which allows for more API requests which is necessary for certain features.
+
 ## Clean Architecture
 
 The application follows this general flow:
